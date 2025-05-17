@@ -29,6 +29,19 @@ void run(List<String> args) async {
     '/*',
   );
 
+  auth.AuthConfig.set(auth.AuthConfig(
+    sendValidationEmail: (session, email, validationCode) async {
+      // TODO: integrate with mail server
+      print('Validation code: $validationCode');
+      return true;
+    },
+    sendPasswordResetEmail: (session, userInfo, validationCode) async {
+      // TODO: integrate with mail server
+      print('Validation code: $validationCode');
+      return true;
+    },
+  ));
+
   // Start the server.
   await pod.start();
 

@@ -1,5 +1,6 @@
 import 'package:journal_custom_client/journal_custom_client.dart';
 import 'package:flutter/material.dart';
+import 'package:journal_custom_flutter/src/account_page.dart';
 import 'package:journal_custom_flutter/src/serverpod_client.dart';
 import 'package:journal_custom_flutter/src/sign_in_page.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
@@ -86,12 +87,23 @@ class MyHomePageState extends State<MyHomePage> {
   }
 
   @override
+  void initState() {
+    super.initState();
+
+    // Make sure that we rebuild the page if signed in status changes.
+    sessionManager.addListener(() {
+      setState(() {});
+    });
+  }
+  
+  @override
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: const SignInPage(), 
+      body: sessionManager.isSignedIn ? const AccountPage() : const SignInPage(), 
+      // const SignInPage(), 
       // Padding(
       //   padding: const EdgeInsets.all(16),
       //   child: Column(
