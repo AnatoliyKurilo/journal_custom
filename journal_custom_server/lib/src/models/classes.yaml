@@ -1,0 +1,10 @@
+class: Classes
+table: classes
+fields:
+  subjectId: int, relation(parent=subjects)
+  # groupId: int, relation(parent=groups)
+  typeId: int, relation(parent=class_types)
+  teacherId: int, relation(parent=teachers)
+  semesterId: int, relation(parent=semesters)
+  subgroupId: int?, relation(parent=subgroups)
+  date: DateTime

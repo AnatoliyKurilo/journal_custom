@@ -1,0 +1,9 @@
+class: Person
+table: person
+fields:
+  firstName: String
+  lastName: String
+  patronymic: String?
+  email: String
+  phoneNumber: String?
+  

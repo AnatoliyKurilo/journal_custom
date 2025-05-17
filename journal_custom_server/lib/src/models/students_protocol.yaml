@@ -1,0 +1,12 @@
+class: Students
+table: students
+fields:
+  personId: int, relation(parent=person)
+  groupId: int, relation(parent=groups)
+indexes:
+  students_groups_unique_idx:
+    fields: groupId
+    unique: true
+  students_person_unique_idx:
+    fields: personId
+    unique: true

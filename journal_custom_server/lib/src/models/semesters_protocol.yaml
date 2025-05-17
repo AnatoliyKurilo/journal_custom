@@ -1,0 +1,6 @@
+class: Semesters
+table: semesters
+fields:
+  name: String
+  startDate: DateTime
+  endDate: DateTime

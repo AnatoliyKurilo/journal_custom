@@ -1,0 +1,5 @@
+class: Subgroups
+table: subgroups
+fields:
+  name: String
+  groupId: int, relation(parent=groups)

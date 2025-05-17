@@ -1,0 +1,6 @@
+class: Subjects
+table: subjects
+fields:
+  name: String
+  description: String?
+  # teacherId: int, relation(parent=teachers)

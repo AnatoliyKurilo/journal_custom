@@ -1,0 +1,6 @@
+class: Roles
+table: roles
+fields:
+  name: String
+
+

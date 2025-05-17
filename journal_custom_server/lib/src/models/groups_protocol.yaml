@@ -1,0 +1,13 @@
+class: Groups
+table: groups
+fields:
+  name: String
+  curatorId: int, relation(parent=teachers)
+  groupHeadId: int,relation(parent=students)
+indexes:
+  unique_curator:
+    fields: curatorId
+    unique: true
+  unique_group_head:
+    fields: groupHeadId
+    unique: true

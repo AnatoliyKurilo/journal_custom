@@ -1,0 +1,102 @@
+{
+  "actions": [
+    {
+      "type": "alterTable",
+      "alterTable": {
+        "name": "classes",
+        "schema": "public",
+        "addColumns": [],
+        "deleteColumns": [
+          "groupId"
+        ],
+        "modifyColumns": [],
+        "addIndexes": [],
+        "deleteIndexes": [],
+        "addForeignKeys": [
+          {
+            "constraintName": "classes_fk_1",
+            "columns": [
+              "typeId"
+            ],
+            "referenceTable": "class_types",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          },
+          {
+            "constraintName": "classes_fk_2",
+            "columns": [
+              "teacherId"
+            ],
+            "referenceTable": "teachers",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          },
+          {
+            "constraintName": "classes_fk_3",
+            "columns": [
+              "semesterId"
+            ],
+            "referenceTable": "semesters",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          },
+          {
+            "constraintName": "classes_fk_4",
+            "columns": [
+              "subgroupId"
+            ],
+            "referenceTable": "subgroups",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          }
+        ],
+        "deleteForeignKeys": [
+          "classes_fk_5",
+          "classes_fk_1",
+          "classes_fk_2",
+          "classes_fk_3",
+          "classes_fk_4"
+        ],
+        "warnings": [
+          {
+            "type": "columnDropped",
+            "message": "Column \"groupId\" of table \"classes\" will be dropped.",
+            "table": "classes",
+            "columns": [
+              "groupId"
+            ],
+            "destrucive": true
+          }
+        ]
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "type": "columnDropped",
+      "message": "Column \"groupId\" of table \"classes\" will be dropped.",
+      "table": "classes",
+      "columns": [
+        "groupId"
+      ],
+      "destrucive": true
+    }
+  ],
+  "migrationApiVersion": 1
+}

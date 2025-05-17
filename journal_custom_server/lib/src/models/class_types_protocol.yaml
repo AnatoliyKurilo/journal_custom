@@ -1,0 +1,4 @@
+class: ClassTypes
+table: class_types
+fields:
+  name: String

@@ -1,0 +1,63 @@
+{
+  "actions": [
+    {
+      "type": "deleteTable",
+      "deleteTable": "group_heads"
+    },
+    {
+      "type": "alterTable",
+      "alterTable": {
+        "name": "subjects",
+        "schema": "public",
+        "addColumns": [],
+        "deleteColumns": [
+          "teacherId"
+        ],
+        "modifyColumns": [],
+        "addIndexes": [],
+        "deleteIndexes": [],
+        "addForeignKeys": [],
+        "deleteForeignKeys": [
+          "subjects_fk_0"
+        ],
+        "warnings": [
+          {
+            "type": "tableDropped",
+            "message": "Table \"group_heads\" will be dropped.",
+            "table": "group_heads",
+            "columns": [],
+            "destrucive": true
+          },
+          {
+            "type": "columnDropped",
+            "message": "Column \"teacherId\" of table \"subjects\" will be dropped.",
+            "table": "subjects",
+            "columns": [
+              "teacherId"
+            ],
+            "destrucive": true
+          }
+        ]
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "type": "tableDropped",
+      "message": "Table \"group_heads\" will be dropped.",
+      "table": "group_heads",
+      "columns": [],
+      "destrucive": true
+    },
+    {
+      "type": "columnDropped",
+      "message": "Column \"teacherId\" of table \"subjects\" will be dropped.",
+      "table": "subjects",
+      "columns": [
+        "teacherId"
+      ],
+      "destrucive": true
+    }
+  ],
+  "migrationApiVersion": 1
+}

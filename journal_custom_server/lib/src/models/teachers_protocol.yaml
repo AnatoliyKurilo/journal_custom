@@ -1,0 +1,18 @@
+class: Teachers
+table: teachers
+fields:
+  # firstName: String
+  # lastName: String
+  # patronymic: String?
+  # email: String?
+  # phone: String?
+  personId: int, relation(parent=person)
+#   userId: int, relation(parent=users)
+# indexes:
+#   teachers_users_unique_idx:
+#     fields: userId
+#     unique: true
+indexes:
+  teachers_person_unique_idx:
+    fields: personId
+    unique: true
