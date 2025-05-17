@@ -24,6 +24,7 @@ import 'subgroups_protocol.dart' as _i12;
 import 'subjects_protocol.dart' as _i13;
 import 'teachers_protocol.dart' as _i14;
 import 'users_protocol.dart' as _i15;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i16;
 export 'greeting.dart';
 export 'attendance_protocol.dart';
 export 'class_types_protocol.dart';
@@ -137,6 +138,9 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i1.getType<_i15.Users?>()) {
       return (data != null ? _i15.Users.fromJson(data) : null) as T;
     }
+    try {
+      return _i16.Protocol().deserialize<T>(data, t);
+    } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
 
@@ -185,6 +189,10 @@ class Protocol extends _i1.SerializationManager {
     }
     if (data is _i15.Users) {
       return 'Users';
+    }
+    className = _i16.Protocol().getClassNameForObject(data);
+    if (className != null) {
+      return 'serverpod_auth.$className';
     }
     return null;
   }
@@ -236,6 +244,10 @@ class Protocol extends _i1.SerializationManager {
     }
     if (dataClassName == 'Users') {
       return deserialize<_i15.Users>(data['data']);
+    }
+    if (dataClassName.startsWith('serverpod_auth.')) {
+      data['className'] = dataClassName.substring(15);
+      return _i16.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }

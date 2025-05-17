@@ -1,5 +1,7 @@
 import 'package:journal_custom_client/journal_custom_client.dart';
 import 'package:flutter/material.dart';
+import 'package:journal_custom_flutter/src/serverpod_client.dart';
+import 'package:journal_custom_flutter/src/sign_in_page.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 
 /// Sets up a global client object that can be used to talk to the server from
@@ -13,7 +15,7 @@ late final Client client;
 
 late String serverUrl;
 
-void main() {
+void main() async{
   // When you are running the app on a physical device, you need to set the
   // server URL to the IP address of your computer. You can find the IP
   // address by running `ipconfig` on Windows or `ifconfig` on Mac/Linux.
@@ -25,6 +27,9 @@ void main() {
 
   client = Client(serverUrl)
     ..connectivityMonitor = FlutterConnectivityMonitor();
+
+  WidgetsFlutterBinding.ensureInitialized();
+  await initializeServerpodClient();
 
   runApp(const MyApp());
 }
@@ -86,33 +91,35 @@ class MyHomePageState extends State<MyHomePage> {
       appBar: AppBar(
         title: Text(widget.title),
       ),
-      body: Padding(
-        padding: const EdgeInsets.all(16),
-        child: Column(
-          children: [
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: TextField(
-                controller: _textEditingController,
-                decoration: const InputDecoration(
-                  hintText: 'Enter your name',
-                ),
-              ),
-            ),
-            Padding(
-              padding: const EdgeInsets.only(bottom: 16.0),
-              child: ElevatedButton(
-                onPressed: _callHello,
-                child: const Text('Send to Server'),
-              ),
-            ),
-            ResultDisplay(
-              resultMessage: _resultMessage,
-              errorMessage: _errorMessage,
-            ),
-          ],
-        ),
-      ),
+      body: const SignInPage(), 
+      // Padding(
+      //   padding: const EdgeInsets.all(16),
+      //   child: Column(
+      //     children: [
+      //       Padding(
+      //         padding: const EdgeInsets.only(bottom: 16.0),
+      //         child: TextField(
+      //           controller: _textEditingController,
+      //           decoration: const InputDecoration(
+      //             hintText: 'Enter your name',
+      //           ),
+      //         ),
+      //       ),
+      //       Padding(
+      //         padding: const EdgeInsets.only(bottom: 16.0),
+      //         child: ElevatedButton(
+      //           onPressed: _callHello,
+      //           child: const Text('Send to Server'),
+      //         ),
+      //       ),
+      //       ResultDisplay(
+      //         resultMessage: _resultMessage,
+      //         errorMessage: _errorMessage,
+      //       ),
+      //     ],
+      //   ),
+      // ),
+    
     );
   }
 }
