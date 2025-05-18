@@ -22,7 +22,7 @@ abstract class Person implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     this.patronymic,
     required this.email,
     this.phoneNumber,
-    required this.userInfoId,
+    this.userInfoId,
     this.userInfo,
   });
 
@@ -33,7 +33,7 @@ abstract class Person implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     String? patronymic,
     required String email,
     String? phoneNumber,
-    required int userInfoId,
+    int? userInfoId,
     _i2.UserInfo? userInfo,
   }) = _PersonImpl;
 
@@ -45,7 +45,7 @@ abstract class Person implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
       patronymic: jsonSerialization['patronymic'] as String?,
       email: jsonSerialization['email'] as String,
       phoneNumber: jsonSerialization['phoneNumber'] as String?,
-      userInfoId: jsonSerialization['userInfoId'] as int,
+      userInfoId: jsonSerialization['userInfoId'] as int?,
       userInfo: jsonSerialization['userInfo'] == null
           ? null
           : _i2.UserInfo.fromJson(
@@ -70,7 +70,7 @@ abstract class Person implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
 
   String? phoneNumber;
 
-  int userInfoId;
+  int? userInfoId;
 
   _i2.UserInfo? userInfo;
 
@@ -99,7 +99,7 @@ abstract class Person implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
       if (patronymic != null) 'patronymic': patronymic,
       'email': email,
       if (phoneNumber != null) 'phoneNumber': phoneNumber,
-      'userInfoId': userInfoId,
+      if (userInfoId != null) 'userInfoId': userInfoId,
       if (userInfo != null) 'userInfo': userInfo?.toJson(),
     };
   }
@@ -113,7 +113,7 @@ abstract class Person implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
       if (patronymic != null) 'patronymic': patronymic,
       'email': email,
       if (phoneNumber != null) 'phoneNumber': phoneNumber,
-      'userInfoId': userInfoId,
+      if (userInfoId != null) 'userInfoId': userInfoId,
       if (userInfo != null) 'userInfo': userInfo?.toJsonForProtocol(),
     };
   }
@@ -158,7 +158,7 @@ class _PersonImpl extends Person {
     String? patronymic,
     required String email,
     String? phoneNumber,
-    required int userInfoId,
+    int? userInfoId,
     _i2.UserInfo? userInfo,
   }) : super._(
           id: id,
@@ -182,7 +182,7 @@ class _PersonImpl extends Person {
     Object? patronymic = _Undefined,
     String? email,
     Object? phoneNumber = _Undefined,
-    int? userInfoId,
+    Object? userInfoId = _Undefined,
     Object? userInfo = _Undefined,
   }) {
     return Person(
@@ -192,7 +192,7 @@ class _PersonImpl extends Person {
       patronymic: patronymic is String? ? patronymic : this.patronymic,
       email: email ?? this.email,
       phoneNumber: phoneNumber is String? ? phoneNumber : this.phoneNumber,
-      userInfoId: userInfoId ?? this.userInfoId,
+      userInfoId: userInfoId is int? ? userInfoId : this.userInfoId,
       userInfo:
           userInfo is _i2.UserInfo? ? userInfo : this.userInfo?.copyWith(),
     );
@@ -312,6 +312,8 @@ class PersonRepository {
   const PersonRepository._();
 
   final attachRow = const PersonAttachRowRepository._();
+
+  final detachRow = const PersonDetachRowRepository._();
 
   /// Returns a list of [Person]s matching the given query parameters.
   ///
@@ -548,6 +550,32 @@ class PersonAttachRowRepository {
     }
 
     var $person = person.copyWith(userInfoId: userInfo.id);
+    await session.db.updateRow<Person>(
+      $person,
+      columns: [Person.t.userInfoId],
+      transaction: transaction,
+    );
+  }
+}
+
+class PersonDetachRowRepository {
+  const PersonDetachRowRepository._();
+
+  /// Detaches the relation between this [Person] and the [UserInfo] set in `userInfo`
+  /// by setting the [Person]'s foreign key `userInfoId` to `null`.
+  ///
+  /// This removes the association between the two models without deleting
+  /// the related record.
+  Future<void> userInfo(
+    _i1.Session session,
+    Person person, {
+    _i1.Transaction? transaction,
+  }) async {
+    if (person.id == null) {
+      throw ArgumentError.notNull('person.id');
+    }
+
+    var $person = person.copyWith(userInfoId: null);
     await session.db.updateRow<Person>(
       $person,
       columns: [Person.t.userInfoId],

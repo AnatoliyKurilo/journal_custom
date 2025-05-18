@@ -1,2 +1,9 @@
+makeUserAdmin:
+  - setUserScopes:
+userRoles:
+  - getUserRoles:
+  - assignCuratorRole:
+  - assignGroupHeadRole:
+  - removeRole:
 greeting:
   - hello:

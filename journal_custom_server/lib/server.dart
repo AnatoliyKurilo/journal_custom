@@ -19,7 +19,7 @@ void run(List<String> args) async {
     Endpoints(),
     authenticationHandler: auth.authenticationHandler,
   );
-
+  
   // Setup a default page at the web root.
   pod.webServer.addRoute(RouteRoot(), '/');
   pod.webServer.addRoute(RouteRoot(), '/index.html');
@@ -42,29 +42,71 @@ void run(List<String> args) async {
     },
     // Заменяем onUserSignup на onUserCreated
     onUserCreated: (session, userInfo) async {
+      
+      session.log('onUserCreated вызван для ${userInfo.email}', level: LogLevel.info);
       // Ищем запись в таблице Person с таким же email
+      session.log('Ищу запись с email: ${userInfo.email ?? "null"}', level: LogLevel.info);
       var existingPerson = await Person.db.findFirstRow(
         session,
         where: (p) => p.email.equals(userInfo.email ?? ''),
       );
-      
+      session.log('Результат поиска: ${existingPerson != null ? "Найден" : "Не найден"}, personid=${existingPerson!.id}', level: LogLevel.info);
+      session.log('userInfo: ${userInfo.toJson()}', level: LogLevel.info);
       if (existingPerson != null) {
         // Если нашли - связываем с созданным аккаунтом
-        existingPerson = existingPerson.copyWith(
-          userInfo: userInfo,
-        );
+        existingPerson.userInfoId = userInfo.id;
         await Person.db.updateRow(session, existingPerson);
+        
+        // Получаем текущие роли пользователя
+        var scopes = userInfo.scopeNames?.toSet() ?? {};
         
         // Проверяем, есть ли запись студента для этого человека
         var student = await Students.db.findFirstRow(
           session, 
-          where: (s) => s.personId.equals(existingPerson?.id!),
+          where: (s) => s.personId.equals(existingPerson!.id!),
         );
         
         if (student != null) {
-          // Если это студент, добавляем роль student в scopes
-          var scopes = userInfo.scopeNames?.toSet() ?? {};
+          // Если это студент, добавляем роль student
           scopes.add('student');
+        }
+        
+        // Проверяем, есть ли запись преподавателя для этого человека
+        var teacher = await Teachers.db.findFirstRow(
+          session, 
+          where: (t) => t.personId.equals(existingPerson!.id!),
+        );
+        
+        if (teacher != null) {
+          // Если это преподаватель, добавляем роль teacher
+          scopes.add('teacher');
+        }
+        
+        // Проверяем, является ли студент старостой
+        var isGroupHead = await Groups.db.findFirstRow(
+          session,
+          where: (g) => g.groupHeadId.equals(student?.id ?? -1),
+        );
+        
+        if (isGroupHead != null) {
+          // Если это староста, добавляем роль groupHead
+          scopes.add('groupHead');
+        }
+        
+        // Проверяем, является ли преподаватель куратором
+        var isCurator = await Groups.db.findFirstRow(
+          session,
+          where: (g) => g.curatorId.equals(teacher?.id ?? -1),
+        );
+        
+        if (isCurator != null) {
+          // Если это куратор, добавляем роль curator
+          scopes.add('curator');
+        }
+        
+        
+        // Обновляем роли пользователя, если они изменились
+        if (scopes.length != userInfo.scopeNames?.length) {
           userInfo = userInfo.copyWith(scopeNames: scopes.toList());
           await auth.UserInfo.db.updateRow(session, userInfo);
         }

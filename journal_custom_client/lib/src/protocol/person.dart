@@ -20,7 +20,7 @@ abstract class Person implements _i1.SerializableModel {
     this.patronymic,
     required this.email,
     this.phoneNumber,
-    required this.userInfoId,
+    this.userInfoId,
     this.userInfo,
   });
 
@@ -31,7 +31,7 @@ abstract class Person implements _i1.SerializableModel {
     String? patronymic,
     required String email,
     String? phoneNumber,
-    required int userInfoId,
+    int? userInfoId,
     _i2.UserInfo? userInfo,
   }) = _PersonImpl;
 
@@ -43,7 +43,7 @@ abstract class Person implements _i1.SerializableModel {
       patronymic: jsonSerialization['patronymic'] as String?,
       email: jsonSerialization['email'] as String,
       phoneNumber: jsonSerialization['phoneNumber'] as String?,
-      userInfoId: jsonSerialization['userInfoId'] as int,
+      userInfoId: jsonSerialization['userInfoId'] as int?,
       userInfo: jsonSerialization['userInfo'] == null
           ? null
           : _i2.UserInfo.fromJson(
@@ -66,7 +66,7 @@ abstract class Person implements _i1.SerializableModel {
 
   String? phoneNumber;
 
-  int userInfoId;
+  int? userInfoId;
 
   _i2.UserInfo? userInfo;
 
@@ -92,7 +92,7 @@ abstract class Person implements _i1.SerializableModel {
       if (patronymic != null) 'patronymic': patronymic,
       'email': email,
       if (phoneNumber != null) 'phoneNumber': phoneNumber,
-      'userInfoId': userInfoId,
+      if (userInfoId != null) 'userInfoId': userInfoId,
       if (userInfo != null) 'userInfo': userInfo?.toJson(),
     };
   }
@@ -113,7 +113,7 @@ class _PersonImpl extends Person {
     String? patronymic,
     required String email,
     String? phoneNumber,
-    required int userInfoId,
+    int? userInfoId,
     _i2.UserInfo? userInfo,
   }) : super._(
           id: id,
@@ -137,7 +137,7 @@ class _PersonImpl extends Person {
     Object? patronymic = _Undefined,
     String? email,
     Object? phoneNumber = _Undefined,
-    int? userInfoId,
+    Object? userInfoId = _Undefined,
     Object? userInfo = _Undefined,
   }) {
     return Person(
@@ -147,7 +147,7 @@ class _PersonImpl extends Person {
       patronymic: patronymic is String? ? patronymic : this.patronymic,
       email: email ?? this.email,
       phoneNumber: phoneNumber is String? ? phoneNumber : this.phoneNumber,
-      userInfoId: userInfoId ?? this.userInfoId,
+      userInfoId: userInfoId is int? ? userInfoId : this.userInfoId,
       userInfo:
           userInfo is _i2.UserInfo? ? userInfo : this.userInfo?.copyWith(),
     );

@@ -15,6 +15,62 @@ import 'package:journal_custom_client/src/protocol/greeting.dart' as _i3;
 import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i4;
 import 'protocol.dart' as _i5;
 
+/// {@category Endpoint}
+class EndpointMakeUserAdmin extends _i1.EndpointRef {
+  EndpointMakeUserAdmin(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'makeUserAdmin';
+
+  _i2.Future<bool> setUserScopes(int userId) => caller.callServerEndpoint<bool>(
+        'makeUserAdmin',
+        'setUserScopes',
+        {'userId': userId},
+      );
+}
+
+/// {@category Endpoint}
+class EndpointUserRoles extends _i1.EndpointRef {
+  EndpointUserRoles(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'userRoles';
+
+  _i2.Future<List<String>> getUserRoles(int personId) =>
+      caller.callServerEndpoint<List<String>>(
+        'userRoles',
+        'getUserRoles',
+        {'personId': personId},
+      );
+
+  _i2.Future<bool> assignCuratorRole(int teacherId) =>
+      caller.callServerEndpoint<bool>(
+        'userRoles',
+        'assignCuratorRole',
+        {'teacherId': teacherId},
+      );
+
+  _i2.Future<bool> assignGroupHeadRole(int studentId) =>
+      caller.callServerEndpoint<bool>(
+        'userRoles',
+        'assignGroupHeadRole',
+        {'studentId': studentId},
+      );
+
+  _i2.Future<bool> removeRole(
+    int personId,
+    String role,
+  ) =>
+      caller.callServerEndpoint<bool>(
+        'userRoles',
+        'removeRole',
+        {
+          'personId': personId,
+          'role': role,
+        },
+      );
+}
+
 /// This is an example endpoint that returns a greeting message through its [hello] method.
 /// {@category Endpoint}
 class EndpointGreeting extends _i1.EndpointRef {
@@ -66,16 +122,26 @@ class Client extends _i1.ServerpodClientShared {
           disconnectStreamsOnLostInternetConnection:
               disconnectStreamsOnLostInternetConnection,
         ) {
+    makeUserAdmin = EndpointMakeUserAdmin(this);
+    userRoles = EndpointUserRoles(this);
     greeting = EndpointGreeting(this);
     modules = Modules(this);
   }
+
+  late final EndpointMakeUserAdmin makeUserAdmin;
+
+  late final EndpointUserRoles userRoles;
 
   late final EndpointGreeting greeting;
 
   late final Modules modules;
 
   @override
-  Map<String, _i1.EndpointRef> get endpointRefLookup => {'greeting': greeting};
+  Map<String, _i1.EndpointRef> get endpointRefLookup => {
+        'makeUserAdmin': makeUserAdmin,
+        'userRoles': userRoles,
+        'greeting': greeting,
+      };
 
   @override
   Map<String, _i1.ModuleEndpointCaller> get moduleLookup =>

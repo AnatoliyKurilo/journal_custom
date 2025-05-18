@@ -29,6 +29,15 @@ class AccountPage extends StatelessWidget {
             child: const Text('Sign out'),
           ),
         ),
+        Padding(
+          padding: const EdgeInsets.all(16),
+          child: ElevatedButton(
+            onPressed: () {
+              
+            },
+            child: const Text('Make admin'),
+          ),
+        ),
       ],
     );
   }
