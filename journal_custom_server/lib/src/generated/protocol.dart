@@ -25,7 +25,6 @@ import 'students_protocol.dart' as _i13;
 import 'subgroups_protocol.dart' as _i14;
 import 'subjects_protocol.dart' as _i15;
 import 'teachers_protocol.dart' as _i16;
-import 'users_protocol.dart' as _i17;
 export 'greeting.dart';
 export 'attendance_protocol.dart';
 export 'class_types_protocol.dart';
@@ -39,7 +38,6 @@ export 'students_protocol.dart';
 export 'subgroups_protocol.dart';
 export 'subjects_protocol.dart';
 export 'teachers_protocol.dart';
-export 'users_protocol.dart';
 
 class Protocol extends _i1.SerializationManagerServer {
   Protocol._();
@@ -423,8 +421,25 @@ class Protocol extends _i1.SerializationManagerServer {
           isNullable: true,
           dartType: 'String?',
         ),
+        _i2.ColumnDefinition(
+          name: 'userInfoId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
+        ),
       ],
-      foreignKeys: [],
+      foreignKeys: [
+        _i2.ForeignKeyDefinition(
+          constraintName: 'person_fk_0',
+          columns: ['userInfoId'],
+          referenceTable: 'serverpod_user_info',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.noAction,
+          matchType: null,
+        )
+      ],
       indexes: [
         _i2.IndexDefinition(
           indexName: 'person_pkey',
@@ -438,7 +453,20 @@ class Protocol extends _i1.SerializationManagerServer {
           type: 'btree',
           isUnique: true,
           isPrimary: true,
-        )
+        ),
+        _i2.IndexDefinition(
+          indexName: 'user_info_unique',
+          tableSpace: null,
+          elements: [
+            _i2.IndexElementDefinition(
+              type: _i2.IndexElementDefinitionType.column,
+              definition: 'userInfoId',
+            )
+          ],
+          type: 'btree',
+          isUnique: true,
+          isPrimary: false,
+        ),
       ],
       managed: true,
     ),
@@ -864,96 +892,6 @@ class Protocol extends _i1.SerializationManagerServer {
       ],
       managed: true,
     ),
-    _i2.TableDefinition(
-      name: 'users',
-      dartName: 'Users',
-      schema: 'public',
-      module: 'journal_custom',
-      columns: [
-        _i2.ColumnDefinition(
-          name: 'id',
-          columnType: _i2.ColumnType.bigint,
-          isNullable: false,
-          dartType: 'int?',
-          columnDefault: 'nextval(\'users_id_seq\'::regclass)',
-        ),
-        _i2.ColumnDefinition(
-          name: 'login',
-          columnType: _i2.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _i2.ColumnDefinition(
-          name: 'passwordHash',
-          columnType: _i2.ColumnType.text,
-          isNullable: false,
-          dartType: 'String',
-        ),
-        _i2.ColumnDefinition(
-          name: 'roleId',
-          columnType: _i2.ColumnType.bigint,
-          isNullable: false,
-          dartType: 'int',
-        ),
-        _i2.ColumnDefinition(
-          name: 'personId',
-          columnType: _i2.ColumnType.bigint,
-          isNullable: false,
-          dartType: 'int',
-        ),
-      ],
-      foreignKeys: [
-        _i2.ForeignKeyDefinition(
-          constraintName: 'users_fk_0',
-          columns: ['roleId'],
-          referenceTable: 'roles',
-          referenceTableSchema: 'public',
-          referenceColumns: ['id'],
-          onUpdate: _i2.ForeignKeyAction.noAction,
-          onDelete: _i2.ForeignKeyAction.noAction,
-          matchType: null,
-        ),
-        _i2.ForeignKeyDefinition(
-          constraintName: 'users_fk_1',
-          columns: ['personId'],
-          referenceTable: 'person',
-          referenceTableSchema: 'public',
-          referenceColumns: ['id'],
-          onUpdate: _i2.ForeignKeyAction.noAction,
-          onDelete: _i2.ForeignKeyAction.noAction,
-          matchType: null,
-        ),
-      ],
-      indexes: [
-        _i2.IndexDefinition(
-          indexName: 'users_pkey',
-          tableSpace: null,
-          elements: [
-            _i2.IndexElementDefinition(
-              type: _i2.IndexElementDefinitionType.column,
-              definition: 'id',
-            )
-          ],
-          type: 'btree',
-          isUnique: true,
-          isPrimary: true,
-        ),
-        _i2.IndexDefinition(
-          indexName: 'users_person_unique_idx',
-          tableSpace: null,
-          elements: [
-            _i2.IndexElementDefinition(
-              type: _i2.IndexElementDefinitionType.column,
-              definition: 'personId',
-            )
-          ],
-          type: 'btree',
-          isUnique: true,
-          isPrimary: false,
-        ),
-      ],
-      managed: true,
-    ),
     ..._i3.Protocol.targetTableDefinitions,
     ..._i2.Protocol.targetTableDefinitions,
   ];
@@ -1003,9 +941,6 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i16.Teachers) {
       return _i16.Teachers.fromJson(data) as T;
     }
-    if (t == _i17.Users) {
-      return _i17.Users.fromJson(data) as T;
-    }
     if (t == _i1.getType<_i4.Greeting?>()) {
       return (data != null ? _i4.Greeting.fromJson(data) : null) as T;
     }
@@ -1044,9 +979,6 @@ class Protocol extends _i1.SerializationManagerServer {
     }
     if (t == _i1.getType<_i16.Teachers?>()) {
       return (data != null ? _i16.Teachers.fromJson(data) : null) as T;
-    }
-    if (t == _i1.getType<_i17.Users?>()) {
-      return (data != null ? _i17.Users.fromJson(data) : null) as T;
     }
     try {
       return _i3.Protocol().deserialize<T>(data, t);
@@ -1099,9 +1031,6 @@ class Protocol extends _i1.SerializationManagerServer {
     }
     if (data is _i16.Teachers) {
       return 'Teachers';
-    }
-    if (data is _i17.Users) {
-      return 'Users';
     }
     className = _i2.Protocol().getClassNameForObject(data);
     if (className != null) {
@@ -1159,9 +1088,6 @@ class Protocol extends _i1.SerializationManagerServer {
     if (dataClassName == 'Teachers') {
       return deserialize<_i16.Teachers>(data['data']);
     }
-    if (dataClassName == 'Users') {
-      return deserialize<_i17.Users>(data['data']);
-    }
     if (dataClassName.startsWith('serverpod.')) {
       data['className'] = dataClassName.substring(10);
       return _i2.Protocol().deserializeByClassName(data);
@@ -1212,8 +1138,6 @@ class Protocol extends _i1.SerializationManagerServer {
         return _i15.Subjects.t;
       case _i16.Teachers:
         return _i16.Teachers.t;
-      case _i17.Users:
-        return _i17.Users.t;
     }
     return null;
   }

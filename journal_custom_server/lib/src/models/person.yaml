@@ -6,4 +6,9 @@ fields:
   patronymic: String?
   email: String
   phoneNumber: String?
+  userInfo: module:auth:UserInfo?, relation
+indexes:
+  user_info_unique:
+    fields: userInfoId
+    unique: true
   

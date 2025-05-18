@@ -8,8 +8,11 @@
 // ignore_for_file: type_literal_in_constant_pattern
 // ignore_for_file: use_super_parameters
 
+// ignore_for_file: unnecessary_null_comparison
+
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i2;
 
 abstract class Person implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
   Person._({
@@ -19,6 +22,8 @@ abstract class Person implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     this.patronymic,
     required this.email,
     this.phoneNumber,
+    required this.userInfoId,
+    this.userInfo,
   });
 
   factory Person({
@@ -28,6 +33,8 @@ abstract class Person implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     String? patronymic,
     required String email,
     String? phoneNumber,
+    required int userInfoId,
+    _i2.UserInfo? userInfo,
   }) = _PersonImpl;
 
   factory Person.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -38,6 +45,11 @@ abstract class Person implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
       patronymic: jsonSerialization['patronymic'] as String?,
       email: jsonSerialization['email'] as String,
       phoneNumber: jsonSerialization['phoneNumber'] as String?,
+      userInfoId: jsonSerialization['userInfoId'] as int,
+      userInfo: jsonSerialization['userInfo'] == null
+          ? null
+          : _i2.UserInfo.fromJson(
+              (jsonSerialization['userInfo'] as Map<String, dynamic>)),
     );
   }
 
@@ -58,6 +70,10 @@ abstract class Person implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
 
   String? phoneNumber;
 
+  int userInfoId;
+
+  _i2.UserInfo? userInfo;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -71,6 +87,8 @@ abstract class Person implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     String? patronymic,
     String? email,
     String? phoneNumber,
+    int? userInfoId,
+    _i2.UserInfo? userInfo,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -81,6 +99,8 @@ abstract class Person implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
       if (patronymic != null) 'patronymic': patronymic,
       'email': email,
       if (phoneNumber != null) 'phoneNumber': phoneNumber,
+      'userInfoId': userInfoId,
+      if (userInfo != null) 'userInfo': userInfo?.toJson(),
     };
   }
 
@@ -93,11 +113,13 @@ abstract class Person implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
       if (patronymic != null) 'patronymic': patronymic,
       'email': email,
       if (phoneNumber != null) 'phoneNumber': phoneNumber,
+      'userInfoId': userInfoId,
+      if (userInfo != null) 'userInfo': userInfo?.toJsonForProtocol(),
     };
   }
 
-  static PersonInclude include() {
-    return PersonInclude._();
+  static PersonInclude include({_i2.UserInfoInclude? userInfo}) {
+    return PersonInclude._(userInfo: userInfo);
   }
 
   static PersonIncludeList includeList({
@@ -136,6 +158,8 @@ class _PersonImpl extends Person {
     String? patronymic,
     required String email,
     String? phoneNumber,
+    required int userInfoId,
+    _i2.UserInfo? userInfo,
   }) : super._(
           id: id,
           firstName: firstName,
@@ -143,6 +167,8 @@ class _PersonImpl extends Person {
           patronymic: patronymic,
           email: email,
           phoneNumber: phoneNumber,
+          userInfoId: userInfoId,
+          userInfo: userInfo,
         );
 
   /// Returns a shallow copy of this [Person]
@@ -156,6 +182,8 @@ class _PersonImpl extends Person {
     Object? patronymic = _Undefined,
     String? email,
     Object? phoneNumber = _Undefined,
+    int? userInfoId,
+    Object? userInfo = _Undefined,
   }) {
     return Person(
       id: id is int? ? id : this.id,
@@ -164,6 +192,9 @@ class _PersonImpl extends Person {
       patronymic: patronymic is String? ? patronymic : this.patronymic,
       email: email ?? this.email,
       phoneNumber: phoneNumber is String? ? phoneNumber : this.phoneNumber,
+      userInfoId: userInfoId ?? this.userInfoId,
+      userInfo:
+          userInfo is _i2.UserInfo? ? userInfo : this.userInfo?.copyWith(),
     );
   }
 }
@@ -190,6 +221,10 @@ class PersonTable extends _i1.Table<int?> {
       'phoneNumber',
       this,
     );
+    userInfoId = _i1.ColumnInt(
+      'userInfoId',
+      this,
+    );
   }
 
   late final _i1.ColumnString firstName;
@@ -202,6 +237,23 @@ class PersonTable extends _i1.Table<int?> {
 
   late final _i1.ColumnString phoneNumber;
 
+  late final _i1.ColumnInt userInfoId;
+
+  _i2.UserInfoTable? _userInfo;
+
+  _i2.UserInfoTable get userInfo {
+    if (_userInfo != null) return _userInfo!;
+    _userInfo = _i1.createRelationTable(
+      relationFieldName: 'userInfo',
+      field: Person.t.userInfoId,
+      foreignField: _i2.UserInfo.t.id,
+      tableRelation: tableRelation,
+      createTable: (foreignTableRelation) =>
+          _i2.UserInfoTable(tableRelation: foreignTableRelation),
+    );
+    return _userInfo!;
+  }
+
   @override
   List<_i1.Column> get columns => [
         id,
@@ -210,14 +262,27 @@ class PersonTable extends _i1.Table<int?> {
         patronymic,
         email,
         phoneNumber,
+        userInfoId,
       ];
+
+  @override
+  _i1.Table? getRelationTable(String relationField) {
+    if (relationField == 'userInfo') {
+      return userInfo;
+    }
+    return null;
+  }
 }
 
 class PersonInclude extends _i1.IncludeObject {
-  PersonInclude._();
+  PersonInclude._({_i2.UserInfoInclude? userInfo}) {
+    _userInfo = userInfo;
+  }
+
+  _i2.UserInfoInclude? _userInfo;
 
   @override
-  Map<String, _i1.Include?> get includes => {};
+  Map<String, _i1.Include?> get includes => {'userInfo': _userInfo};
 
   @override
   _i1.Table<int?> get table => Person.t;
@@ -245,6 +310,8 @@ class PersonIncludeList extends _i1.IncludeList {
 
 class PersonRepository {
   const PersonRepository._();
+
+  final attachRow = const PersonAttachRowRepository._();
 
   /// Returns a list of [Person]s matching the given query parameters.
   ///
@@ -277,6 +344,7 @@ class PersonRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<PersonTable>? orderByList,
     _i1.Transaction? transaction,
+    PersonInclude? include,
   }) async {
     return session.db.find<Person>(
       where: where?.call(Person.t),
@@ -286,6 +354,7 @@ class PersonRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -314,6 +383,7 @@ class PersonRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<PersonTable>? orderByList,
     _i1.Transaction? transaction,
+    PersonInclude? include,
   }) async {
     return session.db.findFirstRow<Person>(
       where: where?.call(Person.t),
@@ -322,6 +392,7 @@ class PersonRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -330,10 +401,12 @@ class PersonRepository {
     _i1.Session session,
     int id, {
     _i1.Transaction? transaction,
+    PersonInclude? include,
   }) async {
     return session.db.findById<Person>(
       id,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -451,6 +524,33 @@ class PersonRepository {
     return session.db.count<Person>(
       where: where?.call(Person.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+}
+
+class PersonAttachRowRepository {
+  const PersonAttachRowRepository._();
+
+  /// Creates a relation between the given [Person] and [UserInfo]
+  /// by setting the [Person]'s foreign key `userInfoId` to refer to the [UserInfo].
+  Future<void> userInfo(
+    _i1.Session session,
+    Person person,
+    _i2.UserInfo userInfo, {
+    _i1.Transaction? transaction,
+  }) async {
+    if (person.id == null) {
+      throw ArgumentError.notNull('person.id');
+    }
+    if (userInfo.id == null) {
+      throw ArgumentError.notNull('userInfo.id');
+    }
+
+    var $person = person.copyWith(userInfoId: userInfo.id);
+    await session.db.updateRow<Person>(
+      $person,
+      columns: [Person.t.userInfoId],
       transaction: transaction,
     );
   }

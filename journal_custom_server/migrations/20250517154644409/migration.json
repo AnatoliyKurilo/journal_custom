@@ -1,0 +1,136 @@
+{
+  "actions": [
+    {
+      "type": "deleteTable",
+      "deleteTable": "users"
+    },
+    {
+      "type": "deleteTable",
+      "deleteTable": "person"
+    },
+    {
+      "type": "createTable",
+      "createTable": {
+        "name": "person",
+        "dartName": "Person",
+        "module": "journal_custom",
+        "schema": "public",
+        "columns": [
+          {
+            "name": "id",
+            "columnType": 6,
+            "isNullable": false,
+            "columnDefault": "nextval('person_id_seq'::regclass)",
+            "dartType": "int?"
+          },
+          {
+            "name": "firstName",
+            "columnType": 0,
+            "isNullable": false,
+            "dartType": "String"
+          },
+          {
+            "name": "lastName",
+            "columnType": 0,
+            "isNullable": false,
+            "dartType": "String"
+          },
+          {
+            "name": "patronymic",
+            "columnType": 0,
+            "isNullable": true,
+            "dartType": "String?"
+          },
+          {
+            "name": "email",
+            "columnType": 0,
+            "isNullable": false,
+            "dartType": "String"
+          },
+          {
+            "name": "phoneNumber",
+            "columnType": 0,
+            "isNullable": true,
+            "dartType": "String?"
+          },
+          {
+            "name": "userInfoId",
+            "columnType": 6,
+            "isNullable": false,
+            "dartType": "int"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "constraintName": "person_fk_0",
+            "columns": [
+              "userInfoId"
+            ],
+            "referenceTable": "serverpod_user_info",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          }
+        ],
+        "indexes": [
+          {
+            "indexName": "person_pkey",
+            "elements": [
+              {
+                "type": 0,
+                "definition": "id"
+              }
+            ],
+            "type": "btree",
+            "isUnique": true,
+            "isPrimary": true
+          },
+          {
+            "indexName": "user_info_unique",
+            "elements": [
+              {
+                "type": 0,
+                "definition": "userInfoId"
+              }
+            ],
+            "type": "btree",
+            "isUnique": true,
+            "isPrimary": false
+          }
+        ],
+        "managed": true
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "type": "tableDropped",
+      "message": "Table \"users\" will be dropped.",
+      "table": "users",
+      "columns": [],
+      "destrucive": true
+    },
+    {
+      "type": "uniqueIndexCreated",
+      "message": "Unique index \"user_info_unique\" is added to table \"person\". If there are existing rows with duplicate values, this migration will fail.",
+      "table": "person",
+      "columns": [
+        "userInfoId"
+      ],
+      "destrucive": false
+    },
+    {
+      "type": "tableDropped",
+      "message": "One or more columns are added to table \"person\" which cannot be added in a table migration. The complete table will be deleted and recreated.",
+      "table": "person",
+      "columns": [
+        "userInfoId"
+      ],
+      "destrucive": true
+    }
+  ],
+  "migrationApiVersion": 1
+}

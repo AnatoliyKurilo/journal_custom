@@ -10,6 +10,7 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i2;
 
 abstract class Person implements _i1.SerializableModel {
   Person._({
@@ -19,6 +20,8 @@ abstract class Person implements _i1.SerializableModel {
     this.patronymic,
     required this.email,
     this.phoneNumber,
+    required this.userInfoId,
+    this.userInfo,
   });
 
   factory Person({
@@ -28,6 +31,8 @@ abstract class Person implements _i1.SerializableModel {
     String? patronymic,
     required String email,
     String? phoneNumber,
+    required int userInfoId,
+    _i2.UserInfo? userInfo,
   }) = _PersonImpl;
 
   factory Person.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -38,6 +43,11 @@ abstract class Person implements _i1.SerializableModel {
       patronymic: jsonSerialization['patronymic'] as String?,
       email: jsonSerialization['email'] as String,
       phoneNumber: jsonSerialization['phoneNumber'] as String?,
+      userInfoId: jsonSerialization['userInfoId'] as int,
+      userInfo: jsonSerialization['userInfo'] == null
+          ? null
+          : _i2.UserInfo.fromJson(
+              (jsonSerialization['userInfo'] as Map<String, dynamic>)),
     );
   }
 
@@ -56,6 +66,10 @@ abstract class Person implements _i1.SerializableModel {
 
   String? phoneNumber;
 
+  int userInfoId;
+
+  _i2.UserInfo? userInfo;
+
   /// Returns a shallow copy of this [Person]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -66,6 +80,8 @@ abstract class Person implements _i1.SerializableModel {
     String? patronymic,
     String? email,
     String? phoneNumber,
+    int? userInfoId,
+    _i2.UserInfo? userInfo,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -76,6 +92,8 @@ abstract class Person implements _i1.SerializableModel {
       if (patronymic != null) 'patronymic': patronymic,
       'email': email,
       if (phoneNumber != null) 'phoneNumber': phoneNumber,
+      'userInfoId': userInfoId,
+      if (userInfo != null) 'userInfo': userInfo?.toJson(),
     };
   }
 
@@ -95,6 +113,8 @@ class _PersonImpl extends Person {
     String? patronymic,
     required String email,
     String? phoneNumber,
+    required int userInfoId,
+    _i2.UserInfo? userInfo,
   }) : super._(
           id: id,
           firstName: firstName,
@@ -102,6 +122,8 @@ class _PersonImpl extends Person {
           patronymic: patronymic,
           email: email,
           phoneNumber: phoneNumber,
+          userInfoId: userInfoId,
+          userInfo: userInfo,
         );
 
   /// Returns a shallow copy of this [Person]
@@ -115,6 +137,8 @@ class _PersonImpl extends Person {
     Object? patronymic = _Undefined,
     String? email,
     Object? phoneNumber = _Undefined,
+    int? userInfoId,
+    Object? userInfo = _Undefined,
   }) {
     return Person(
       id: id is int? ? id : this.id,
@@ -123,6 +147,9 @@ class _PersonImpl extends Person {
       patronymic: patronymic is String? ? patronymic : this.patronymic,
       email: email ?? this.email,
       phoneNumber: phoneNumber is String? ? phoneNumber : this.phoneNumber,
+      userInfoId: userInfoId ?? this.userInfoId,
+      userInfo:
+          userInfo is _i2.UserInfo? ? userInfo : this.userInfo?.copyWith(),
     );
   }
 }

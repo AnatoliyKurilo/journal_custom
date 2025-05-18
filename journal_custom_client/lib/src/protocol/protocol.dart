@@ -23,8 +23,7 @@ import 'students_protocol.dart' as _i11;
 import 'subgroups_protocol.dart' as _i12;
 import 'subjects_protocol.dart' as _i13;
 import 'teachers_protocol.dart' as _i14;
-import 'users_protocol.dart' as _i15;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i16;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i15;
 export 'greeting.dart';
 export 'attendance_protocol.dart';
 export 'class_types_protocol.dart';
@@ -38,7 +37,6 @@ export 'students_protocol.dart';
 export 'subgroups_protocol.dart';
 export 'subjects_protocol.dart';
 export 'teachers_protocol.dart';
-export 'users_protocol.dart';
 export 'client.dart';
 
 class Protocol extends _i1.SerializationManager {
@@ -93,9 +91,6 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i14.Teachers) {
       return _i14.Teachers.fromJson(data) as T;
     }
-    if (t == _i15.Users) {
-      return _i15.Users.fromJson(data) as T;
-    }
     if (t == _i1.getType<_i2.Greeting?>()) {
       return (data != null ? _i2.Greeting.fromJson(data) : null) as T;
     }
@@ -135,11 +130,8 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i1.getType<_i14.Teachers?>()) {
       return (data != null ? _i14.Teachers.fromJson(data) : null) as T;
     }
-    if (t == _i1.getType<_i15.Users?>()) {
-      return (data != null ? _i15.Users.fromJson(data) : null) as T;
-    }
     try {
-      return _i16.Protocol().deserialize<T>(data, t);
+      return _i15.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
@@ -187,10 +179,7 @@ class Protocol extends _i1.SerializationManager {
     if (data is _i14.Teachers) {
       return 'Teachers';
     }
-    if (data is _i15.Users) {
-      return 'Users';
-    }
-    className = _i16.Protocol().getClassNameForObject(data);
+    className = _i15.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth.$className';
     }
@@ -242,12 +231,9 @@ class Protocol extends _i1.SerializationManager {
     if (dataClassName == 'Teachers') {
       return deserialize<_i14.Teachers>(data['data']);
     }
-    if (dataClassName == 'Users') {
-      return deserialize<_i15.Users>(data['data']);
-    }
     if (dataClassName.startsWith('serverpod_auth.')) {
       data['className'] = dataClassName.substring(15);
-      return _i16.Protocol().deserializeByClassName(data);
+      return _i15.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }
