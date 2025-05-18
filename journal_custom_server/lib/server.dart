@@ -40,6 +40,36 @@ void run(List<String> args) async {
       print('Validation code: $validationCode');
       return true;
     },
+    // Заменяем onUserSignup на onUserCreated
+    onUserCreated: (session, userInfo) async {
+      // Ищем запись в таблице Person с таким же email
+      var existingPerson = await Person.db.findFirstRow(
+        session,
+        where: (p) => p.email.equals(userInfo.email ?? ''),
+      );
+      
+      if (existingPerson != null) {
+        // Если нашли - связываем с созданным аккаунтом
+        existingPerson = existingPerson.copyWith(
+          userInfo: userInfo,
+        );
+        await Person.db.updateRow(session, existingPerson);
+        
+        // Проверяем, есть ли запись студента для этого человека
+        var student = await Students.db.findFirstRow(
+          session, 
+          where: (s) => s.personId.equals(existingPerson?.id!),
+        );
+        
+        if (student != null) {
+          // Если это студент, добавляем роль student в scopes
+          var scopes = userInfo.scopeNames?.toSet() ?? {};
+          scopes.add('student');
+          userInfo = userInfo.copyWith(scopeNames: scopes.toList());
+          await auth.UserInfo.db.updateRow(session, userInfo);
+        }
+      }
+    },
   ));
 
   // Start the server.
