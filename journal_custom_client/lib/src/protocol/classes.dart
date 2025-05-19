@@ -19,7 +19,6 @@ import 'subgroups_protocol.dart' as _i6;
 abstract class Classes implements _i1.SerializableModel {
   Classes._({
     this.id,
-    required this.subjectId,
     required this.subjectsId,
     this.subjects,
     required this.class_typesId,
@@ -35,7 +34,6 @@ abstract class Classes implements _i1.SerializableModel {
 
   factory Classes({
     int? id,
-    required int subjectId,
     required int subjectsId,
     _i2.Subjects? subjects,
     required int class_typesId,
@@ -52,7 +50,6 @@ abstract class Classes implements _i1.SerializableModel {
   factory Classes.fromJson(Map<String, dynamic> jsonSerialization) {
     return Classes(
       id: jsonSerialization['id'] as int?,
-      subjectId: jsonSerialization['subjectId'] as int,
       subjectsId: jsonSerialization['subjectsId'] as int,
       subjects: jsonSerialization['subjects'] == null
           ? null
@@ -87,8 +84,6 @@ abstract class Classes implements _i1.SerializableModel {
   /// the id will be null.
   int? id;
 
-  int subjectId;
-
   int subjectsId;
 
   _i2.Subjects? subjects;
@@ -116,7 +111,6 @@ abstract class Classes implements _i1.SerializableModel {
   @_i1.useResult
   Classes copyWith({
     int? id,
-    int? subjectId,
     int? subjectsId,
     _i2.Subjects? subjects,
     int? class_typesId,
@@ -133,7 +127,6 @@ abstract class Classes implements _i1.SerializableModel {
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
-      'subjectId': subjectId,
       'subjectsId': subjectsId,
       if (subjects != null) 'subjects': subjects?.toJson(),
       'class_typesId': class_typesId,
@@ -159,7 +152,6 @@ class _Undefined {}
 class _ClassesImpl extends Classes {
   _ClassesImpl({
     int? id,
-    required int subjectId,
     required int subjectsId,
     _i2.Subjects? subjects,
     required int class_typesId,
@@ -173,7 +165,6 @@ class _ClassesImpl extends Classes {
     required DateTime date,
   }) : super._(
           id: id,
-          subjectId: subjectId,
           subjectsId: subjectsId,
           subjects: subjects,
           class_typesId: class_typesId,
@@ -193,7 +184,6 @@ class _ClassesImpl extends Classes {
   @override
   Classes copyWith({
     Object? id = _Undefined,
-    int? subjectId,
     int? subjectsId,
     Object? subjects = _Undefined,
     int? class_typesId,
@@ -208,7 +198,6 @@ class _ClassesImpl extends Classes {
   }) {
     return Classes(
       id: id is int? ? id : this.id,
-      subjectId: subjectId ?? this.subjectId,
       subjectsId: subjectsId ?? this.subjectsId,
       subjects:
           subjects is _i2.Subjects? ? subjects : this.subjects?.copyWith(),

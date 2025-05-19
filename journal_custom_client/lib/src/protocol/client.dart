@@ -14,9 +14,12 @@ import 'dart:async' as _i2;
 import 'package:journal_custom_client/src/protocol/groups_protocol.dart' as _i3;
 import 'package:journal_custom_client/src/protocol/teachers_protocol.dart'
     as _i4;
-import 'package:journal_custom_client/src/protocol/greeting.dart' as _i5;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i6;
-import 'protocol.dart' as _i7;
+import 'package:journal_custom_client/src/protocol/students_protocol.dart'
+    as _i5;
+import 'package:journal_custom_client/src/protocol/person.dart' as _i6;
+import 'package:journal_custom_client/src/protocol/greeting.dart' as _i7;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i8;
+import 'protocol.dart' as _i9;
 
 /// {@category Endpoint}
 class EndpointAdmin extends _i1.EndpointRef {
@@ -47,6 +50,21 @@ class EndpointAdmin extends _i1.EndpointRef {
         {},
       );
 
+  _i2.Future<_i3.Groups> updateGroup(
+    _i3.Groups group, {
+    int? curatorId,
+    int? groupHeadId,
+  }) =>
+      caller.callServerEndpoint<_i3.Groups>(
+        'admin',
+        'updateGroup',
+        {
+          'group': group,
+          'curatorId': curatorId,
+          'groupHeadId': groupHeadId,
+        },
+      );
+
   _i2.Future<_i4.Teachers> createTeacher({
     required String firstName,
     required String lastName,
@@ -66,11 +84,74 @@ class EndpointAdmin extends _i1.EndpointRef {
         },
       );
 
+  _i2.Future<_i5.Students> createStudent({
+    required String firstName,
+    required String lastName,
+    String? patronymic,
+    required String email,
+    String? phoneNumber,
+    required String groupName,
+  }) =>
+      caller.callServerEndpoint<_i5.Students>(
+        'admin',
+        'createStudent',
+        {
+          'firstName': firstName,
+          'lastName': lastName,
+          'patronymic': patronymic,
+          'email': email,
+          'phoneNumber': phoneNumber,
+          'groupName': groupName,
+        },
+      );
+
   _i2.Future<List<_i4.Teachers>> getAllTeachers() =>
       caller.callServerEndpoint<List<_i4.Teachers>>(
         'admin',
         'getAllTeachers',
         {},
+      );
+
+  _i2.Future<List<_i5.Students>> getAllStudents() =>
+      caller.callServerEndpoint<List<_i5.Students>>(
+        'admin',
+        'getAllStudents',
+        {},
+      );
+
+  _i2.Future<_i6.Person> updatePerson(_i6.Person person) =>
+      caller.callServerEndpoint<_i6.Person>(
+        'admin',
+        'updatePerson',
+        {'person': person},
+      );
+
+  _i2.Future<List<_i5.Students>> searchStudents({required String query}) =>
+      caller.callServerEndpoint<List<_i5.Students>>(
+        'admin',
+        'searchStudents',
+        {'query': query},
+      );
+
+  _i2.Future<List<_i4.Teachers>> searchTeachers({required String query}) =>
+      caller.callServerEndpoint<List<_i4.Teachers>>(
+        'admin',
+        'searchTeachers',
+        {'query': query},
+      );
+
+  _i2.Future<List<_i3.Groups>> searchGroups({required String query}) =>
+      caller.callServerEndpoint<List<_i3.Groups>>(
+        'admin',
+        'searchGroups',
+        {'query': query},
+      );
+
+  _i2.Future<_i5.Students> updateStudent(_i5.Students student) =>
+      caller.callServerEndpoint<_i5.Students>(
+        'admin',
+        'updateStudent',
+        {'student': student},
       );
 }
 
@@ -139,8 +220,8 @@ class EndpointGreeting extends _i1.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i2.Future<_i5.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i5.Greeting>(
+  _i2.Future<_i7.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i7.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -149,10 +230,10 @@ class EndpointGreeting extends _i1.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i6.Caller(client);
+    auth = _i8.Caller(client);
   }
 
-  late final _i6.Caller auth;
+  late final _i8.Caller auth;
 }
 
 class Client extends _i1.ServerpodClientShared {
@@ -171,7 +252,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
           host,
-          _i7.Protocol(),
+          _i9.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,

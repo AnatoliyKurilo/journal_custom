@@ -29,6 +29,8 @@ import 'package:journal_custom_server/src/generated/groups_protocol.dart'
     as _i17;
 import 'package:journal_custom_server/src/generated/teachers_protocol.dart'
     as _i18;
+import 'package:journal_custom_server/src/generated/students_protocol.dart'
+    as _i19;
 export 'greeting.dart';
 export 'attendance_protocol.dart';
 export 'class_types_protocol.dart';
@@ -180,12 +182,6 @@ class Protocol extends _i1.SerializationManagerServer {
           columnDefault: 'nextval(\'classes_id_seq\'::regclass)',
         ),
         _i2.ColumnDefinition(
-          name: 'subjectId',
-          columnType: _i2.ColumnType.bigint,
-          isNullable: false,
-          dartType: 'int',
-        ),
-        _i2.ColumnDefinition(
           name: 'subjectsId',
           columnType: _i2.ColumnType.bigint,
           isNullable: false,
@@ -225,16 +221,6 @@ class Protocol extends _i1.SerializationManagerServer {
       foreignKeys: [
         _i2.ForeignKeyDefinition(
           constraintName: 'classes_fk_0',
-          columns: ['subjectId'],
-          referenceTable: 'subjects',
-          referenceTableSchema: 'public',
-          referenceColumns: ['id'],
-          onUpdate: _i2.ForeignKeyAction.noAction,
-          onDelete: _i2.ForeignKeyAction.noAction,
-          matchType: null,
-        ),
-        _i2.ForeignKeyDefinition(
-          constraintName: 'classes_fk_1',
           columns: ['subjectsId'],
           referenceTable: 'subjects',
           referenceTableSchema: 'public',
@@ -244,7 +230,7 @@ class Protocol extends _i1.SerializationManagerServer {
           matchType: null,
         ),
         _i2.ForeignKeyDefinition(
-          constraintName: 'classes_fk_2',
+          constraintName: 'classes_fk_1',
           columns: ['class_typesId'],
           referenceTable: 'class_types',
           referenceTableSchema: 'public',
@@ -254,7 +240,7 @@ class Protocol extends _i1.SerializationManagerServer {
           matchType: null,
         ),
         _i2.ForeignKeyDefinition(
-          constraintName: 'classes_fk_3',
+          constraintName: 'classes_fk_2',
           columns: ['teachersId'],
           referenceTable: 'teachers',
           referenceTableSchema: 'public',
@@ -264,7 +250,7 @@ class Protocol extends _i1.SerializationManagerServer {
           matchType: null,
         ),
         _i2.ForeignKeyDefinition(
-          constraintName: 'classes_fk_4',
+          constraintName: 'classes_fk_3',
           columns: ['semestersId'],
           referenceTable: 'semesters',
           referenceTableSchema: 'public',
@@ -274,7 +260,7 @@ class Protocol extends _i1.SerializationManagerServer {
           matchType: null,
         ),
         _i2.ForeignKeyDefinition(
-          constraintName: 'classes_fk_5',
+          constraintName: 'classes_fk_4',
           columns: ['subgroupsId'],
           referenceTable: 'subgroups',
           referenceTableSchema: 'public',
@@ -723,19 +709,6 @@ class Protocol extends _i1.SerializationManagerServer {
           isPrimary: true,
         ),
         _i2.IndexDefinition(
-          indexName: 'students_groups_unique_idx',
-          tableSpace: null,
-          elements: [
-            _i2.IndexElementDefinition(
-              type: _i2.IndexElementDefinitionType.column,
-              definition: 'groupsId',
-            )
-          ],
-          type: 'btree',
-          isUnique: true,
-          isPrimary: false,
-        ),
-        _i2.IndexDefinition(
           indexName: 'students_person_unique_idx',
           tableSpace: null,
           elements: [
@@ -1006,6 +979,10 @@ class Protocol extends _i1.SerializationManagerServer {
     }
     if (t == List<_i18.Teachers>) {
       return (data as List).map((e) => deserialize<_i18.Teachers>(e)).toList()
+          as T;
+    }
+    if (t == List<_i19.Students>) {
+      return (data as List).map((e) => deserialize<_i19.Students>(e)).toList()
           as T;
     }
     if (t == List<String>) {

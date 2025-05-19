@@ -8,166 +8,64 @@ class AdminEndpoint extends Endpoint {
   @override
   Set<String> get requiredRoles => {'serverpod.admin'};
 
-  // ======== Методы для работы с группами ========
-
-  Future<List<Groups>> getAllGroups(Session session) async {
-    // Получаем все группы
-    var groups = await Groups.db.find(session);
-
-    // Загружаем связанные данные для каждой группы
-    for (var i = 0; i < groups.length; i++) {
-      var group = groups[i];
-
-      // Загружаем куратора
-      if (group.curatorId != null) {
-        var curator = await Teachers.db.findById(session, group.curatorId);
-        if (curator != null) {
-          var person = await Person.db.findById(session, curator.personId);
-          if (person != null) {
-            // Добавляем данные о человеке в куратора
-            session.log('Куратор найден: ${person.firstName} ${person.lastName}');
-          }
-        }
-      }
-
-      // Загружаем старосту
-      if (group.groupHeadId != null) {
-        var groupHead = await Students.db.findById(session, group.groupHeadId);
-        if (groupHead != null) {
-          var person = await Person.db.findById(session, groupHead.personId);
-          if (person != null) {
-            // Добавляем данные о человеке в старосту
-            session.log('Староста найден: ${person.firstName} ${person.lastName}');
-          }
-        }
-      }
-
-      groups[i] = group;
-    }
-
-    return groups;
-  }
-
-  Future<Groups?> getGroupById(Session session, int id) async {
-    // Получаем группу по ID
-    var group = await Groups.db.findById(session, id);
-    if (group == null) {
-      return null;
-    }
-
-    // Загружаем куратора
-    if (group.curatorId != null) {
-      var curator = await Teachers.db.findById(session, group.curatorId);
-      if (curator != null) {
-        var person = await Person.db.findById(session, curator.personId);
-        if (person != null) {
-          session.log('Куратор найден: ${person.firstName} ${person.lastName}');
-        }
-      }
-    }
-
-    // Загружаем старосту
-    if (group.groupHeadId != null) {
-      var groupHead = await Students.db.findById(session, group.groupHeadId);
-      if (groupHead != null) {
-        var person = await Person.db.findById(session, groupHead.personId);
-        if (person != null) {
-          session.log('Староста найден: ${person.firstName} ${person.lastName}');
-        }
-      }
-    }
-
-    return group;
-  }
-
-  Future<Groups> createGroup(Session session, String name, int curatorId, int groupHeadId) async {
+  // Метод для создания группы
+  Future<Groups> createGroup(Session session, String name, int? curatorId, int? groupHeadId) async {
     var group = Groups(
-      name: name,
-      curatorId: curatorId,
-      groupHeadId: groupHeadId == 0 ? -1 : groupHeadId, // Если 0, то -1 (или другое значение по умолчанию)
-    );
-
-    return await Groups.db.insertRow(session, group);
-  }
-
-  Future<Groups> updateGroup(Session session, int id, String name, int curatorId, int? groupHeadId) async {
-    var group = await Groups.db.findById(session, id);
-    if (group == null) {
-      throw Exception('Группа не найдена');
-    }
-
-    group = group.copyWith(
       name: name,
       curatorId: curatorId,
       groupHeadId: groupHeadId,
     );
 
-    return await Groups.db.updateRow(session, group);
+    return await Groups.db.insertRow(session, group);
   }
 
-  Future<bool> deleteGroup(Session session, int id) async {
-    try {
-      // Проверяем, есть ли в группе студенты
-      var students = await Students.db.find(
-        session,
-        where: (s) => s.groupId.equals(id),
-      );
-
-      if (students.isNotEmpty) {
-        throw Exception('Невозможно удалить группу, в которой есть студенты');
-      }
-
-      var group = await Groups.db.findById(session, id);
-      if (group == null) {
-        return false;
-      }
-
-      await Groups.db.deleteRow(session, group);
-      return true;
-    } catch (e) {
-      session.log(e.toString());
-      return false;
-    }
+  // Метод для получения всех групп с использованием include
+  Future<List<Groups>> getAllGroups(Session session) async {
+    return await Groups.db.find(
+      session,
+      include: Groups.include(
+        curator: Teachers.include(person: Person.include()),
+        groupHead: Students.include(person: Person.include()),
+      ),
+    );
   }
 
-  // ======== Методы для работы с преподавателями ========
 
-  Future<List<Teachers>> getAllTeachers(Session session) async {
-    var teachers = await Teachers.db.find(session);
 
-    for (var i = 0; i < teachers.length; i++) {
-      var teacher = teachers[i];
-      var person = await Person.db.findById(session, teacher.personId);
-      if (person != null) {
-        session.log('Преподаватель найден: ${person.firstName} ${person.lastName}');
-      }
+  // Метод для обновления данных группы
+  Future<Groups> updateGroup(
+    Session session,
+    Groups group, {
+    int? curatorId,
+    int? groupHeadId,
+  }) async {
+    // Проверяем, существует ли группа с таким ID
+    var existingGroup = await Groups.db.findById(session, group.id!);
+    if (existingGroup == null) {
+      throw Exception('Группа с ID ${group.id} не найдена');
     }
 
-    return teachers;
+    // // Обновляем данные группы
+    // var updatedGroup = existingGroup.copyWith(
+    //   curatorId: curatorId ?? existingGroup.curatorId,
+    //   groupHeadId: groupHeadId ?? existingGroup.groupHeadId,
+    // );
+
+    await Groups.db.updateRow(session, group);
+
+    return group; // Возвращаем обновленную группу
   }
 
-  Future<Teachers?> getTeacherById(Session session, int id) async {
-    var teacher = await Teachers.db.findById(session, id);
-    if (teacher == null) {
-      return null;
-    }
-
-    var person = await Person.db.findById(session, teacher.personId);
-    if (person != null) {
-      session.log('Преподаватель найден: ${person.firstName} ${person.lastName}');
-    }
-
-    return teacher;
-  }
-
-  Future<Teachers> createTeacher(Session session, {
+  // Метод для создания преподавателя
+  Future<Teachers> createTeacher(
+    Session session, {
     required String firstName,
     required String lastName,
     String? patronymic,
     required String email,
     String? phoneNumber,
   }) async {
-    // Проверяем, не существует ли уже человек с таким email
+    // Проверяем, существует ли уже человек с таким email
     var existingPerson = await Person.db.findFirstRow(
       session,
       where: (p) => p.email.equals(email),
@@ -196,26 +94,283 @@ class AdminEndpoint extends Endpoint {
     return await Teachers.db.insertRow(session, teacher);
   }
 
-  Future<bool> deleteTeacher(Session session, int id) async {
+  // Метод для создания студента
+  Future<Students> createStudent(
+    Session session, {
+    required String firstName,
+    required String lastName,
+    String? patronymic,
+    required String email,
+    String? phoneNumber,
+    required String groupName,
+  }) async {
+    session.log('Начало создания студента: $firstName $lastName');
+
     try {
-      var teacher = await Teachers.db.findById(session, id);
-      if (teacher == null) {
-        return false;
+      // Проверяем, существует ли уже человек с таким email
+      var existingPerson = await Person.db.findFirstRow(
+        session,
+        where: (p) => p.email.equals(email),
+      );
+
+      if (existingPerson != null) {
+        session.log('Человек с таким email уже существует: $email');
+        throw Exception('Человек с таким email уже существует');
       }
 
-      // Удаляем запись Teacher
-      await Teachers.db.deleteRow(session, teacher);
+      // Ищем группу по названию
+      var group = await Groups.db.findFirstRow(
+        session,
+        where: (g) => g.name.equals(groupName),
+      );
 
-      // Удаляем запись Person
-      var person = await Person.db.findById(session, teacher.personId);
-      if (person != null) {
-        await Person.db.deleteRow(session, person);
+      if (group == null) {
+        session.log('Группа с названием "$groupName" не найдена');
+        throw Exception('Группа с названием "$groupName" не найдена');
       }
 
-      return true;
-    } catch (e) {
-      session.log(e.toString());
-      return false;
+      // Создаем запись Person
+      var person = Person(
+        firstName: firstName,
+        lastName: lastName,
+        patronymic: patronymic,
+        email: email,
+        phoneNumber: phoneNumber,
+      );
+
+      person = await Person.db.insertRow(session, person);
+      session.log('Создана запись в таблице Person: ${person.id}');
+
+      // Создаем запись Student
+      var student = Students(
+        personId: person.id!,
+        groupsId: group.id!,
+      );
+
+      student = await Students.db.insertRow(session, student);
+      session.log('Создана запись в таблице Students: ${student.id}');
+
+      return student;
+    } catch (e, stackTrace) {
+      session.log(
+        'Ошибка при создании студента: $e',
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  // Метод для получения всех преподавателей с использованием include
+  Future<List<Teachers>> getAllTeachers(Session session) async {
+    return await Teachers.db.find(
+      session,
+      include: Teachers.include(person: Person.include()),
+    );
+  }
+
+  // Метод для получения всех студентов с использованием include
+  Future<List<Students>> getAllStudents(Session session) async {
+    return await Students.db.find(
+      session,
+      include: Students.include(
+        person: Person.include(), // Включаем данные о человеке
+        groups: Groups.include(), // Включаем данные о группе
+      ),
+    );
+  }
+
+  // Метод для обновления данных человека
+  Future<Person> updatePerson(Session session, Person person) async {
+    return await _executeWithErrorHandling<Person>(
+      session,
+      () async {
+        await Person.db.updateRow(session, person);
+        return person;
+      },
+    );
+  }
+
+  // Метод для поиска студентов
+  Future<List<Students>> searchStudents(
+    Session session, {
+    required String query, // Принимаем строку запроса
+  }) async {
+    // 1. Разделяем строку на слова
+    final tokens = query
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((t) => t.isNotEmpty)
+        .toList();
+
+    // Если строка пуста, возвращаем всех студентов
+    if (tokens.isEmpty) {
+      return await Students.db.find(
+        session,
+        include: Students.include(
+          person: Person.include(),
+          groups: Groups.include(),
+        ),
+      );
+    }
+
+    // 2. Построение списка условий
+    var conditions = <Expression<dynamic>>[];
+    for (var token in tokens) {
+      final pattern = '%${token.toLowerCase()}%';
+      conditions.add(
+        Students.t.person.firstName.ilike(pattern) |
+        Students.t.person.lastName.ilike(pattern) |
+        Students.t.person.patronymic.ilike(pattern) |
+        Students.t.person.email.ilike(pattern) |
+        Students.t.person.phoneNumber.ilike(pattern) |
+        Students.t.groups.name.ilike(pattern),
+      );
+    }
+
+    // 3. Объединение условий через AND
+    var combinedCondition = conditions.reduce((a, b) => a & b);
+
+    // 4. Выполняем запрос с использованием include
+    return await Students.db.find(
+      session,
+      where: (t) => combinedCondition,
+      include: Students.include(
+        person: Person.include(),
+        groups: Groups.include(),
+      ),
+    );
+  }
+
+  // Метод для поиска преподавателей
+  Future<List<Teachers>> searchTeachers(
+    Session session, {
+    required String query, // Принимаем строку запроса
+  }) async {
+    // 1. Разделяем строку на слова
+    final tokens = query
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((t) => t.isNotEmpty)
+        .toList();
+
+    // Если строка пуста, возвращаем всех преподавателей
+    if (tokens.isEmpty) {
+      return await Teachers.db.find(
+        session,
+        include: Teachers.include(
+          person: Person.include(),
+        ),
+      );
+    }
+
+    // 2. Построение списка условий
+    var conditions = <Expression<dynamic>>[];
+    for (var token in tokens) {
+      final pattern = '%${token.toLowerCase()}%';
+      conditions.add(
+        Teachers.t.person.firstName.ilike(pattern) |
+        Teachers.t.person.lastName.ilike(pattern) |
+        Teachers.t.person.patronymic.ilike(pattern) |
+        Teachers.t.person.email.ilike(pattern) |
+        Teachers.t.person.phoneNumber.ilike(pattern),
+      );
+    }
+
+    // 3. Объединение условий через AND
+    var combinedCondition = conditions.reduce((a, b) => a & b);
+
+    // 4. Выполняем запрос с использованием include
+    return await Teachers.db.find(
+      session,
+      where: (t) => combinedCondition,
+      include: Teachers.include(
+        person: Person.include(),
+      ),
+    );
+  }
+
+  // Метод для поиска групп
+  Future<List<Groups>> searchGroups(
+    Session session, {
+    required String query, // Принимаем строку запроса
+  }) async {
+    // 1. Разделяем строку на слова
+    final tokens = query
+        .trim()
+        .split(RegExp(r'\s+'))
+        .where((t) => t.isNotEmpty)
+        .toList();
+
+    // Если строка пуста, возвращаем все группы
+    if (tokens.isEmpty) {
+      return await Groups.db.find(
+        session,
+        include: Groups.include(
+          curator: Teachers.include(person: Person.include()),
+          groupHead: Students.include(person: Person.include()),
+        ),
+      );
+    }
+
+    // 2. Построение списка условий
+    var conditions = <Expression<dynamic>>[];
+    for (var token in tokens) {
+      final pattern = '%${token.toLowerCase()}%';
+      conditions.add(
+        Groups.t.name.ilike(pattern) |
+        Groups.t.curator.person.firstName.ilike(pattern) |
+        Groups.t.curator.person.lastName.ilike(pattern) |
+        Groups.t.groupHead.person.firstName.ilike(pattern) |
+        Groups.t.groupHead.person.lastName.ilike(pattern),
+      );
+    }
+
+    // 3. Объединение условий через AND
+    var combinedCondition = conditions.reduce((a, b) => a & b);
+
+    // 4. Выполняем запрос с использованием include
+    return await Groups.db.find(
+      session,
+      where: (t) => combinedCondition,
+      include: Groups.include(
+        curator: Teachers.include(person: Person.include()),
+        groupHead: Students.include(person: Person.include()),
+      ),
+    );
+  }
+
+  // Метод для обновления данных студента
+  Future<Students> updateStudent(
+    Session session,
+    Students student,
+  ) async {
+    // Проверяем, существует ли студент с таким ID
+    var existingStudent = await Students.db.findById(session, student.id!);
+    if (existingStudent == null) {
+      throw Exception('Студент с ID ${student.id} не найден');
+    }
+
+    // Обновляем данные студента
+    await Students.db.updateRow(session, student);
+
+    return student;
+  }
+
+  // Вспомогательный метод для обработки ошибок
+  Future<T> _executeWithErrorHandling<T>(
+    Session session,
+    Future<T> Function() action,
+  ) async {
+    try {
+      return await action();
+    } catch (e, stackTrace) {
+      session.log(
+        'Ошибка: $e',
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
     }
   }
 }

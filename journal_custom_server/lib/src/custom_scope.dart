@@ -10,5 +10,5 @@ class CustomScope extends Scope {
   static const teacher = CustomScope('teacher');
   static const curator = CustomScope('curator');
   static const documentSpecialist = CustomScope('documentSpecialist');
-  static const admin = CustomScope('admin');
+  // static const admin = CustomScope('admin');
 }

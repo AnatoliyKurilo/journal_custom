@@ -1,8 +1,16 @@
 admin:
   - createGroup:
   - getAllGroups:
+  - updateGroup:
   - createTeacher:
+  - createStudent:
   - getAllTeachers:
+  - getAllStudents:
+  - updatePerson:
+  - searchStudents:
+  - searchTeachers:
+  - searchGroups:
+  - updateStudent:
 makeUserAdmin:
   - setUserScopes:
 userRoles:

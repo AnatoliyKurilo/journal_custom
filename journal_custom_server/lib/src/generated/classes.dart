@@ -22,7 +22,6 @@ abstract class Classes
     implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
   Classes._({
     this.id,
-    required this.subjectId,
     required this.subjectsId,
     this.subjects,
     required this.class_typesId,
@@ -38,7 +37,6 @@ abstract class Classes
 
   factory Classes({
     int? id,
-    required int subjectId,
     required int subjectsId,
     _i2.Subjects? subjects,
     required int class_typesId,
@@ -55,7 +53,6 @@ abstract class Classes
   factory Classes.fromJson(Map<String, dynamic> jsonSerialization) {
     return Classes(
       id: jsonSerialization['id'] as int?,
-      subjectId: jsonSerialization['subjectId'] as int,
       subjectsId: jsonSerialization['subjectsId'] as int,
       subjects: jsonSerialization['subjects'] == null
           ? null
@@ -92,8 +89,6 @@ abstract class Classes
   @override
   int? id;
 
-  int subjectId;
-
   int subjectsId;
 
   _i2.Subjects? subjects;
@@ -124,7 +119,6 @@ abstract class Classes
   @_i1.useResult
   Classes copyWith({
     int? id,
-    int? subjectId,
     int? subjectsId,
     _i2.Subjects? subjects,
     int? class_typesId,
@@ -141,7 +135,6 @@ abstract class Classes
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
-      'subjectId': subjectId,
       'subjectsId': subjectsId,
       if (subjects != null) 'subjects': subjects?.toJson(),
       'class_typesId': class_typesId,
@@ -160,7 +153,6 @@ abstract class Classes
   Map<String, dynamic> toJsonForProtocol() {
     return {
       if (id != null) 'id': id,
-      'subjectId': subjectId,
       'subjectsId': subjectsId,
       if (subjects != null) 'subjects': subjects?.toJsonForProtocol(),
       'class_typesId': class_typesId,
@@ -222,7 +214,6 @@ class _Undefined {}
 class _ClassesImpl extends Classes {
   _ClassesImpl({
     int? id,
-    required int subjectId,
     required int subjectsId,
     _i2.Subjects? subjects,
     required int class_typesId,
@@ -236,7 +227,6 @@ class _ClassesImpl extends Classes {
     required DateTime date,
   }) : super._(
           id: id,
-          subjectId: subjectId,
           subjectsId: subjectsId,
           subjects: subjects,
           class_typesId: class_typesId,
@@ -256,7 +246,6 @@ class _ClassesImpl extends Classes {
   @override
   Classes copyWith({
     Object? id = _Undefined,
-    int? subjectId,
     int? subjectsId,
     Object? subjects = _Undefined,
     int? class_typesId,
@@ -271,7 +260,6 @@ class _ClassesImpl extends Classes {
   }) {
     return Classes(
       id: id is int? ? id : this.id,
-      subjectId: subjectId ?? this.subjectId,
       subjectsId: subjectsId ?? this.subjectsId,
       subjects:
           subjects is _i2.Subjects? ? subjects : this.subjects?.copyWith(),
@@ -295,10 +283,6 @@ class _ClassesImpl extends Classes {
 
 class ClassesTable extends _i1.Table<int?> {
   ClassesTable({super.tableRelation}) : super(tableName: 'classes') {
-    subjectId = _i1.ColumnInt(
-      'subjectId',
-      this,
-    );
     subjectsId = _i1.ColumnInt(
       'subjectsId',
       this,
@@ -324,8 +308,6 @@ class ClassesTable extends _i1.Table<int?> {
       this,
     );
   }
-
-  late final _i1.ColumnInt subjectId;
 
   late final _i1.ColumnInt subjectsId;
 
@@ -417,7 +399,6 @@ class ClassesTable extends _i1.Table<int?> {
   @override
   List<_i1.Column> get columns => [
         id,
-        subjectId,
         subjectsId,
         class_typesId,
         teachersId,

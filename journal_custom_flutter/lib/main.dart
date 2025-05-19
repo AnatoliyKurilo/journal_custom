@@ -5,6 +5,8 @@ import 'package:journal_custom_flutter/src/serverpod_client.dart';
 import 'package:journal_custom_flutter/src/sign_in_page.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 
+// import 'package:logging/logging.dart';
+import 'dart:developer' as developer;
 /// Sets up a global client object that can be used to talk to the server from
 /// anywhere in our app. The client is generated from your server code
 /// and is set up to connect to a Serverpod running on a local server on
