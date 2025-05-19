@@ -1,0 +1,639 @@
+{
+  "actions": [
+    {
+      "type": "deleteTable",
+      "deleteTable": "attendance"
+    },
+    {
+      "type": "createTable",
+      "createTable": {
+        "name": "attendance",
+        "dartName": "Attendance",
+        "module": "journal_custom",
+        "schema": "public",
+        "columns": [
+          {
+            "name": "id",
+            "columnType": 6,
+            "isNullable": false,
+            "columnDefault": "nextval('attendance_id_seq'::regclass)",
+            "dartType": "int?"
+          },
+          {
+            "name": "classesId",
+            "columnType": 6,
+            "isNullable": false,
+            "dartType": "int"
+          },
+          {
+            "name": "studentsId",
+            "columnType": 6,
+            "isNullable": false,
+            "dartType": "int"
+          },
+          {
+            "name": "status",
+            "columnType": 0,
+            "isNullable": false,
+            "dartType": "String"
+          },
+          {
+            "name": "comment",
+            "columnType": 0,
+            "isNullable": true,
+            "dartType": "String?"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "constraintName": "attendance_fk_0",
+            "columns": [
+              "classesId"
+            ],
+            "referenceTable": "classes",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          },
+          {
+            "constraintName": "attendance_fk_1",
+            "columns": [
+              "studentsId"
+            ],
+            "referenceTable": "students",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          }
+        ],
+        "indexes": [
+          {
+            "indexName": "attendance_pkey",
+            "elements": [
+              {
+                "type": 0,
+                "definition": "id"
+              }
+            ],
+            "type": "btree",
+            "isUnique": true,
+            "isPrimary": true
+          }
+        ],
+        "managed": true
+      }
+    },
+    {
+      "type": "deleteTable",
+      "deleteTable": "classes"
+    },
+    {
+      "type": "createTable",
+      "createTable": {
+        "name": "classes",
+        "dartName": "Classes",
+        "module": "journal_custom",
+        "schema": "public",
+        "columns": [
+          {
+            "name": "id",
+            "columnType": 6,
+            "isNullable": false,
+            "columnDefault": "nextval('classes_id_seq'::regclass)",
+            "dartType": "int?"
+          },
+          {
+            "name": "subjectId",
+            "columnType": 6,
+            "isNullable": false,
+            "dartType": "int"
+          },
+          {
+            "name": "subjectsId",
+            "columnType": 6,
+            "isNullable": false,
+            "dartType": "int"
+          },
+          {
+            "name": "class_typesId",
+            "columnType": 6,
+            "isNullable": false,
+            "dartType": "int"
+          },
+          {
+            "name": "teachersId",
+            "columnType": 6,
+            "isNullable": false,
+            "dartType": "int"
+          },
+          {
+            "name": "semestersId",
+            "columnType": 6,
+            "isNullable": false,
+            "dartType": "int"
+          },
+          {
+            "name": "subgroupsId",
+            "columnType": 6,
+            "isNullable": false,
+            "dartType": "int"
+          },
+          {
+            "name": "date",
+            "columnType": 4,
+            "isNullable": false,
+            "dartType": "DateTime"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "constraintName": "classes_fk_0",
+            "columns": [
+              "subjectId"
+            ],
+            "referenceTable": "subjects",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          },
+          {
+            "constraintName": "classes_fk_1",
+            "columns": [
+              "subjectsId"
+            ],
+            "referenceTable": "subjects",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          },
+          {
+            "constraintName": "classes_fk_2",
+            "columns": [
+              "class_typesId"
+            ],
+            "referenceTable": "class_types",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          },
+          {
+            "constraintName": "classes_fk_3",
+            "columns": [
+              "teachersId"
+            ],
+            "referenceTable": "teachers",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          },
+          {
+            "constraintName": "classes_fk_4",
+            "columns": [
+              "semestersId"
+            ],
+            "referenceTable": "semesters",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          },
+          {
+            "constraintName": "classes_fk_5",
+            "columns": [
+              "subgroupsId"
+            ],
+            "referenceTable": "subgroups",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          }
+        ],
+        "indexes": [
+          {
+            "indexName": "classes_pkey",
+            "elements": [
+              {
+                "type": 0,
+                "definition": "id"
+              }
+            ],
+            "type": "btree",
+            "isUnique": true,
+            "isPrimary": true
+          }
+        ],
+        "managed": true
+      }
+    },
+    {
+      "type": "deleteTable",
+      "deleteTable": "student_subgroups"
+    },
+    {
+      "type": "createTable",
+      "createTable": {
+        "name": "student_subgroups",
+        "dartName": "StudentSubgroup",
+        "module": "journal_custom",
+        "schema": "public",
+        "columns": [
+          {
+            "name": "id",
+            "columnType": 6,
+            "isNullable": false,
+            "columnDefault": "nextval('student_subgroups_id_seq'::regclass)",
+            "dartType": "int?"
+          },
+          {
+            "name": "studentsId",
+            "columnType": 6,
+            "isNullable": false,
+            "dartType": "int"
+          },
+          {
+            "name": "subgroupsId",
+            "columnType": 6,
+            "isNullable": false,
+            "dartType": "int"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "constraintName": "student_subgroups_fk_0",
+            "columns": [
+              "studentsId"
+            ],
+            "referenceTable": "students",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          },
+          {
+            "constraintName": "student_subgroups_fk_1",
+            "columns": [
+              "subgroupsId"
+            ],
+            "referenceTable": "subgroups",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          }
+        ],
+        "indexes": [
+          {
+            "indexName": "student_subgroups_pkey",
+            "elements": [
+              {
+                "type": 0,
+                "definition": "id"
+              }
+            ],
+            "type": "btree",
+            "isUnique": true,
+            "isPrimary": true
+          },
+          {
+            "indexName": "unique_combination",
+            "elements": [
+              {
+                "type": 0,
+                "definition": "studentsId"
+              },
+              {
+                "type": 0,
+                "definition": "subgroupsId"
+              }
+            ],
+            "type": "btree",
+            "isUnique": true,
+            "isPrimary": false
+          }
+        ],
+        "managed": true
+      }
+    },
+    {
+      "type": "deleteTable",
+      "deleteTable": "students"
+    },
+    {
+      "type": "createTable",
+      "createTable": {
+        "name": "students",
+        "dartName": "Students",
+        "module": "journal_custom",
+        "schema": "public",
+        "columns": [
+          {
+            "name": "id",
+            "columnType": 6,
+            "isNullable": false,
+            "columnDefault": "nextval('students_id_seq'::regclass)",
+            "dartType": "int?"
+          },
+          {
+            "name": "personId",
+            "columnType": 6,
+            "isNullable": false,
+            "dartType": "int"
+          },
+          {
+            "name": "groupsId",
+            "columnType": 6,
+            "isNullable": false,
+            "dartType": "int"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "constraintName": "students_fk_0",
+            "columns": [
+              "personId"
+            ],
+            "referenceTable": "person",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          },
+          {
+            "constraintName": "students_fk_1",
+            "columns": [
+              "groupsId"
+            ],
+            "referenceTable": "groups",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          }
+        ],
+        "indexes": [
+          {
+            "indexName": "students_pkey",
+            "elements": [
+              {
+                "type": 0,
+                "definition": "id"
+              }
+            ],
+            "type": "btree",
+            "isUnique": true,
+            "isPrimary": true
+          },
+          {
+            "indexName": "students_groups_unique_idx",
+            "elements": [
+              {
+                "type": 0,
+                "definition": "groupsId"
+              }
+            ],
+            "type": "btree",
+            "isUnique": true,
+            "isPrimary": false
+          },
+          {
+            "indexName": "students_person_unique_idx",
+            "elements": [
+              {
+                "type": 0,
+                "definition": "personId"
+              }
+            ],
+            "type": "btree",
+            "isUnique": true,
+            "isPrimary": false
+          }
+        ],
+        "managed": true
+      }
+    },
+    {
+      "type": "deleteTable",
+      "deleteTable": "subgroups"
+    },
+    {
+      "type": "createTable",
+      "createTable": {
+        "name": "subgroups",
+        "dartName": "Subgroups",
+        "module": "journal_custom",
+        "schema": "public",
+        "columns": [
+          {
+            "name": "id",
+            "columnType": 6,
+            "isNullable": false,
+            "columnDefault": "nextval('subgroups_id_seq'::regclass)",
+            "dartType": "int?"
+          },
+          {
+            "name": "name",
+            "columnType": 0,
+            "isNullable": false,
+            "dartType": "String"
+          },
+          {
+            "name": "groupsId",
+            "columnType": 6,
+            "isNullable": false,
+            "dartType": "int"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "constraintName": "subgroups_fk_0",
+            "columns": [
+              "groupsId"
+            ],
+            "referenceTable": "groups",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          }
+        ],
+        "indexes": [
+          {
+            "indexName": "subgroups_pkey",
+            "elements": [
+              {
+                "type": 0,
+                "definition": "id"
+              }
+            ],
+            "type": "btree",
+            "isUnique": true,
+            "isPrimary": true
+          }
+        ],
+        "managed": true
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "type": "columnDropped",
+      "message": "Column \"classId\" of table \"attendance\" will be dropped.",
+      "table": "attendance",
+      "columns": [
+        "classId"
+      ],
+      "destrucive": true
+    },
+    {
+      "type": "tableDropped",
+      "message": "One or more columns are added to table \"attendance\" which cannot be added in a table migration. The complete table will be deleted and recreated.",
+      "table": "attendance",
+      "columns": [
+        "classesId"
+      ],
+      "destrucive": true
+    },
+    {
+      "type": "columnDropped",
+      "message": "Column \"typeId\" of table \"classes\" will be dropped.",
+      "table": "classes",
+      "columns": [
+        "typeId"
+      ],
+      "destrucive": true
+    },
+    {
+      "type": "columnDropped",
+      "message": "Column \"teacherId\" of table \"classes\" will be dropped.",
+      "table": "classes",
+      "columns": [
+        "teacherId"
+      ],
+      "destrucive": true
+    },
+    {
+      "type": "columnDropped",
+      "message": "Column \"semesterId\" of table \"classes\" will be dropped.",
+      "table": "classes",
+      "columns": [
+        "semesterId"
+      ],
+      "destrucive": true
+    },
+    {
+      "type": "columnDropped",
+      "message": "Column \"subgroupId\" of table \"classes\" will be dropped.",
+      "table": "classes",
+      "columns": [
+        "subgroupId"
+      ],
+      "destrucive": true
+    },
+    {
+      "type": "tableDropped",
+      "message": "One or more columns are added to table \"classes\" which cannot be added in a table migration. The complete table will be deleted and recreated.",
+      "table": "classes",
+      "columns": [
+        "subjectsId"
+      ],
+      "destrucive": true
+    },
+    {
+      "type": "columnDropped",
+      "message": "Column \"studentId\" of table \"student_subgroups\" will be dropped.",
+      "table": "student_subgroups",
+      "columns": [
+        "studentId"
+      ],
+      "destrucive": true
+    },
+    {
+      "type": "columnDropped",
+      "message": "Column \"subgroupId\" of table \"student_subgroups\" will be dropped.",
+      "table": "student_subgroups",
+      "columns": [
+        "subgroupId"
+      ],
+      "destrucive": true
+    },
+    {
+      "type": "tableDropped",
+      "message": "One or more columns are added to table \"student_subgroups\" which cannot be added in a table migration. The complete table will be deleted and recreated.",
+      "table": "student_subgroups",
+      "columns": [
+        "studentsId"
+      ],
+      "destrucive": true
+    },
+    {
+      "type": "columnDropped",
+      "message": "Column \"groupId\" of table \"students\" will be dropped.",
+      "table": "students",
+      "columns": [
+        "groupId"
+      ],
+      "destrucive": true
+    },
+    {
+      "type": "tableDropped",
+      "message": "One or more columns are added to table \"students\" which cannot be added in a table migration. The complete table will be deleted and recreated.",
+      "table": "students",
+      "columns": [
+        "groupsId"
+      ],
+      "destrucive": true
+    },
+    {
+      "type": "columnDropped",
+      "message": "Column \"groupId\" of table \"subgroups\" will be dropped.",
+      "table": "subgroups",
+      "columns": [
+        "groupId"
+      ],
+      "destrucive": true
+    },
+    {
+      "type": "tableDropped",
+      "message": "One or more columns are added to table \"subgroups\" which cannot be added in a table migration. The complete table will be deleted and recreated.",
+      "table": "subgroups",
+      "columns": [
+        "groupsId"
+      ],
+      "destrucive": true
+    }
+  ],
+  "migrationApiVersion": 1
+}

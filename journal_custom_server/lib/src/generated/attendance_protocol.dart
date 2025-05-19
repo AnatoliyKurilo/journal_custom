@@ -8,23 +8,31 @@
 // ignore_for_file: type_literal_in_constant_pattern
 // ignore_for_file: use_super_parameters
 
+// ignore_for_file: unnecessary_null_comparison
+
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
+import 'classes.dart' as _i2;
+import 'students_protocol.dart' as _i3;
 
 abstract class Attendance
     implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
   Attendance._({
     this.id,
-    required this.classId,
-    required this.studentId,
+    required this.classesId,
+    this.classes,
+    required this.studentsId,
+    this.students,
     required this.status,
     this.comment,
   });
 
   factory Attendance({
     int? id,
-    required int classId,
-    required int studentId,
+    required int classesId,
+    _i2.Classes? classes,
+    required int studentsId,
+    _i3.Students? students,
     required String status,
     String? comment,
   }) = _AttendanceImpl;
@@ -32,8 +40,16 @@ abstract class Attendance
   factory Attendance.fromJson(Map<String, dynamic> jsonSerialization) {
     return Attendance(
       id: jsonSerialization['id'] as int?,
-      classId: jsonSerialization['classId'] as int,
-      studentId: jsonSerialization['studentId'] as int,
+      classesId: jsonSerialization['classesId'] as int,
+      classes: jsonSerialization['classes'] == null
+          ? null
+          : _i2.Classes.fromJson(
+              (jsonSerialization['classes'] as Map<String, dynamic>)),
+      studentsId: jsonSerialization['studentsId'] as int,
+      students: jsonSerialization['students'] == null
+          ? null
+          : _i3.Students.fromJson(
+              (jsonSerialization['students'] as Map<String, dynamic>)),
       status: jsonSerialization['status'] as String,
       comment: jsonSerialization['comment'] as String?,
     );
@@ -46,9 +62,13 @@ abstract class Attendance
   @override
   int? id;
 
-  int classId;
+  int classesId;
 
-  int studentId;
+  _i2.Classes? classes;
+
+  int studentsId;
+
+  _i3.Students? students;
 
   String status;
 
@@ -62,8 +82,10 @@ abstract class Attendance
   @_i1.useResult
   Attendance copyWith({
     int? id,
-    int? classId,
-    int? studentId,
+    int? classesId,
+    _i2.Classes? classes,
+    int? studentsId,
+    _i3.Students? students,
     String? status,
     String? comment,
   });
@@ -71,8 +93,10 @@ abstract class Attendance
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
-      'classId': classId,
-      'studentId': studentId,
+      'classesId': classesId,
+      if (classes != null) 'classes': classes?.toJson(),
+      'studentsId': studentsId,
+      if (students != null) 'students': students?.toJson(),
       'status': status,
       if (comment != null) 'comment': comment,
     };
@@ -82,15 +106,23 @@ abstract class Attendance
   Map<String, dynamic> toJsonForProtocol() {
     return {
       if (id != null) 'id': id,
-      'classId': classId,
-      'studentId': studentId,
+      'classesId': classesId,
+      if (classes != null) 'classes': classes?.toJsonForProtocol(),
+      'studentsId': studentsId,
+      if (students != null) 'students': students?.toJsonForProtocol(),
       'status': status,
       if (comment != null) 'comment': comment,
     };
   }
 
-  static AttendanceInclude include() {
-    return AttendanceInclude._();
+  static AttendanceInclude include({
+    _i2.ClassesInclude? classes,
+    _i3.StudentsInclude? students,
+  }) {
+    return AttendanceInclude._(
+      classes: classes,
+      students: students,
+    );
   }
 
   static AttendanceIncludeList includeList({
@@ -124,14 +156,18 @@ class _Undefined {}
 class _AttendanceImpl extends Attendance {
   _AttendanceImpl({
     int? id,
-    required int classId,
-    required int studentId,
+    required int classesId,
+    _i2.Classes? classes,
+    required int studentsId,
+    _i3.Students? students,
     required String status,
     String? comment,
   }) : super._(
           id: id,
-          classId: classId,
-          studentId: studentId,
+          classesId: classesId,
+          classes: classes,
+          studentsId: studentsId,
+          students: students,
           status: status,
           comment: comment,
         );
@@ -142,15 +178,20 @@ class _AttendanceImpl extends Attendance {
   @override
   Attendance copyWith({
     Object? id = _Undefined,
-    int? classId,
-    int? studentId,
+    int? classesId,
+    Object? classes = _Undefined,
+    int? studentsId,
+    Object? students = _Undefined,
     String? status,
     Object? comment = _Undefined,
   }) {
     return Attendance(
       id: id is int? ? id : this.id,
-      classId: classId ?? this.classId,
-      studentId: studentId ?? this.studentId,
+      classesId: classesId ?? this.classesId,
+      classes: classes is _i2.Classes? ? classes : this.classes?.copyWith(),
+      studentsId: studentsId ?? this.studentsId,
+      students:
+          students is _i3.Students? ? students : this.students?.copyWith(),
       status: status ?? this.status,
       comment: comment is String? ? comment : this.comment,
     );
@@ -159,12 +200,12 @@ class _AttendanceImpl extends Attendance {
 
 class AttendanceTable extends _i1.Table<int?> {
   AttendanceTable({super.tableRelation}) : super(tableName: 'attendance') {
-    classId = _i1.ColumnInt(
-      'classId',
+    classesId = _i1.ColumnInt(
+      'classesId',
       this,
     );
-    studentId = _i1.ColumnInt(
-      'studentId',
+    studentsId = _i1.ColumnInt(
+      'studentsId',
       this,
     );
     status = _i1.ColumnString(
@@ -177,29 +218,83 @@ class AttendanceTable extends _i1.Table<int?> {
     );
   }
 
-  late final _i1.ColumnInt classId;
+  late final _i1.ColumnInt classesId;
 
-  late final _i1.ColumnInt studentId;
+  _i2.ClassesTable? _classes;
+
+  late final _i1.ColumnInt studentsId;
+
+  _i3.StudentsTable? _students;
 
   late final _i1.ColumnString status;
 
   late final _i1.ColumnString comment;
 
+  _i2.ClassesTable get classes {
+    if (_classes != null) return _classes!;
+    _classes = _i1.createRelationTable(
+      relationFieldName: 'classes',
+      field: Attendance.t.classesId,
+      foreignField: _i2.Classes.t.id,
+      tableRelation: tableRelation,
+      createTable: (foreignTableRelation) =>
+          _i2.ClassesTable(tableRelation: foreignTableRelation),
+    );
+    return _classes!;
+  }
+
+  _i3.StudentsTable get students {
+    if (_students != null) return _students!;
+    _students = _i1.createRelationTable(
+      relationFieldName: 'students',
+      field: Attendance.t.studentsId,
+      foreignField: _i3.Students.t.id,
+      tableRelation: tableRelation,
+      createTable: (foreignTableRelation) =>
+          _i3.StudentsTable(tableRelation: foreignTableRelation),
+    );
+    return _students!;
+  }
+
   @override
   List<_i1.Column> get columns => [
         id,
-        classId,
-        studentId,
+        classesId,
+        studentsId,
         status,
         comment,
       ];
+
+  @override
+  _i1.Table? getRelationTable(String relationField) {
+    if (relationField == 'classes') {
+      return classes;
+    }
+    if (relationField == 'students') {
+      return students;
+    }
+    return null;
+  }
 }
 
 class AttendanceInclude extends _i1.IncludeObject {
-  AttendanceInclude._();
+  AttendanceInclude._({
+    _i2.ClassesInclude? classes,
+    _i3.StudentsInclude? students,
+  }) {
+    _classes = classes;
+    _students = students;
+  }
+
+  _i2.ClassesInclude? _classes;
+
+  _i3.StudentsInclude? _students;
 
   @override
-  Map<String, _i1.Include?> get includes => {};
+  Map<String, _i1.Include?> get includes => {
+        'classes': _classes,
+        'students': _students,
+      };
 
   @override
   _i1.Table<int?> get table => Attendance.t;
@@ -227,6 +322,8 @@ class AttendanceIncludeList extends _i1.IncludeList {
 
 class AttendanceRepository {
   const AttendanceRepository._();
+
+  final attachRow = const AttendanceAttachRowRepository._();
 
   /// Returns a list of [Attendance]s matching the given query parameters.
   ///
@@ -259,6 +356,7 @@ class AttendanceRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<AttendanceTable>? orderByList,
     _i1.Transaction? transaction,
+    AttendanceInclude? include,
   }) async {
     return session.db.find<Attendance>(
       where: where?.call(Attendance.t),
@@ -268,6 +366,7 @@ class AttendanceRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -296,6 +395,7 @@ class AttendanceRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<AttendanceTable>? orderByList,
     _i1.Transaction? transaction,
+    AttendanceInclude? include,
   }) async {
     return session.db.findFirstRow<Attendance>(
       where: where?.call(Attendance.t),
@@ -304,6 +404,7 @@ class AttendanceRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -312,10 +413,12 @@ class AttendanceRepository {
     _i1.Session session,
     int id, {
     _i1.Transaction? transaction,
+    AttendanceInclude? include,
   }) async {
     return session.db.findById<Attendance>(
       id,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -433,6 +536,56 @@ class AttendanceRepository {
     return session.db.count<Attendance>(
       where: where?.call(Attendance.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+}
+
+class AttendanceAttachRowRepository {
+  const AttendanceAttachRowRepository._();
+
+  /// Creates a relation between the given [Attendance] and [Classes]
+  /// by setting the [Attendance]'s foreign key `classesId` to refer to the [Classes].
+  Future<void> classes(
+    _i1.Session session,
+    Attendance attendance,
+    _i2.Classes classes, {
+    _i1.Transaction? transaction,
+  }) async {
+    if (attendance.id == null) {
+      throw ArgumentError.notNull('attendance.id');
+    }
+    if (classes.id == null) {
+      throw ArgumentError.notNull('classes.id');
+    }
+
+    var $attendance = attendance.copyWith(classesId: classes.id);
+    await session.db.updateRow<Attendance>(
+      $attendance,
+      columns: [Attendance.t.classesId],
+      transaction: transaction,
+    );
+  }
+
+  /// Creates a relation between the given [Attendance] and [Students]
+  /// by setting the [Attendance]'s foreign key `studentsId` to refer to the [Students].
+  Future<void> students(
+    _i1.Session session,
+    Attendance attendance,
+    _i3.Students students, {
+    _i1.Transaction? transaction,
+  }) async {
+    if (attendance.id == null) {
+      throw ArgumentError.notNull('attendance.id');
+    }
+    if (students.id == null) {
+      throw ArgumentError.notNull('students.id');
+    }
+
+    var $attendance = attendance.copyWith(studentsId: students.id);
+    await session.db.updateRow<Attendance>(
+      $attendance,
+      columns: [Attendance.t.studentsId],
       transaction: transaction,
     );
   }

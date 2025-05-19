@@ -8,28 +8,44 @@
 // ignore_for_file: type_literal_in_constant_pattern
 // ignore_for_file: use_super_parameters
 
+// ignore_for_file: unnecessary_null_comparison
+
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
+import 'students_protocol.dart' as _i2;
+import 'subgroups_protocol.dart' as _i3;
 
 abstract class StudentSubgroup
     implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
   StudentSubgroup._({
     this.id,
-    required this.studentId,
-    required this.subgroupId,
+    required this.studentsId,
+    this.students,
+    required this.subgroupsId,
+    this.subgroups,
   });
 
   factory StudentSubgroup({
     int? id,
-    required int studentId,
-    required int subgroupId,
+    required int studentsId,
+    _i2.Students? students,
+    required int subgroupsId,
+    _i3.Subgroups? subgroups,
   }) = _StudentSubgroupImpl;
 
   factory StudentSubgroup.fromJson(Map<String, dynamic> jsonSerialization) {
     return StudentSubgroup(
       id: jsonSerialization['id'] as int?,
-      studentId: jsonSerialization['studentId'] as int,
-      subgroupId: jsonSerialization['subgroupId'] as int,
+      studentsId: jsonSerialization['studentsId'] as int,
+      students: jsonSerialization['students'] == null
+          ? null
+          : _i2.Students.fromJson(
+              (jsonSerialization['students'] as Map<String, dynamic>)),
+      subgroupsId: jsonSerialization['subgroupsId'] as int,
+      subgroups: jsonSerialization['subgroups'] == null
+          ? null
+          : _i3.Subgroups.fromJson(
+              (jsonSerialization['subgroups'] as Map<String, dynamic>)),
     );
   }
 
@@ -40,9 +56,13 @@ abstract class StudentSubgroup
   @override
   int? id;
 
-  int studentId;
+  int studentsId;
 
-  int subgroupId;
+  _i2.Students? students;
+
+  int subgroupsId;
+
+  _i3.Subgroups? subgroups;
 
   @override
   _i1.Table<int?> get table => t;
@@ -52,15 +72,19 @@ abstract class StudentSubgroup
   @_i1.useResult
   StudentSubgroup copyWith({
     int? id,
-    int? studentId,
-    int? subgroupId,
+    int? studentsId,
+    _i2.Students? students,
+    int? subgroupsId,
+    _i3.Subgroups? subgroups,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
-      'studentId': studentId,
-      'subgroupId': subgroupId,
+      'studentsId': studentsId,
+      if (students != null) 'students': students?.toJson(),
+      'subgroupsId': subgroupsId,
+      if (subgroups != null) 'subgroups': subgroups?.toJson(),
     };
   }
 
@@ -68,13 +92,21 @@ abstract class StudentSubgroup
   Map<String, dynamic> toJsonForProtocol() {
     return {
       if (id != null) 'id': id,
-      'studentId': studentId,
-      'subgroupId': subgroupId,
+      'studentsId': studentsId,
+      if (students != null) 'students': students?.toJsonForProtocol(),
+      'subgroupsId': subgroupsId,
+      if (subgroups != null) 'subgroups': subgroups?.toJsonForProtocol(),
     };
   }
 
-  static StudentSubgroupInclude include() {
-    return StudentSubgroupInclude._();
+  static StudentSubgroupInclude include({
+    _i2.StudentsInclude? students,
+    _i3.SubgroupsInclude? subgroups,
+  }) {
+    return StudentSubgroupInclude._(
+      students: students,
+      subgroups: subgroups,
+    );
   }
 
   static StudentSubgroupIncludeList includeList({
@@ -108,12 +140,16 @@ class _Undefined {}
 class _StudentSubgroupImpl extends StudentSubgroup {
   _StudentSubgroupImpl({
     int? id,
-    required int studentId,
-    required int subgroupId,
+    required int studentsId,
+    _i2.Students? students,
+    required int subgroupsId,
+    _i3.Subgroups? subgroups,
   }) : super._(
           id: id,
-          studentId: studentId,
-          subgroupId: subgroupId,
+          studentsId: studentsId,
+          students: students,
+          subgroupsId: subgroupsId,
+          subgroups: subgroups,
         );
 
   /// Returns a shallow copy of this [StudentSubgroup]
@@ -122,13 +158,19 @@ class _StudentSubgroupImpl extends StudentSubgroup {
   @override
   StudentSubgroup copyWith({
     Object? id = _Undefined,
-    int? studentId,
-    int? subgroupId,
+    int? studentsId,
+    Object? students = _Undefined,
+    int? subgroupsId,
+    Object? subgroups = _Undefined,
   }) {
     return StudentSubgroup(
       id: id is int? ? id : this.id,
-      studentId: studentId ?? this.studentId,
-      subgroupId: subgroupId ?? this.subgroupId,
+      studentsId: studentsId ?? this.studentsId,
+      students:
+          students is _i2.Students? ? students : this.students?.copyWith(),
+      subgroupsId: subgroupsId ?? this.subgroupsId,
+      subgroups:
+          subgroups is _i3.Subgroups? ? subgroups : this.subgroups?.copyWith(),
     );
   }
 }
@@ -136,33 +178,87 @@ class _StudentSubgroupImpl extends StudentSubgroup {
 class StudentSubgroupTable extends _i1.Table<int?> {
   StudentSubgroupTable({super.tableRelation})
       : super(tableName: 'student_subgroups') {
-    studentId = _i1.ColumnInt(
-      'studentId',
+    studentsId = _i1.ColumnInt(
+      'studentsId',
       this,
     );
-    subgroupId = _i1.ColumnInt(
-      'subgroupId',
+    subgroupsId = _i1.ColumnInt(
+      'subgroupsId',
       this,
     );
   }
 
-  late final _i1.ColumnInt studentId;
+  late final _i1.ColumnInt studentsId;
 
-  late final _i1.ColumnInt subgroupId;
+  _i2.StudentsTable? _students;
+
+  late final _i1.ColumnInt subgroupsId;
+
+  _i3.SubgroupsTable? _subgroups;
+
+  _i2.StudentsTable get students {
+    if (_students != null) return _students!;
+    _students = _i1.createRelationTable(
+      relationFieldName: 'students',
+      field: StudentSubgroup.t.studentsId,
+      foreignField: _i2.Students.t.id,
+      tableRelation: tableRelation,
+      createTable: (foreignTableRelation) =>
+          _i2.StudentsTable(tableRelation: foreignTableRelation),
+    );
+    return _students!;
+  }
+
+  _i3.SubgroupsTable get subgroups {
+    if (_subgroups != null) return _subgroups!;
+    _subgroups = _i1.createRelationTable(
+      relationFieldName: 'subgroups',
+      field: StudentSubgroup.t.subgroupsId,
+      foreignField: _i3.Subgroups.t.id,
+      tableRelation: tableRelation,
+      createTable: (foreignTableRelation) =>
+          _i3.SubgroupsTable(tableRelation: foreignTableRelation),
+    );
+    return _subgroups!;
+  }
 
   @override
   List<_i1.Column> get columns => [
         id,
-        studentId,
-        subgroupId,
+        studentsId,
+        subgroupsId,
       ];
+
+  @override
+  _i1.Table? getRelationTable(String relationField) {
+    if (relationField == 'students') {
+      return students;
+    }
+    if (relationField == 'subgroups') {
+      return subgroups;
+    }
+    return null;
+  }
 }
 
 class StudentSubgroupInclude extends _i1.IncludeObject {
-  StudentSubgroupInclude._();
+  StudentSubgroupInclude._({
+    _i2.StudentsInclude? students,
+    _i3.SubgroupsInclude? subgroups,
+  }) {
+    _students = students;
+    _subgroups = subgroups;
+  }
+
+  _i2.StudentsInclude? _students;
+
+  _i3.SubgroupsInclude? _subgroups;
 
   @override
-  Map<String, _i1.Include?> get includes => {};
+  Map<String, _i1.Include?> get includes => {
+        'students': _students,
+        'subgroups': _subgroups,
+      };
 
   @override
   _i1.Table<int?> get table => StudentSubgroup.t;
@@ -190,6 +286,8 @@ class StudentSubgroupIncludeList extends _i1.IncludeList {
 
 class StudentSubgroupRepository {
   const StudentSubgroupRepository._();
+
+  final attachRow = const StudentSubgroupAttachRowRepository._();
 
   /// Returns a list of [StudentSubgroup]s matching the given query parameters.
   ///
@@ -222,6 +320,7 @@ class StudentSubgroupRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<StudentSubgroupTable>? orderByList,
     _i1.Transaction? transaction,
+    StudentSubgroupInclude? include,
   }) async {
     return session.db.find<StudentSubgroup>(
       where: where?.call(StudentSubgroup.t),
@@ -231,6 +330,7 @@ class StudentSubgroupRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -259,6 +359,7 @@ class StudentSubgroupRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<StudentSubgroupTable>? orderByList,
     _i1.Transaction? transaction,
+    StudentSubgroupInclude? include,
   }) async {
     return session.db.findFirstRow<StudentSubgroup>(
       where: where?.call(StudentSubgroup.t),
@@ -267,6 +368,7 @@ class StudentSubgroupRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -275,10 +377,12 @@ class StudentSubgroupRepository {
     _i1.Session session,
     int id, {
     _i1.Transaction? transaction,
+    StudentSubgroupInclude? include,
   }) async {
     return session.db.findById<StudentSubgroup>(
       id,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -396,6 +500,56 @@ class StudentSubgroupRepository {
     return session.db.count<StudentSubgroup>(
       where: where?.call(StudentSubgroup.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+}
+
+class StudentSubgroupAttachRowRepository {
+  const StudentSubgroupAttachRowRepository._();
+
+  /// Creates a relation between the given [StudentSubgroup] and [Students]
+  /// by setting the [StudentSubgroup]'s foreign key `studentsId` to refer to the [Students].
+  Future<void> students(
+    _i1.Session session,
+    StudentSubgroup studentSubgroup,
+    _i2.Students students, {
+    _i1.Transaction? transaction,
+  }) async {
+    if (studentSubgroup.id == null) {
+      throw ArgumentError.notNull('studentSubgroup.id');
+    }
+    if (students.id == null) {
+      throw ArgumentError.notNull('students.id');
+    }
+
+    var $studentSubgroup = studentSubgroup.copyWith(studentsId: students.id);
+    await session.db.updateRow<StudentSubgroup>(
+      $studentSubgroup,
+      columns: [StudentSubgroup.t.studentsId],
+      transaction: transaction,
+    );
+  }
+
+  /// Creates a relation between the given [StudentSubgroup] and [Subgroups]
+  /// by setting the [StudentSubgroup]'s foreign key `subgroupsId` to refer to the [Subgroups].
+  Future<void> subgroups(
+    _i1.Session session,
+    StudentSubgroup studentSubgroup,
+    _i3.Subgroups subgroups, {
+    _i1.Transaction? transaction,
+  }) async {
+    if (studentSubgroup.id == null) {
+      throw ArgumentError.notNull('studentSubgroup.id');
+    }
+    if (subgroups.id == null) {
+      throw ArgumentError.notNull('subgroups.id');
+    }
+
+    var $studentSubgroup = studentSubgroup.copyWith(subgroupsId: subgroups.id);
+    await session.db.updateRow<StudentSubgroup>(
+      $studentSubgroup,
+      columns: [StudentSubgroup.t.subgroupsId],
       transaction: transaction,
     );
   }

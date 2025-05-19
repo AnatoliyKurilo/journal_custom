@@ -10,25 +10,32 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'groups_protocol.dart' as _i2;
 
 abstract class Subgroups implements _i1.SerializableModel {
   Subgroups._({
     this.id,
     required this.name,
-    required this.groupId,
+    required this.groupsId,
+    this.groups,
   });
 
   factory Subgroups({
     int? id,
     required String name,
-    required int groupId,
+    required int groupsId,
+    _i2.Groups? groups,
   }) = _SubgroupsImpl;
 
   factory Subgroups.fromJson(Map<String, dynamic> jsonSerialization) {
     return Subgroups(
       id: jsonSerialization['id'] as int?,
       name: jsonSerialization['name'] as String,
-      groupId: jsonSerialization['groupId'] as int,
+      groupsId: jsonSerialization['groupsId'] as int,
+      groups: jsonSerialization['groups'] == null
+          ? null
+          : _i2.Groups.fromJson(
+              (jsonSerialization['groups'] as Map<String, dynamic>)),
     );
   }
 
@@ -39,7 +46,9 @@ abstract class Subgroups implements _i1.SerializableModel {
 
   String name;
 
-  int groupId;
+  int groupsId;
+
+  _i2.Groups? groups;
 
   /// Returns a shallow copy of this [Subgroups]
   /// with some or all fields replaced by the given arguments.
@@ -47,14 +56,16 @@ abstract class Subgroups implements _i1.SerializableModel {
   Subgroups copyWith({
     int? id,
     String? name,
-    int? groupId,
+    int? groupsId,
+    _i2.Groups? groups,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
       'name': name,
-      'groupId': groupId,
+      'groupsId': groupsId,
+      if (groups != null) 'groups': groups?.toJson(),
     };
   }
 
@@ -70,11 +81,13 @@ class _SubgroupsImpl extends Subgroups {
   _SubgroupsImpl({
     int? id,
     required String name,
-    required int groupId,
+    required int groupsId,
+    _i2.Groups? groups,
   }) : super._(
           id: id,
           name: name,
-          groupId: groupId,
+          groupsId: groupsId,
+          groups: groups,
         );
 
   /// Returns a shallow copy of this [Subgroups]
@@ -84,12 +97,14 @@ class _SubgroupsImpl extends Subgroups {
   Subgroups copyWith({
     Object? id = _Undefined,
     String? name,
-    int? groupId,
+    int? groupsId,
+    Object? groups = _Undefined,
   }) {
     return Subgroups(
       id: id is int? ? id : this.id,
       name: name ?? this.name,
-      groupId: groupId ?? this.groupId,
+      groupsId: groupsId ?? this.groupsId,
+      groups: groups is _i2.Groups? ? groups : this.groups?.copyWith(),
     );
   }
 }

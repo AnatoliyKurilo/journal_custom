@@ -25,6 +25,10 @@ import 'students_protocol.dart' as _i13;
 import 'subgroups_protocol.dart' as _i14;
 import 'subjects_protocol.dart' as _i15;
 import 'teachers_protocol.dart' as _i16;
+import 'package:journal_custom_server/src/generated/groups_protocol.dart'
+    as _i17;
+import 'package:journal_custom_server/src/generated/teachers_protocol.dart'
+    as _i18;
 export 'greeting.dart';
 export 'attendance_protocol.dart';
 export 'class_types_protocol.dart';
@@ -61,13 +65,13 @@ class Protocol extends _i1.SerializationManagerServer {
           columnDefault: 'nextval(\'attendance_id_seq\'::regclass)',
         ),
         _i2.ColumnDefinition(
-          name: 'classId',
+          name: 'classesId',
           columnType: _i2.ColumnType.bigint,
           isNullable: false,
           dartType: 'int',
         ),
         _i2.ColumnDefinition(
-          name: 'studentId',
+          name: 'studentsId',
           columnType: _i2.ColumnType.bigint,
           isNullable: false,
           dartType: 'int',
@@ -88,7 +92,7 @@ class Protocol extends _i1.SerializationManagerServer {
       foreignKeys: [
         _i2.ForeignKeyDefinition(
           constraintName: 'attendance_fk_0',
-          columns: ['classId'],
+          columns: ['classesId'],
           referenceTable: 'classes',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
@@ -98,7 +102,7 @@ class Protocol extends _i1.SerializationManagerServer {
         ),
         _i2.ForeignKeyDefinition(
           constraintName: 'attendance_fk_1',
-          columns: ['studentId'],
+          columns: ['studentsId'],
           referenceTable: 'students',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
@@ -182,28 +186,34 @@ class Protocol extends _i1.SerializationManagerServer {
           dartType: 'int',
         ),
         _i2.ColumnDefinition(
-          name: 'typeId',
+          name: 'subjectsId',
           columnType: _i2.ColumnType.bigint,
           isNullable: false,
           dartType: 'int',
         ),
         _i2.ColumnDefinition(
-          name: 'teacherId',
+          name: 'class_typesId',
           columnType: _i2.ColumnType.bigint,
           isNullable: false,
           dartType: 'int',
         ),
         _i2.ColumnDefinition(
-          name: 'semesterId',
+          name: 'teachersId',
           columnType: _i2.ColumnType.bigint,
           isNullable: false,
           dartType: 'int',
         ),
         _i2.ColumnDefinition(
-          name: 'subgroupId',
+          name: 'semestersId',
           columnType: _i2.ColumnType.bigint,
-          isNullable: true,
-          dartType: 'int?',
+          isNullable: false,
+          dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'subgroupsId',
+          columnType: _i2.ColumnType.bigint,
+          isNullable: false,
+          dartType: 'int',
         ),
         _i2.ColumnDefinition(
           name: 'date',
@@ -225,8 +235,8 @@ class Protocol extends _i1.SerializationManagerServer {
         ),
         _i2.ForeignKeyDefinition(
           constraintName: 'classes_fk_1',
-          columns: ['typeId'],
-          referenceTable: 'class_types',
+          columns: ['subjectsId'],
+          referenceTable: 'subjects',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _i2.ForeignKeyAction.noAction,
@@ -235,8 +245,8 @@ class Protocol extends _i1.SerializationManagerServer {
         ),
         _i2.ForeignKeyDefinition(
           constraintName: 'classes_fk_2',
-          columns: ['teacherId'],
-          referenceTable: 'teachers',
+          columns: ['class_typesId'],
+          referenceTable: 'class_types',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _i2.ForeignKeyAction.noAction,
@@ -245,8 +255,8 @@ class Protocol extends _i1.SerializationManagerServer {
         ),
         _i2.ForeignKeyDefinition(
           constraintName: 'classes_fk_3',
-          columns: ['semesterId'],
-          referenceTable: 'semesters',
+          columns: ['teachersId'],
+          referenceTable: 'teachers',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _i2.ForeignKeyAction.noAction,
@@ -255,7 +265,17 @@ class Protocol extends _i1.SerializationManagerServer {
         ),
         _i2.ForeignKeyDefinition(
           constraintName: 'classes_fk_4',
-          columns: ['subgroupId'],
+          columns: ['semestersId'],
+          referenceTable: 'semesters',
+          referenceTableSchema: 'public',
+          referenceColumns: ['id'],
+          onUpdate: _i2.ForeignKeyAction.noAction,
+          onDelete: _i2.ForeignKeyAction.noAction,
+          matchType: null,
+        ),
+        _i2.ForeignKeyDefinition(
+          constraintName: 'classes_fk_5',
+          columns: ['subgroupsId'],
           referenceTable: 'subgroups',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
@@ -303,14 +323,14 @@ class Protocol extends _i1.SerializationManagerServer {
         _i2.ColumnDefinition(
           name: 'curatorId',
           columnType: _i2.ColumnType.bigint,
-          isNullable: false,
-          dartType: 'int',
+          isNullable: true,
+          dartType: 'int?',
         ),
         _i2.ColumnDefinition(
           name: 'groupHeadId',
           columnType: _i2.ColumnType.bigint,
-          isNullable: false,
-          dartType: 'int',
+          isNullable: true,
+          dartType: 'int?',
         ),
       ],
       foreignKeys: [
@@ -572,13 +592,13 @@ class Protocol extends _i1.SerializationManagerServer {
           columnDefault: 'nextval(\'student_subgroups_id_seq\'::regclass)',
         ),
         _i2.ColumnDefinition(
-          name: 'studentId',
+          name: 'studentsId',
           columnType: _i2.ColumnType.bigint,
           isNullable: false,
           dartType: 'int',
         ),
         _i2.ColumnDefinition(
-          name: 'subgroupId',
+          name: 'subgroupsId',
           columnType: _i2.ColumnType.bigint,
           isNullable: false,
           dartType: 'int',
@@ -587,7 +607,7 @@ class Protocol extends _i1.SerializationManagerServer {
       foreignKeys: [
         _i2.ForeignKeyDefinition(
           constraintName: 'student_subgroups_fk_0',
-          columns: ['studentId'],
+          columns: ['studentsId'],
           referenceTable: 'students',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
@@ -597,7 +617,7 @@ class Protocol extends _i1.SerializationManagerServer {
         ),
         _i2.ForeignKeyDefinition(
           constraintName: 'student_subgroups_fk_1',
-          columns: ['subgroupId'],
+          columns: ['subgroupsId'],
           referenceTable: 'subgroups',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
@@ -626,11 +646,11 @@ class Protocol extends _i1.SerializationManagerServer {
           elements: [
             _i2.IndexElementDefinition(
               type: _i2.IndexElementDefinitionType.column,
-              definition: 'studentId',
+              definition: 'studentsId',
             ),
             _i2.IndexElementDefinition(
               type: _i2.IndexElementDefinitionType.column,
-              definition: 'subgroupId',
+              definition: 'subgroupsId',
             ),
           ],
           type: 'btree',
@@ -660,7 +680,7 @@ class Protocol extends _i1.SerializationManagerServer {
           dartType: 'int',
         ),
         _i2.ColumnDefinition(
-          name: 'groupId',
+          name: 'groupsId',
           columnType: _i2.ColumnType.bigint,
           isNullable: false,
           dartType: 'int',
@@ -679,7 +699,7 @@ class Protocol extends _i1.SerializationManagerServer {
         ),
         _i2.ForeignKeyDefinition(
           constraintName: 'students_fk_1',
-          columns: ['groupId'],
+          columns: ['groupsId'],
           referenceTable: 'groups',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
@@ -708,7 +728,7 @@ class Protocol extends _i1.SerializationManagerServer {
           elements: [
             _i2.IndexElementDefinition(
               type: _i2.IndexElementDefinitionType.column,
-              definition: 'groupId',
+              definition: 'groupsId',
             )
           ],
           type: 'btree',
@@ -751,7 +771,7 @@ class Protocol extends _i1.SerializationManagerServer {
           dartType: 'String',
         ),
         _i2.ColumnDefinition(
-          name: 'groupId',
+          name: 'groupsId',
           columnType: _i2.ColumnType.bigint,
           isNullable: false,
           dartType: 'int',
@@ -760,7 +780,7 @@ class Protocol extends _i1.SerializationManagerServer {
       foreignKeys: [
         _i2.ForeignKeyDefinition(
           constraintName: 'subgroups_fk_0',
-          columns: ['groupId'],
+          columns: ['groupsId'],
           referenceTable: 'groups',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
@@ -979,6 +999,14 @@ class Protocol extends _i1.SerializationManagerServer {
     }
     if (t == _i1.getType<_i16.Teachers?>()) {
       return (data != null ? _i16.Teachers.fromJson(data) : null) as T;
+    }
+    if (t == List<_i17.Groups>) {
+      return (data as List).map((e) => deserialize<_i17.Groups>(e)).toList()
+          as T;
+    }
+    if (t == List<_i18.Teachers>) {
+      return (data as List).map((e) => deserialize<_i18.Teachers>(e)).toList()
+          as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;

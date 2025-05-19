@@ -8,28 +8,37 @@
 // ignore_for_file: type_literal_in_constant_pattern
 // ignore_for_file: use_super_parameters
 
+// ignore_for_file: unnecessary_null_comparison
+
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
+import 'groups_protocol.dart' as _i2;
 
 abstract class Subgroups
     implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
   Subgroups._({
     this.id,
     required this.name,
-    required this.groupId,
+    required this.groupsId,
+    this.groups,
   });
 
   factory Subgroups({
     int? id,
     required String name,
-    required int groupId,
+    required int groupsId,
+    _i2.Groups? groups,
   }) = _SubgroupsImpl;
 
   factory Subgroups.fromJson(Map<String, dynamic> jsonSerialization) {
     return Subgroups(
       id: jsonSerialization['id'] as int?,
       name: jsonSerialization['name'] as String,
-      groupId: jsonSerialization['groupId'] as int,
+      groupsId: jsonSerialization['groupsId'] as int,
+      groups: jsonSerialization['groups'] == null
+          ? null
+          : _i2.Groups.fromJson(
+              (jsonSerialization['groups'] as Map<String, dynamic>)),
     );
   }
 
@@ -42,7 +51,9 @@ abstract class Subgroups
 
   String name;
 
-  int groupId;
+  int groupsId;
+
+  _i2.Groups? groups;
 
   @override
   _i1.Table<int?> get table => t;
@@ -53,14 +64,16 @@ abstract class Subgroups
   Subgroups copyWith({
     int? id,
     String? name,
-    int? groupId,
+    int? groupsId,
+    _i2.Groups? groups,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
       'name': name,
-      'groupId': groupId,
+      'groupsId': groupsId,
+      if (groups != null) 'groups': groups?.toJson(),
     };
   }
 
@@ -69,12 +82,13 @@ abstract class Subgroups
     return {
       if (id != null) 'id': id,
       'name': name,
-      'groupId': groupId,
+      'groupsId': groupsId,
+      if (groups != null) 'groups': groups?.toJsonForProtocol(),
     };
   }
 
-  static SubgroupsInclude include() {
-    return SubgroupsInclude._();
+  static SubgroupsInclude include({_i2.GroupsInclude? groups}) {
+    return SubgroupsInclude._(groups: groups);
   }
 
   static SubgroupsIncludeList includeList({
@@ -109,11 +123,13 @@ class _SubgroupsImpl extends Subgroups {
   _SubgroupsImpl({
     int? id,
     required String name,
-    required int groupId,
+    required int groupsId,
+    _i2.Groups? groups,
   }) : super._(
           id: id,
           name: name,
-          groupId: groupId,
+          groupsId: groupsId,
+          groups: groups,
         );
 
   /// Returns a shallow copy of this [Subgroups]
@@ -123,12 +139,14 @@ class _SubgroupsImpl extends Subgroups {
   Subgroups copyWith({
     Object? id = _Undefined,
     String? name,
-    int? groupId,
+    int? groupsId,
+    Object? groups = _Undefined,
   }) {
     return Subgroups(
       id: id is int? ? id : this.id,
       name: name ?? this.name,
-      groupId: groupId ?? this.groupId,
+      groupsId: groupsId ?? this.groupsId,
+      groups: groups is _i2.Groups? ? groups : this.groups?.copyWith(),
     );
   }
 }
@@ -139,29 +157,56 @@ class SubgroupsTable extends _i1.Table<int?> {
       'name',
       this,
     );
-    groupId = _i1.ColumnInt(
-      'groupId',
+    groupsId = _i1.ColumnInt(
+      'groupsId',
       this,
     );
   }
 
   late final _i1.ColumnString name;
 
-  late final _i1.ColumnInt groupId;
+  late final _i1.ColumnInt groupsId;
+
+  _i2.GroupsTable? _groups;
+
+  _i2.GroupsTable get groups {
+    if (_groups != null) return _groups!;
+    _groups = _i1.createRelationTable(
+      relationFieldName: 'groups',
+      field: Subgroups.t.groupsId,
+      foreignField: _i2.Groups.t.id,
+      tableRelation: tableRelation,
+      createTable: (foreignTableRelation) =>
+          _i2.GroupsTable(tableRelation: foreignTableRelation),
+    );
+    return _groups!;
+  }
 
   @override
   List<_i1.Column> get columns => [
         id,
         name,
-        groupId,
+        groupsId,
       ];
+
+  @override
+  _i1.Table? getRelationTable(String relationField) {
+    if (relationField == 'groups') {
+      return groups;
+    }
+    return null;
+  }
 }
 
 class SubgroupsInclude extends _i1.IncludeObject {
-  SubgroupsInclude._();
+  SubgroupsInclude._({_i2.GroupsInclude? groups}) {
+    _groups = groups;
+  }
+
+  _i2.GroupsInclude? _groups;
 
   @override
-  Map<String, _i1.Include?> get includes => {};
+  Map<String, _i1.Include?> get includes => {'groups': _groups};
 
   @override
   _i1.Table<int?> get table => Subgroups.t;
@@ -189,6 +234,8 @@ class SubgroupsIncludeList extends _i1.IncludeList {
 
 class SubgroupsRepository {
   const SubgroupsRepository._();
+
+  final attachRow = const SubgroupsAttachRowRepository._();
 
   /// Returns a list of [Subgroups]s matching the given query parameters.
   ///
@@ -221,6 +268,7 @@ class SubgroupsRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<SubgroupsTable>? orderByList,
     _i1.Transaction? transaction,
+    SubgroupsInclude? include,
   }) async {
     return session.db.find<Subgroups>(
       where: where?.call(Subgroups.t),
@@ -230,6 +278,7 @@ class SubgroupsRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -258,6 +307,7 @@ class SubgroupsRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<SubgroupsTable>? orderByList,
     _i1.Transaction? transaction,
+    SubgroupsInclude? include,
   }) async {
     return session.db.findFirstRow<Subgroups>(
       where: where?.call(Subgroups.t),
@@ -266,6 +316,7 @@ class SubgroupsRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -274,10 +325,12 @@ class SubgroupsRepository {
     _i1.Session session,
     int id, {
     _i1.Transaction? transaction,
+    SubgroupsInclude? include,
   }) async {
     return session.db.findById<Subgroups>(
       id,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -395,6 +448,33 @@ class SubgroupsRepository {
     return session.db.count<Subgroups>(
       where: where?.call(Subgroups.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+}
+
+class SubgroupsAttachRowRepository {
+  const SubgroupsAttachRowRepository._();
+
+  /// Creates a relation between the given [Subgroups] and [Groups]
+  /// by setting the [Subgroups]'s foreign key `groupsId` to refer to the [Groups].
+  Future<void> groups(
+    _i1.Session session,
+    Subgroups subgroups,
+    _i2.Groups groups, {
+    _i1.Transaction? transaction,
+  }) async {
+    if (subgroups.id == null) {
+      throw ArgumentError.notNull('subgroups.id');
+    }
+    if (groups.id == null) {
+      throw ArgumentError.notNull('groups.id');
+    }
+
+    var $subgroups = subgroups.copyWith(groupsId: groups.id);
+    await session.db.updateRow<Subgroups>(
+      $subgroups,
+      columns: [Subgroups.t.groupsId],
       transaction: transaction,
     );
   }

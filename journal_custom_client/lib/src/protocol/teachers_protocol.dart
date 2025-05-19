@@ -10,22 +10,29 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'person.dart' as _i2;
 
 abstract class Teachers implements _i1.SerializableModel {
   Teachers._({
     this.id,
     required this.personId,
+    this.person,
   });
 
   factory Teachers({
     int? id,
     required int personId,
+    _i2.Person? person,
   }) = _TeachersImpl;
 
   factory Teachers.fromJson(Map<String, dynamic> jsonSerialization) {
     return Teachers(
       id: jsonSerialization['id'] as int?,
       personId: jsonSerialization['personId'] as int,
+      person: jsonSerialization['person'] == null
+          ? null
+          : _i2.Person.fromJson(
+              (jsonSerialization['person'] as Map<String, dynamic>)),
     );
   }
 
@@ -36,18 +43,22 @@ abstract class Teachers implements _i1.SerializableModel {
 
   int personId;
 
+  _i2.Person? person;
+
   /// Returns a shallow copy of this [Teachers]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
   Teachers copyWith({
     int? id,
     int? personId,
+    _i2.Person? person,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
       'personId': personId,
+      if (person != null) 'person': person?.toJson(),
     };
   }
 
@@ -63,9 +74,11 @@ class _TeachersImpl extends Teachers {
   _TeachersImpl({
     int? id,
     required int personId,
+    _i2.Person? person,
   }) : super._(
           id: id,
           personId: personId,
+          person: person,
         );
 
   /// Returns a shallow copy of this [Teachers]
@@ -75,10 +88,12 @@ class _TeachersImpl extends Teachers {
   Teachers copyWith({
     Object? id = _Undefined,
     int? personId,
+    Object? person = _Undefined,
   }) {
     return Teachers(
       id: id is int? ? id : this.id,
       personId: personId ?? this.personId,
+      person: person is _i2.Person? ? person : this.person?.copyWith(),
     );
   }
 }

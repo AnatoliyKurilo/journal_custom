@@ -10,25 +10,42 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'subjects_protocol.dart' as _i2;
+import 'class_types_protocol.dart' as _i3;
+import 'teachers_protocol.dart' as _i4;
+import 'semesters_protocol.dart' as _i5;
+import 'subgroups_protocol.dart' as _i6;
 
 abstract class Classes implements _i1.SerializableModel {
   Classes._({
     this.id,
     required this.subjectId,
-    required this.typeId,
-    required this.teacherId,
-    required this.semesterId,
-    this.subgroupId,
+    required this.subjectsId,
+    this.subjects,
+    required this.class_typesId,
+    this.class_types,
+    required this.teachersId,
+    this.teachers,
+    required this.semestersId,
+    this.semesters,
+    required this.subgroupsId,
+    this.subgroups,
     required this.date,
   });
 
   factory Classes({
     int? id,
     required int subjectId,
-    required int typeId,
-    required int teacherId,
-    required int semesterId,
-    int? subgroupId,
+    required int subjectsId,
+    _i2.Subjects? subjects,
+    required int class_typesId,
+    _i3.ClassTypes? class_types,
+    required int teachersId,
+    _i4.Teachers? teachers,
+    required int semestersId,
+    _i5.Semesters? semesters,
+    required int subgroupsId,
+    _i6.Subgroups? subgroups,
     required DateTime date,
   }) = _ClassesImpl;
 
@@ -36,10 +53,31 @@ abstract class Classes implements _i1.SerializableModel {
     return Classes(
       id: jsonSerialization['id'] as int?,
       subjectId: jsonSerialization['subjectId'] as int,
-      typeId: jsonSerialization['typeId'] as int,
-      teacherId: jsonSerialization['teacherId'] as int,
-      semesterId: jsonSerialization['semesterId'] as int,
-      subgroupId: jsonSerialization['subgroupId'] as int?,
+      subjectsId: jsonSerialization['subjectsId'] as int,
+      subjects: jsonSerialization['subjects'] == null
+          ? null
+          : _i2.Subjects.fromJson(
+              (jsonSerialization['subjects'] as Map<String, dynamic>)),
+      class_typesId: jsonSerialization['class_typesId'] as int,
+      class_types: jsonSerialization['class_types'] == null
+          ? null
+          : _i3.ClassTypes.fromJson(
+              (jsonSerialization['class_types'] as Map<String, dynamic>)),
+      teachersId: jsonSerialization['teachersId'] as int,
+      teachers: jsonSerialization['teachers'] == null
+          ? null
+          : _i4.Teachers.fromJson(
+              (jsonSerialization['teachers'] as Map<String, dynamic>)),
+      semestersId: jsonSerialization['semestersId'] as int,
+      semesters: jsonSerialization['semesters'] == null
+          ? null
+          : _i5.Semesters.fromJson(
+              (jsonSerialization['semesters'] as Map<String, dynamic>)),
+      subgroupsId: jsonSerialization['subgroupsId'] as int,
+      subgroups: jsonSerialization['subgroups'] == null
+          ? null
+          : _i6.Subgroups.fromJson(
+              (jsonSerialization['subgroups'] as Map<String, dynamic>)),
       date: _i1.DateTimeJsonExtension.fromJson(jsonSerialization['date']),
     );
   }
@@ -51,13 +89,25 @@ abstract class Classes implements _i1.SerializableModel {
 
   int subjectId;
 
-  int typeId;
+  int subjectsId;
 
-  int teacherId;
+  _i2.Subjects? subjects;
 
-  int semesterId;
+  int class_typesId;
 
-  int? subgroupId;
+  _i3.ClassTypes? class_types;
+
+  int teachersId;
+
+  _i4.Teachers? teachers;
+
+  int semestersId;
+
+  _i5.Semesters? semesters;
+
+  int subgroupsId;
+
+  _i6.Subgroups? subgroups;
 
   DateTime date;
 
@@ -67,10 +117,16 @@ abstract class Classes implements _i1.SerializableModel {
   Classes copyWith({
     int? id,
     int? subjectId,
-    int? typeId,
-    int? teacherId,
-    int? semesterId,
-    int? subgroupId,
+    int? subjectsId,
+    _i2.Subjects? subjects,
+    int? class_typesId,
+    _i3.ClassTypes? class_types,
+    int? teachersId,
+    _i4.Teachers? teachers,
+    int? semestersId,
+    _i5.Semesters? semesters,
+    int? subgroupsId,
+    _i6.Subgroups? subgroups,
     DateTime? date,
   });
   @override
@@ -78,10 +134,16 @@ abstract class Classes implements _i1.SerializableModel {
     return {
       if (id != null) 'id': id,
       'subjectId': subjectId,
-      'typeId': typeId,
-      'teacherId': teacherId,
-      'semesterId': semesterId,
-      if (subgroupId != null) 'subgroupId': subgroupId,
+      'subjectsId': subjectsId,
+      if (subjects != null) 'subjects': subjects?.toJson(),
+      'class_typesId': class_typesId,
+      if (class_types != null) 'class_types': class_types?.toJson(),
+      'teachersId': teachersId,
+      if (teachers != null) 'teachers': teachers?.toJson(),
+      'semestersId': semestersId,
+      if (semesters != null) 'semesters': semesters?.toJson(),
+      'subgroupsId': subgroupsId,
+      if (subgroups != null) 'subgroups': subgroups?.toJson(),
       'date': date.toJson(),
     };
   }
@@ -98,18 +160,30 @@ class _ClassesImpl extends Classes {
   _ClassesImpl({
     int? id,
     required int subjectId,
-    required int typeId,
-    required int teacherId,
-    required int semesterId,
-    int? subgroupId,
+    required int subjectsId,
+    _i2.Subjects? subjects,
+    required int class_typesId,
+    _i3.ClassTypes? class_types,
+    required int teachersId,
+    _i4.Teachers? teachers,
+    required int semestersId,
+    _i5.Semesters? semesters,
+    required int subgroupsId,
+    _i6.Subgroups? subgroups,
     required DateTime date,
   }) : super._(
           id: id,
           subjectId: subjectId,
-          typeId: typeId,
-          teacherId: teacherId,
-          semesterId: semesterId,
-          subgroupId: subgroupId,
+          subjectsId: subjectsId,
+          subjects: subjects,
+          class_typesId: class_typesId,
+          class_types: class_types,
+          teachersId: teachersId,
+          teachers: teachers,
+          semestersId: semestersId,
+          semesters: semesters,
+          subgroupsId: subgroupsId,
+          subgroups: subgroups,
           date: date,
         );
 
@@ -120,19 +194,37 @@ class _ClassesImpl extends Classes {
   Classes copyWith({
     Object? id = _Undefined,
     int? subjectId,
-    int? typeId,
-    int? teacherId,
-    int? semesterId,
-    Object? subgroupId = _Undefined,
+    int? subjectsId,
+    Object? subjects = _Undefined,
+    int? class_typesId,
+    Object? class_types = _Undefined,
+    int? teachersId,
+    Object? teachers = _Undefined,
+    int? semestersId,
+    Object? semesters = _Undefined,
+    int? subgroupsId,
+    Object? subgroups = _Undefined,
     DateTime? date,
   }) {
     return Classes(
       id: id is int? ? id : this.id,
       subjectId: subjectId ?? this.subjectId,
-      typeId: typeId ?? this.typeId,
-      teacherId: teacherId ?? this.teacherId,
-      semesterId: semesterId ?? this.semesterId,
-      subgroupId: subgroupId is int? ? subgroupId : this.subgroupId,
+      subjectsId: subjectsId ?? this.subjectsId,
+      subjects:
+          subjects is _i2.Subjects? ? subjects : this.subjects?.copyWith(),
+      class_typesId: class_typesId ?? this.class_typesId,
+      class_types: class_types is _i3.ClassTypes?
+          ? class_types
+          : this.class_types?.copyWith(),
+      teachersId: teachersId ?? this.teachersId,
+      teachers:
+          teachers is _i4.Teachers? ? teachers : this.teachers?.copyWith(),
+      semestersId: semestersId ?? this.semestersId,
+      semesters:
+          semesters is _i5.Semesters? ? semesters : this.semesters?.copyWith(),
+      subgroupsId: subgroupsId ?? this.subgroupsId,
+      subgroups:
+          subgroups is _i6.Subgroups? ? subgroups : this.subgroups?.copyWith(),
       date: date ?? this.date,
     );
   }

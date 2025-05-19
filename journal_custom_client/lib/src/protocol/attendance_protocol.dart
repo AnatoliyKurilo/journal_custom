@@ -10,20 +10,26 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'classes.dart' as _i2;
+import 'students_protocol.dart' as _i3;
 
 abstract class Attendance implements _i1.SerializableModel {
   Attendance._({
     this.id,
-    required this.classId,
-    required this.studentId,
+    required this.classesId,
+    this.classes,
+    required this.studentsId,
+    this.students,
     required this.status,
     this.comment,
   });
 
   factory Attendance({
     int? id,
-    required int classId,
-    required int studentId,
+    required int classesId,
+    _i2.Classes? classes,
+    required int studentsId,
+    _i3.Students? students,
     required String status,
     String? comment,
   }) = _AttendanceImpl;
@@ -31,8 +37,16 @@ abstract class Attendance implements _i1.SerializableModel {
   factory Attendance.fromJson(Map<String, dynamic> jsonSerialization) {
     return Attendance(
       id: jsonSerialization['id'] as int?,
-      classId: jsonSerialization['classId'] as int,
-      studentId: jsonSerialization['studentId'] as int,
+      classesId: jsonSerialization['classesId'] as int,
+      classes: jsonSerialization['classes'] == null
+          ? null
+          : _i2.Classes.fromJson(
+              (jsonSerialization['classes'] as Map<String, dynamic>)),
+      studentsId: jsonSerialization['studentsId'] as int,
+      students: jsonSerialization['students'] == null
+          ? null
+          : _i3.Students.fromJson(
+              (jsonSerialization['students'] as Map<String, dynamic>)),
       status: jsonSerialization['status'] as String,
       comment: jsonSerialization['comment'] as String?,
     );
@@ -43,9 +57,13 @@ abstract class Attendance implements _i1.SerializableModel {
   /// the id will be null.
   int? id;
 
-  int classId;
+  int classesId;
 
-  int studentId;
+  _i2.Classes? classes;
+
+  int studentsId;
+
+  _i3.Students? students;
 
   String status;
 
@@ -56,8 +74,10 @@ abstract class Attendance implements _i1.SerializableModel {
   @_i1.useResult
   Attendance copyWith({
     int? id,
-    int? classId,
-    int? studentId,
+    int? classesId,
+    _i2.Classes? classes,
+    int? studentsId,
+    _i3.Students? students,
     String? status,
     String? comment,
   });
@@ -65,8 +85,10 @@ abstract class Attendance implements _i1.SerializableModel {
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
-      'classId': classId,
-      'studentId': studentId,
+      'classesId': classesId,
+      if (classes != null) 'classes': classes?.toJson(),
+      'studentsId': studentsId,
+      if (students != null) 'students': students?.toJson(),
       'status': status,
       if (comment != null) 'comment': comment,
     };
@@ -83,14 +105,18 @@ class _Undefined {}
 class _AttendanceImpl extends Attendance {
   _AttendanceImpl({
     int? id,
-    required int classId,
-    required int studentId,
+    required int classesId,
+    _i2.Classes? classes,
+    required int studentsId,
+    _i3.Students? students,
     required String status,
     String? comment,
   }) : super._(
           id: id,
-          classId: classId,
-          studentId: studentId,
+          classesId: classesId,
+          classes: classes,
+          studentsId: studentsId,
+          students: students,
           status: status,
           comment: comment,
         );
@@ -101,15 +127,20 @@ class _AttendanceImpl extends Attendance {
   @override
   Attendance copyWith({
     Object? id = _Undefined,
-    int? classId,
-    int? studentId,
+    int? classesId,
+    Object? classes = _Undefined,
+    int? studentsId,
+    Object? students = _Undefined,
     String? status,
     Object? comment = _Undefined,
   }) {
     return Attendance(
       id: id is int? ? id : this.id,
-      classId: classId ?? this.classId,
-      studentId: studentId ?? this.studentId,
+      classesId: classesId ?? this.classesId,
+      classes: classes is _i2.Classes? ? classes : this.classes?.copyWith(),
+      studentsId: studentsId ?? this.studentsId,
+      students:
+          students is _i3.Students? ? students : this.students?.copyWith(),
       status: status ?? this.status,
       comment: comment is String? ? comment : this.comment,
     );

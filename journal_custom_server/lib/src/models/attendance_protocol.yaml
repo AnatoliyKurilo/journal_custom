@@ -1,7 +1,9 @@
 class: Attendance
 table: attendance
 fields:
-  classId: int, relation(parent=classes)
-  studentId: int, relation(parent=students)
+  # classId: int, relation(parent=classes)
+  # studentId: int, relation(parent=students)
+  classes: Classes?, relation
+  students: Students?, relation
   status: String
   comment: String?

@@ -23,7 +23,11 @@ import 'students_protocol.dart' as _i11;
 import 'subgroups_protocol.dart' as _i12;
 import 'subjects_protocol.dart' as _i13;
 import 'teachers_protocol.dart' as _i14;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i15;
+import 'package:journal_custom_client/src/protocol/groups_protocol.dart'
+    as _i15;
+import 'package:journal_custom_client/src/protocol/teachers_protocol.dart'
+    as _i16;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i17;
 export 'greeting.dart';
 export 'attendance_protocol.dart';
 export 'class_types_protocol.dart';
@@ -130,11 +134,19 @@ class Protocol extends _i1.SerializationManager {
     if (t == _i1.getType<_i14.Teachers?>()) {
       return (data != null ? _i14.Teachers.fromJson(data) : null) as T;
     }
+    if (t == List<_i15.Groups>) {
+      return (data as List).map((e) => deserialize<_i15.Groups>(e)).toList()
+          as T;
+    }
+    if (t == List<_i16.Teachers>) {
+      return (data as List).map((e) => deserialize<_i16.Teachers>(e)).toList()
+          as T;
+    }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
     try {
-      return _i15.Protocol().deserialize<T>(data, t);
+      return _i17.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
@@ -182,7 +194,7 @@ class Protocol extends _i1.SerializationManager {
     if (data is _i14.Teachers) {
       return 'Teachers';
     }
-    className = _i15.Protocol().getClassNameForObject(data);
+    className = _i17.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth.$className';
     }
@@ -236,7 +248,7 @@ class Protocol extends _i1.SerializationManager {
     }
     if (dataClassName.startsWith('serverpod_auth.')) {
       data['className'] = dataClassName.substring(15);
-      return _i15.Protocol().deserializeByClassName(data);
+      return _i17.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }

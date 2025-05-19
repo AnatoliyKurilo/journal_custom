@@ -2,9 +2,14 @@ class: Classes
 table: classes
 fields:
   subjectId: int, relation(parent=subjects)
+  subjects: Subjects?, relation
   # groupId: int, relation(parent=groups)
-  typeId: int, relation(parent=class_types)
-  teacherId: int, relation(parent=teachers)
-  semesterId: int, relation(parent=semesters)
-  subgroupId: int?, relation(parent=subgroups)
+  # typeId: int, relation(parent=class_types)
+  class_types: ClassTypes?, relation
+  # teacherId: int, relation(parent=teachers)
+  teachers: Teachers?, relation
+  # semesterId: int, relation(parent=semesters)
+  semesters: Semesters?, relation
+  # subgroupId: int?, relation(parent=subgroups)
+  subgroups: Subgroups?, relation
   date: DateTime

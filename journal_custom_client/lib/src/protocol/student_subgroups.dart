@@ -10,25 +10,39 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'students_protocol.dart' as _i2;
+import 'subgroups_protocol.dart' as _i3;
 
 abstract class StudentSubgroup implements _i1.SerializableModel {
   StudentSubgroup._({
     this.id,
-    required this.studentId,
-    required this.subgroupId,
+    required this.studentsId,
+    this.students,
+    required this.subgroupsId,
+    this.subgroups,
   });
 
   factory StudentSubgroup({
     int? id,
-    required int studentId,
-    required int subgroupId,
+    required int studentsId,
+    _i2.Students? students,
+    required int subgroupsId,
+    _i3.Subgroups? subgroups,
   }) = _StudentSubgroupImpl;
 
   factory StudentSubgroup.fromJson(Map<String, dynamic> jsonSerialization) {
     return StudentSubgroup(
       id: jsonSerialization['id'] as int?,
-      studentId: jsonSerialization['studentId'] as int,
-      subgroupId: jsonSerialization['subgroupId'] as int,
+      studentsId: jsonSerialization['studentsId'] as int,
+      students: jsonSerialization['students'] == null
+          ? null
+          : _i2.Students.fromJson(
+              (jsonSerialization['students'] as Map<String, dynamic>)),
+      subgroupsId: jsonSerialization['subgroupsId'] as int,
+      subgroups: jsonSerialization['subgroups'] == null
+          ? null
+          : _i3.Subgroups.fromJson(
+              (jsonSerialization['subgroups'] as Map<String, dynamic>)),
     );
   }
 
@@ -37,24 +51,32 @@ abstract class StudentSubgroup implements _i1.SerializableModel {
   /// the id will be null.
   int? id;
 
-  int studentId;
+  int studentsId;
 
-  int subgroupId;
+  _i2.Students? students;
+
+  int subgroupsId;
+
+  _i3.Subgroups? subgroups;
 
   /// Returns a shallow copy of this [StudentSubgroup]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
   StudentSubgroup copyWith({
     int? id,
-    int? studentId,
-    int? subgroupId,
+    int? studentsId,
+    _i2.Students? students,
+    int? subgroupsId,
+    _i3.Subgroups? subgroups,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
-      'studentId': studentId,
-      'subgroupId': subgroupId,
+      'studentsId': studentsId,
+      if (students != null) 'students': students?.toJson(),
+      'subgroupsId': subgroupsId,
+      if (subgroups != null) 'subgroups': subgroups?.toJson(),
     };
   }
 
@@ -69,12 +91,16 @@ class _Undefined {}
 class _StudentSubgroupImpl extends StudentSubgroup {
   _StudentSubgroupImpl({
     int? id,
-    required int studentId,
-    required int subgroupId,
+    required int studentsId,
+    _i2.Students? students,
+    required int subgroupsId,
+    _i3.Subgroups? subgroups,
   }) : super._(
           id: id,
-          studentId: studentId,
-          subgroupId: subgroupId,
+          studentsId: studentsId,
+          students: students,
+          subgroupsId: subgroupsId,
+          subgroups: subgroups,
         );
 
   /// Returns a shallow copy of this [StudentSubgroup]
@@ -83,13 +109,19 @@ class _StudentSubgroupImpl extends StudentSubgroup {
   @override
   StudentSubgroup copyWith({
     Object? id = _Undefined,
-    int? studentId,
-    int? subgroupId,
+    int? studentsId,
+    Object? students = _Undefined,
+    int? subgroupsId,
+    Object? subgroups = _Undefined,
   }) {
     return StudentSubgroup(
       id: id is int? ? id : this.id,
-      studentId: studentId ?? this.studentId,
-      subgroupId: subgroupId ?? this.subgroupId,
+      studentsId: studentsId ?? this.studentsId,
+      students:
+          students is _i2.Students? ? students : this.students?.copyWith(),
+      subgroupsId: subgroupsId ?? this.subgroupsId,
+      subgroups:
+          subgroups is _i3.Subgroups? ? subgroups : this.subgroups?.copyWith(),
     );
   }
 }

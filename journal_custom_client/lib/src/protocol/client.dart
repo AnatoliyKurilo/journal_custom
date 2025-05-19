@@ -11,9 +11,68 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
 import 'dart:async' as _i2;
-import 'package:journal_custom_client/src/protocol/greeting.dart' as _i3;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i4;
-import 'protocol.dart' as _i5;
+import 'package:journal_custom_client/src/protocol/groups_protocol.dart' as _i3;
+import 'package:journal_custom_client/src/protocol/teachers_protocol.dart'
+    as _i4;
+import 'package:journal_custom_client/src/protocol/greeting.dart' as _i5;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i6;
+import 'protocol.dart' as _i7;
+
+/// {@category Endpoint}
+class EndpointAdmin extends _i1.EndpointRef {
+  EndpointAdmin(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'admin';
+
+  _i2.Future<_i3.Groups> createGroup(
+    String name,
+    int? curatorId,
+    int? groupHeadId,
+  ) =>
+      caller.callServerEndpoint<_i3.Groups>(
+        'admin',
+        'createGroup',
+        {
+          'name': name,
+          'curatorId': curatorId,
+          'groupHeadId': groupHeadId,
+        },
+      );
+
+  _i2.Future<List<_i3.Groups>> getAllGroups() =>
+      caller.callServerEndpoint<List<_i3.Groups>>(
+        'admin',
+        'getAllGroups',
+        {},
+      );
+
+  _i2.Future<_i4.Teachers> createTeacher({
+    required String firstName,
+    required String lastName,
+    String? patronymic,
+    required String email,
+    String? phoneNumber,
+  }) =>
+      caller.callServerEndpoint<_i4.Teachers>(
+        'admin',
+        'createTeacher',
+        {
+          'firstName': firstName,
+          'lastName': lastName,
+          'patronymic': patronymic,
+          'email': email,
+          'phoneNumber': phoneNumber,
+        },
+      );
+
+  _i2.Future<List<_i4.Teachers>> getAllTeachers() =>
+      caller.callServerEndpoint<List<_i4.Teachers>>(
+        'admin',
+        'getAllTeachers',
+        {},
+      );
+}
 
 /// {@category Endpoint}
 class EndpointMakeUserAdmin extends _i1.EndpointRef {
@@ -80,8 +139,8 @@ class EndpointGreeting extends _i1.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i2.Future<_i3.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i3.Greeting>(
+  _i2.Future<_i5.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i5.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -90,10 +149,10 @@ class EndpointGreeting extends _i1.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i4.Caller(client);
+    auth = _i6.Caller(client);
   }
 
-  late final _i4.Caller auth;
+  late final _i6.Caller auth;
 }
 
 class Client extends _i1.ServerpodClientShared {
@@ -112,7 +171,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
           host,
-          _i5.Protocol(),
+          _i7.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,
@@ -122,11 +181,14 @@ class Client extends _i1.ServerpodClientShared {
           disconnectStreamsOnLostInternetConnection:
               disconnectStreamsOnLostInternetConnection,
         ) {
+    admin = EndpointAdmin(this);
     makeUserAdmin = EndpointMakeUserAdmin(this);
     userRoles = EndpointUserRoles(this);
     greeting = EndpointGreeting(this);
     modules = Modules(this);
   }
+
+  late final EndpointAdmin admin;
 
   late final EndpointMakeUserAdmin makeUserAdmin;
 
@@ -138,6 +200,7 @@ class Client extends _i1.ServerpodClientShared {
 
   @override
   Map<String, _i1.EndpointRef> get endpointRefLookup => {
+        'admin': admin,
         'makeUserAdmin': makeUserAdmin,
         'userRoles': userRoles,
         'greeting': greeting,

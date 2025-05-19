@@ -1,0 +1,84 @@
+{
+  "actions": [
+    {
+      "type": "alterTable",
+      "alterTable": {
+        "name": "groups",
+        "schema": "public",
+        "addColumns": [],
+        "deleteColumns": [],
+        "modifyColumns": [],
+        "addIndexes": [
+          {
+            "indexName": "unique_curator",
+            "elements": [
+              {
+                "type": 0,
+                "definition": "curatorId"
+              }
+            ],
+            "type": "btree",
+            "isUnique": true,
+            "isPrimary": false
+          },
+          {
+            "indexName": "unique_group_head",
+            "elements": [
+              {
+                "type": 0,
+                "definition": "groupHeadId"
+              }
+            ],
+            "type": "btree",
+            "isUnique": true,
+            "isPrimary": false
+          }
+        ],
+        "deleteIndexes": [],
+        "addForeignKeys": [],
+        "deleteForeignKeys": [],
+        "warnings": [
+          {
+            "type": "uniqueIndexCreated",
+            "message": "Unique index \"unique_curator\" is added to table \"groups\". If there are existing rows with duplicate values, this migration will fail.",
+            "table": "groups",
+            "columns": [
+              "curatorId"
+            ],
+            "destrucive": false
+          },
+          {
+            "type": "uniqueIndexCreated",
+            "message": "Unique index \"unique_group_head\" is added to table \"groups\". If there are existing rows with duplicate values, this migration will fail.",
+            "table": "groups",
+            "columns": [
+              "groupHeadId"
+            ],
+            "destrucive": false
+          }
+        ]
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "type": "uniqueIndexCreated",
+      "message": "Unique index \"unique_curator\" is added to table \"groups\". If there are existing rows with duplicate values, this migration will fail.",
+      "table": "groups",
+      "columns": [
+        "curatorId"
+      ],
+      "destrucive": false
+    },
+    {
+      "type": "uniqueIndexCreated",
+      "message": "Unique index \"unique_group_head\" is added to table \"groups\". If there are existing rows with duplicate values, this migration will fail.",
+      "table": "groups",
+      "columns": [
+        "groupHeadId"
+      ],
+      "destrucive": false
+    }
+  ],
+  "migrationApiVersion": 1
+}

@@ -1,11 +1,13 @@
 class: StudentSubgroup
 table: student_subgroups
 fields:
-  studentId: int, relation(parent=students)
-  subgroupId: int, relation(parent=subgroups)
+  # studentId: int, relation(parent=students)
+  students: Students?, relation
+  # subgroupId: int, relation(parent=subgroups)
+  subgroups: Subgroups?, relation
 
 indexes:
   unique_combination:
-    fields: studentId, subgroupId
+    fields: studentsId, subgroupsId
     unique: true
 

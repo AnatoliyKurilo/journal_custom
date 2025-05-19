@@ -2,8 +2,10 @@ class: Groups
 table: groups
 fields:
   name: String
-  curatorId: int, relation(parent=teachers)
-  groupHeadId: int,relation(parent=students)
+  # curatorId: int?, relation(parent=teachers)
+  # groupHeadId: int?, relation(parent=students)
+  curator: Teachers?, relation(optional)
+  groupHead: Students?, relation(optional)
 indexes:
   unique_curator:
     fields: curatorId

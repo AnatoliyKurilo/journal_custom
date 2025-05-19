@@ -10,25 +10,39 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'person.dart' as _i2;
+import 'groups_protocol.dart' as _i3;
 
 abstract class Students implements _i1.SerializableModel {
   Students._({
     this.id,
     required this.personId,
-    required this.groupId,
+    this.person,
+    required this.groupsId,
+    this.groups,
   });
 
   factory Students({
     int? id,
     required int personId,
-    required int groupId,
+    _i2.Person? person,
+    required int groupsId,
+    _i3.Groups? groups,
   }) = _StudentsImpl;
 
   factory Students.fromJson(Map<String, dynamic> jsonSerialization) {
     return Students(
       id: jsonSerialization['id'] as int?,
       personId: jsonSerialization['personId'] as int,
-      groupId: jsonSerialization['groupId'] as int,
+      person: jsonSerialization['person'] == null
+          ? null
+          : _i2.Person.fromJson(
+              (jsonSerialization['person'] as Map<String, dynamic>)),
+      groupsId: jsonSerialization['groupsId'] as int,
+      groups: jsonSerialization['groups'] == null
+          ? null
+          : _i3.Groups.fromJson(
+              (jsonSerialization['groups'] as Map<String, dynamic>)),
     );
   }
 
@@ -39,7 +53,11 @@ abstract class Students implements _i1.SerializableModel {
 
   int personId;
 
-  int groupId;
+  _i2.Person? person;
+
+  int groupsId;
+
+  _i3.Groups? groups;
 
   /// Returns a shallow copy of this [Students]
   /// with some or all fields replaced by the given arguments.
@@ -47,14 +65,18 @@ abstract class Students implements _i1.SerializableModel {
   Students copyWith({
     int? id,
     int? personId,
-    int? groupId,
+    _i2.Person? person,
+    int? groupsId,
+    _i3.Groups? groups,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
       'personId': personId,
-      'groupId': groupId,
+      if (person != null) 'person': person?.toJson(),
+      'groupsId': groupsId,
+      if (groups != null) 'groups': groups?.toJson(),
     };
   }
 
@@ -70,11 +92,15 @@ class _StudentsImpl extends Students {
   _StudentsImpl({
     int? id,
     required int personId,
-    required int groupId,
+    _i2.Person? person,
+    required int groupsId,
+    _i3.Groups? groups,
   }) : super._(
           id: id,
           personId: personId,
-          groupId: groupId,
+          person: person,
+          groupsId: groupsId,
+          groups: groups,
         );
 
   /// Returns a shallow copy of this [Students]
@@ -84,12 +110,16 @@ class _StudentsImpl extends Students {
   Students copyWith({
     Object? id = _Undefined,
     int? personId,
-    int? groupId,
+    Object? person = _Undefined,
+    int? groupsId,
+    Object? groups = _Undefined,
   }) {
     return Students(
       id: id is int? ? id : this.id,
       personId: personId ?? this.personId,
-      groupId: groupId ?? this.groupId,
+      person: person is _i2.Person? ? person : this.person?.copyWith(),
+      groupsId: groupsId ?? this.groupsId,
+      groups: groups is _i3.Groups? ? groups : this.groups?.copyWith(),
     );
   }
 }

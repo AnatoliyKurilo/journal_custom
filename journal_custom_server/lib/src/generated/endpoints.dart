@@ -10,34 +10,137 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
-import '../endpoints/user_endpoint.dart' as _i2;
-import '../endpoints/user_roles_endpoint.dart' as _i3;
-import '../greeting_endpoint.dart' as _i4;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i5;
+import '../endpoints/admin_endpoint.dart' as _i2;
+import '../endpoints/user_endpoint.dart' as _i3;
+import '../endpoints/user_roles_endpoint.dart' as _i4;
+import '../greeting_endpoint.dart' as _i5;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i6;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
   void initializeEndpoints(_i1.Server server) {
     var endpoints = <String, _i1.Endpoint>{
-      'makeUserAdmin': _i2.MakeUserAdminEndpoint()
+      'admin': _i2.AdminEndpoint()
+        ..initialize(
+          server,
+          'admin',
+          null,
+        ),
+      'makeUserAdmin': _i3.MakeUserAdminEndpoint()
         ..initialize(
           server,
           'makeUserAdmin',
           null,
         ),
-      'userRoles': _i3.UserRolesEndpoint()
+      'userRoles': _i4.UserRolesEndpoint()
         ..initialize(
           server,
           'userRoles',
           null,
         ),
-      'greeting': _i4.GreetingEndpoint()
+      'greeting': _i5.GreetingEndpoint()
         ..initialize(
           server,
           'greeting',
           null,
         ),
     };
+    connectors['admin'] = _i1.EndpointConnector(
+      name: 'admin',
+      endpoint: endpoints['admin']!,
+      methodConnectors: {
+        'createGroup': _i1.MethodConnector(
+          name: 'createGroup',
+          params: {
+            'name': _i1.ParameterDescription(
+              name: 'name',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'curatorId': _i1.ParameterDescription(
+              name: 'curatorId',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'groupHeadId': _i1.ParameterDescription(
+              name: 'groupHeadId',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['admin'] as _i2.AdminEndpoint).createGroup(
+            session,
+            params['name'],
+            params['curatorId'],
+            params['groupHeadId'],
+          ),
+        ),
+        'getAllGroups': _i1.MethodConnector(
+          name: 'getAllGroups',
+          params: {},
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['admin'] as _i2.AdminEndpoint).getAllGroups(session),
+        ),
+        'createTeacher': _i1.MethodConnector(
+          name: 'createTeacher',
+          params: {
+            'firstName': _i1.ParameterDescription(
+              name: 'firstName',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'lastName': _i1.ParameterDescription(
+              name: 'lastName',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'patronymic': _i1.ParameterDescription(
+              name: 'patronymic',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'phoneNumber': _i1.ParameterDescription(
+              name: 'phoneNumber',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['admin'] as _i2.AdminEndpoint).createTeacher(
+            session,
+            firstName: params['firstName'],
+            lastName: params['lastName'],
+            patronymic: params['patronymic'],
+            email: params['email'],
+            phoneNumber: params['phoneNumber'],
+          ),
+        ),
+        'getAllTeachers': _i1.MethodConnector(
+          name: 'getAllTeachers',
+          params: {},
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['admin'] as _i2.AdminEndpoint).getAllTeachers(session),
+        ),
+      },
+    );
     connectors['makeUserAdmin'] = _i1.EndpointConnector(
       name: 'makeUserAdmin',
       endpoint: endpoints['makeUserAdmin']!,
@@ -55,7 +158,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['makeUserAdmin'] as _i2.MakeUserAdminEndpoint)
+              (endpoints['makeUserAdmin'] as _i3.MakeUserAdminEndpoint)
                   .setUserScopes(
             session,
             params['userId'],
@@ -80,7 +183,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['userRoles'] as _i3.UserRolesEndpoint).getUserRoles(
+              (endpoints['userRoles'] as _i4.UserRolesEndpoint).getUserRoles(
             session,
             params['personId'],
           ),
@@ -98,7 +201,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['userRoles'] as _i3.UserRolesEndpoint)
+              (endpoints['userRoles'] as _i4.UserRolesEndpoint)
                   .assignCuratorRole(
             session,
             params['teacherId'],
@@ -117,7 +220,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['userRoles'] as _i3.UserRolesEndpoint)
+              (endpoints['userRoles'] as _i4.UserRolesEndpoint)
                   .assignGroupHeadRole(
             session,
             params['studentId'],
@@ -141,7 +244,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['userRoles'] as _i3.UserRolesEndpoint).removeRole(
+              (endpoints['userRoles'] as _i4.UserRolesEndpoint).removeRole(
             session,
             params['personId'],
             params['role'],
@@ -166,13 +269,13 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['greeting'] as _i4.GreetingEndpoint).hello(
+              (endpoints['greeting'] as _i5.GreetingEndpoint).hello(
             session,
             params['name'],
           ),
         )
       },
     );
-    modules['serverpod_auth'] = _i5.Endpoints()..initializeEndpoints(server);
+    modules['serverpod_auth'] = _i6.Endpoints()..initializeEndpoints(server);
   }
 }

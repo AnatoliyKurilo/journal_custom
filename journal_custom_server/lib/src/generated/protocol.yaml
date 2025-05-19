@@ -1,3 +1,8 @@
+admin:
+  - createGroup:
+  - getAllGroups:
+  - createTeacher:
+  - getAllTeachers:
 makeUserAdmin:
   - setUserScopes:
 userRoles:

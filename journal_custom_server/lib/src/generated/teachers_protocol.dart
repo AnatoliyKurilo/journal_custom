@@ -8,25 +8,34 @@
 // ignore_for_file: type_literal_in_constant_pattern
 // ignore_for_file: use_super_parameters
 
+// ignore_for_file: unnecessary_null_comparison
+
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
+import 'person.dart' as _i2;
 
 abstract class Teachers
     implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
   Teachers._({
     this.id,
     required this.personId,
+    this.person,
   });
 
   factory Teachers({
     int? id,
     required int personId,
+    _i2.Person? person,
   }) = _TeachersImpl;
 
   factory Teachers.fromJson(Map<String, dynamic> jsonSerialization) {
     return Teachers(
       id: jsonSerialization['id'] as int?,
       personId: jsonSerialization['personId'] as int,
+      person: jsonSerialization['person'] == null
+          ? null
+          : _i2.Person.fromJson(
+              (jsonSerialization['person'] as Map<String, dynamic>)),
     );
   }
 
@@ -39,6 +48,8 @@ abstract class Teachers
 
   int personId;
 
+  _i2.Person? person;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -48,12 +59,14 @@ abstract class Teachers
   Teachers copyWith({
     int? id,
     int? personId,
+    _i2.Person? person,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
       'personId': personId,
+      if (person != null) 'person': person?.toJson(),
     };
   }
 
@@ -62,11 +75,12 @@ abstract class Teachers
     return {
       if (id != null) 'id': id,
       'personId': personId,
+      if (person != null) 'person': person?.toJsonForProtocol(),
     };
   }
 
-  static TeachersInclude include() {
-    return TeachersInclude._();
+  static TeachersInclude include({_i2.PersonInclude? person}) {
+    return TeachersInclude._(person: person);
   }
 
   static TeachersIncludeList includeList({
@@ -101,9 +115,11 @@ class _TeachersImpl extends Teachers {
   _TeachersImpl({
     int? id,
     required int personId,
+    _i2.Person? person,
   }) : super._(
           id: id,
           personId: personId,
+          person: person,
         );
 
   /// Returns a shallow copy of this [Teachers]
@@ -113,10 +129,12 @@ class _TeachersImpl extends Teachers {
   Teachers copyWith({
     Object? id = _Undefined,
     int? personId,
+    Object? person = _Undefined,
   }) {
     return Teachers(
       id: id is int? ? id : this.id,
       personId: personId ?? this.personId,
+      person: person is _i2.Person? ? person : this.person?.copyWith(),
     );
   }
 }
@@ -131,18 +149,45 @@ class TeachersTable extends _i1.Table<int?> {
 
   late final _i1.ColumnInt personId;
 
+  _i2.PersonTable? _person;
+
+  _i2.PersonTable get person {
+    if (_person != null) return _person!;
+    _person = _i1.createRelationTable(
+      relationFieldName: 'person',
+      field: Teachers.t.personId,
+      foreignField: _i2.Person.t.id,
+      tableRelation: tableRelation,
+      createTable: (foreignTableRelation) =>
+          _i2.PersonTable(tableRelation: foreignTableRelation),
+    );
+    return _person!;
+  }
+
   @override
   List<_i1.Column> get columns => [
         id,
         personId,
       ];
+
+  @override
+  _i1.Table? getRelationTable(String relationField) {
+    if (relationField == 'person') {
+      return person;
+    }
+    return null;
+  }
 }
 
 class TeachersInclude extends _i1.IncludeObject {
-  TeachersInclude._();
+  TeachersInclude._({_i2.PersonInclude? person}) {
+    _person = person;
+  }
+
+  _i2.PersonInclude? _person;
 
   @override
-  Map<String, _i1.Include?> get includes => {};
+  Map<String, _i1.Include?> get includes => {'person': _person};
 
   @override
   _i1.Table<int?> get table => Teachers.t;
@@ -170,6 +215,8 @@ class TeachersIncludeList extends _i1.IncludeList {
 
 class TeachersRepository {
   const TeachersRepository._();
+
+  final attachRow = const TeachersAttachRowRepository._();
 
   /// Returns a list of [Teachers]s matching the given query parameters.
   ///
@@ -202,6 +249,7 @@ class TeachersRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<TeachersTable>? orderByList,
     _i1.Transaction? transaction,
+    TeachersInclude? include,
   }) async {
     return session.db.find<Teachers>(
       where: where?.call(Teachers.t),
@@ -211,6 +259,7 @@ class TeachersRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -239,6 +288,7 @@ class TeachersRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<TeachersTable>? orderByList,
     _i1.Transaction? transaction,
+    TeachersInclude? include,
   }) async {
     return session.db.findFirstRow<Teachers>(
       where: where?.call(Teachers.t),
@@ -247,6 +297,7 @@ class TeachersRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -255,10 +306,12 @@ class TeachersRepository {
     _i1.Session session,
     int id, {
     _i1.Transaction? transaction,
+    TeachersInclude? include,
   }) async {
     return session.db.findById<Teachers>(
       id,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -376,6 +429,33 @@ class TeachersRepository {
     return session.db.count<Teachers>(
       where: where?.call(Teachers.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+}
+
+class TeachersAttachRowRepository {
+  const TeachersAttachRowRepository._();
+
+  /// Creates a relation between the given [Teachers] and [Person]
+  /// by setting the [Teachers]'s foreign key `personId` to refer to the [Person].
+  Future<void> person(
+    _i1.Session session,
+    Teachers teachers,
+    _i2.Person person, {
+    _i1.Transaction? transaction,
+  }) async {
+    if (teachers.id == null) {
+      throw ArgumentError.notNull('teachers.id');
+    }
+    if (person.id == null) {
+      throw ArgumentError.notNull('person.id');
+    }
+
+    var $teachers = teachers.copyWith(personId: person.id);
+    await session.db.updateRow<Teachers>(
+      $teachers,
+      columns: [Teachers.t.personId],
       transaction: transaction,
     );
   }

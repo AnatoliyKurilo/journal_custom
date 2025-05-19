@@ -10,28 +10,42 @@
 
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
+import 'teachers_protocol.dart' as _i2;
+import 'students_protocol.dart' as _i3;
 
 abstract class Groups implements _i1.SerializableModel {
   Groups._({
     this.id,
     required this.name,
-    required this.curatorId,
-    required this.groupHeadId,
+    this.curatorId,
+    this.curator,
+    this.groupHeadId,
+    this.groupHead,
   });
 
   factory Groups({
     int? id,
     required String name,
-    required int curatorId,
-    required int groupHeadId,
+    int? curatorId,
+    _i2.Teachers? curator,
+    int? groupHeadId,
+    _i3.Students? groupHead,
   }) = _GroupsImpl;
 
   factory Groups.fromJson(Map<String, dynamic> jsonSerialization) {
     return Groups(
       id: jsonSerialization['id'] as int?,
       name: jsonSerialization['name'] as String,
-      curatorId: jsonSerialization['curatorId'] as int,
-      groupHeadId: jsonSerialization['groupHeadId'] as int,
+      curatorId: jsonSerialization['curatorId'] as int?,
+      curator: jsonSerialization['curator'] == null
+          ? null
+          : _i2.Teachers.fromJson(
+              (jsonSerialization['curator'] as Map<String, dynamic>)),
+      groupHeadId: jsonSerialization['groupHeadId'] as int?,
+      groupHead: jsonSerialization['groupHead'] == null
+          ? null
+          : _i3.Students.fromJson(
+              (jsonSerialization['groupHead'] as Map<String, dynamic>)),
     );
   }
 
@@ -42,9 +56,13 @@ abstract class Groups implements _i1.SerializableModel {
 
   String name;
 
-  int curatorId;
+  int? curatorId;
 
-  int groupHeadId;
+  _i2.Teachers? curator;
+
+  int? groupHeadId;
+
+  _i3.Students? groupHead;
 
   /// Returns a shallow copy of this [Groups]
   /// with some or all fields replaced by the given arguments.
@@ -53,15 +71,19 @@ abstract class Groups implements _i1.SerializableModel {
     int? id,
     String? name,
     int? curatorId,
+    _i2.Teachers? curator,
     int? groupHeadId,
+    _i3.Students? groupHead,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
       'name': name,
-      'curatorId': curatorId,
-      'groupHeadId': groupHeadId,
+      if (curatorId != null) 'curatorId': curatorId,
+      if (curator != null) 'curator': curator?.toJson(),
+      if (groupHeadId != null) 'groupHeadId': groupHeadId,
+      if (groupHead != null) 'groupHead': groupHead?.toJson(),
     };
   }
 
@@ -77,13 +99,17 @@ class _GroupsImpl extends Groups {
   _GroupsImpl({
     int? id,
     required String name,
-    required int curatorId,
-    required int groupHeadId,
+    int? curatorId,
+    _i2.Teachers? curator,
+    int? groupHeadId,
+    _i3.Students? groupHead,
   }) : super._(
           id: id,
           name: name,
           curatorId: curatorId,
+          curator: curator,
           groupHeadId: groupHeadId,
+          groupHead: groupHead,
         );
 
   /// Returns a shallow copy of this [Groups]
@@ -93,14 +119,19 @@ class _GroupsImpl extends Groups {
   Groups copyWith({
     Object? id = _Undefined,
     String? name,
-    int? curatorId,
-    int? groupHeadId,
+    Object? curatorId = _Undefined,
+    Object? curator = _Undefined,
+    Object? groupHeadId = _Undefined,
+    Object? groupHead = _Undefined,
   }) {
     return Groups(
       id: id is int? ? id : this.id,
       name: name ?? this.name,
-      curatorId: curatorId ?? this.curatorId,
-      groupHeadId: groupHeadId ?? this.groupHeadId,
+      curatorId: curatorId is int? ? curatorId : this.curatorId,
+      curator: curator is _i2.Teachers? ? curator : this.curator?.copyWith(),
+      groupHeadId: groupHeadId is int? ? groupHeadId : this.groupHeadId,
+      groupHead:
+          groupHead is _i3.Students? ? groupHead : this.groupHead?.copyWith(),
     );
   }
 }

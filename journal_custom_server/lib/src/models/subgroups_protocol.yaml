@@ -2,4 +2,5 @@ class: Subgroups
 table: subgroups
 fields:
   name: String
-  groupId: int, relation(parent=groups)
+  # groupId: int, relation(parent=groups)
+  groups: Groups?, relation

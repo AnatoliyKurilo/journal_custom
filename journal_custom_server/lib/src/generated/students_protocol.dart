@@ -8,28 +8,44 @@
 // ignore_for_file: type_literal_in_constant_pattern
 // ignore_for_file: use_super_parameters
 
+// ignore_for_file: unnecessary_null_comparison
+
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
+import 'person.dart' as _i2;
+import 'groups_protocol.dart' as _i3;
 
 abstract class Students
     implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
   Students._({
     this.id,
     required this.personId,
-    required this.groupId,
+    this.person,
+    required this.groupsId,
+    this.groups,
   });
 
   factory Students({
     int? id,
     required int personId,
-    required int groupId,
+    _i2.Person? person,
+    required int groupsId,
+    _i3.Groups? groups,
   }) = _StudentsImpl;
 
   factory Students.fromJson(Map<String, dynamic> jsonSerialization) {
     return Students(
       id: jsonSerialization['id'] as int?,
       personId: jsonSerialization['personId'] as int,
-      groupId: jsonSerialization['groupId'] as int,
+      person: jsonSerialization['person'] == null
+          ? null
+          : _i2.Person.fromJson(
+              (jsonSerialization['person'] as Map<String, dynamic>)),
+      groupsId: jsonSerialization['groupsId'] as int,
+      groups: jsonSerialization['groups'] == null
+          ? null
+          : _i3.Groups.fromJson(
+              (jsonSerialization['groups'] as Map<String, dynamic>)),
     );
   }
 
@@ -42,7 +58,11 @@ abstract class Students
 
   int personId;
 
-  int groupId;
+  _i2.Person? person;
+
+  int groupsId;
+
+  _i3.Groups? groups;
 
   @override
   _i1.Table<int?> get table => t;
@@ -53,14 +73,18 @@ abstract class Students
   Students copyWith({
     int? id,
     int? personId,
-    int? groupId,
+    _i2.Person? person,
+    int? groupsId,
+    _i3.Groups? groups,
   });
   @override
   Map<String, dynamic> toJson() {
     return {
       if (id != null) 'id': id,
       'personId': personId,
-      'groupId': groupId,
+      if (person != null) 'person': person?.toJson(),
+      'groupsId': groupsId,
+      if (groups != null) 'groups': groups?.toJson(),
     };
   }
 
@@ -69,12 +93,20 @@ abstract class Students
     return {
       if (id != null) 'id': id,
       'personId': personId,
-      'groupId': groupId,
+      if (person != null) 'person': person?.toJsonForProtocol(),
+      'groupsId': groupsId,
+      if (groups != null) 'groups': groups?.toJsonForProtocol(),
     };
   }
 
-  static StudentsInclude include() {
-    return StudentsInclude._();
+  static StudentsInclude include({
+    _i2.PersonInclude? person,
+    _i3.GroupsInclude? groups,
+  }) {
+    return StudentsInclude._(
+      person: person,
+      groups: groups,
+    );
   }
 
   static StudentsIncludeList includeList({
@@ -109,11 +141,15 @@ class _StudentsImpl extends Students {
   _StudentsImpl({
     int? id,
     required int personId,
-    required int groupId,
+    _i2.Person? person,
+    required int groupsId,
+    _i3.Groups? groups,
   }) : super._(
           id: id,
           personId: personId,
-          groupId: groupId,
+          person: person,
+          groupsId: groupsId,
+          groups: groups,
         );
 
   /// Returns a shallow copy of this [Students]
@@ -123,12 +159,16 @@ class _StudentsImpl extends Students {
   Students copyWith({
     Object? id = _Undefined,
     int? personId,
-    int? groupId,
+    Object? person = _Undefined,
+    int? groupsId,
+    Object? groups = _Undefined,
   }) {
     return Students(
       id: id is int? ? id : this.id,
       personId: personId ?? this.personId,
-      groupId: groupId ?? this.groupId,
+      person: person is _i2.Person? ? person : this.person?.copyWith(),
+      groupsId: groupsId ?? this.groupsId,
+      groups: groups is _i3.Groups? ? groups : this.groups?.copyWith(),
     );
   }
 }
@@ -139,29 +179,83 @@ class StudentsTable extends _i1.Table<int?> {
       'personId',
       this,
     );
-    groupId = _i1.ColumnInt(
-      'groupId',
+    groupsId = _i1.ColumnInt(
+      'groupsId',
       this,
     );
   }
 
   late final _i1.ColumnInt personId;
 
-  late final _i1.ColumnInt groupId;
+  _i2.PersonTable? _person;
+
+  late final _i1.ColumnInt groupsId;
+
+  _i3.GroupsTable? _groups;
+
+  _i2.PersonTable get person {
+    if (_person != null) return _person!;
+    _person = _i1.createRelationTable(
+      relationFieldName: 'person',
+      field: Students.t.personId,
+      foreignField: _i2.Person.t.id,
+      tableRelation: tableRelation,
+      createTable: (foreignTableRelation) =>
+          _i2.PersonTable(tableRelation: foreignTableRelation),
+    );
+    return _person!;
+  }
+
+  _i3.GroupsTable get groups {
+    if (_groups != null) return _groups!;
+    _groups = _i1.createRelationTable(
+      relationFieldName: 'groups',
+      field: Students.t.groupsId,
+      foreignField: _i3.Groups.t.id,
+      tableRelation: tableRelation,
+      createTable: (foreignTableRelation) =>
+          _i3.GroupsTable(tableRelation: foreignTableRelation),
+    );
+    return _groups!;
+  }
 
   @override
   List<_i1.Column> get columns => [
         id,
         personId,
-        groupId,
+        groupsId,
       ];
+
+  @override
+  _i1.Table? getRelationTable(String relationField) {
+    if (relationField == 'person') {
+      return person;
+    }
+    if (relationField == 'groups') {
+      return groups;
+    }
+    return null;
+  }
 }
 
 class StudentsInclude extends _i1.IncludeObject {
-  StudentsInclude._();
+  StudentsInclude._({
+    _i2.PersonInclude? person,
+    _i3.GroupsInclude? groups,
+  }) {
+    _person = person;
+    _groups = groups;
+  }
+
+  _i2.PersonInclude? _person;
+
+  _i3.GroupsInclude? _groups;
 
   @override
-  Map<String, _i1.Include?> get includes => {};
+  Map<String, _i1.Include?> get includes => {
+        'person': _person,
+        'groups': _groups,
+      };
 
   @override
   _i1.Table<int?> get table => Students.t;
@@ -189,6 +283,8 @@ class StudentsIncludeList extends _i1.IncludeList {
 
 class StudentsRepository {
   const StudentsRepository._();
+
+  final attachRow = const StudentsAttachRowRepository._();
 
   /// Returns a list of [Students]s matching the given query parameters.
   ///
@@ -221,6 +317,7 @@ class StudentsRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<StudentsTable>? orderByList,
     _i1.Transaction? transaction,
+    StudentsInclude? include,
   }) async {
     return session.db.find<Students>(
       where: where?.call(Students.t),
@@ -230,6 +327,7 @@ class StudentsRepository {
       limit: limit,
       offset: offset,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -258,6 +356,7 @@ class StudentsRepository {
     bool orderDescending = false,
     _i1.OrderByListBuilder<StudentsTable>? orderByList,
     _i1.Transaction? transaction,
+    StudentsInclude? include,
   }) async {
     return session.db.findFirstRow<Students>(
       where: where?.call(Students.t),
@@ -266,6 +365,7 @@ class StudentsRepository {
       orderDescending: orderDescending,
       offset: offset,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -274,10 +374,12 @@ class StudentsRepository {
     _i1.Session session,
     int id, {
     _i1.Transaction? transaction,
+    StudentsInclude? include,
   }) async {
     return session.db.findById<Students>(
       id,
       transaction: transaction,
+      include: include,
     );
   }
 
@@ -395,6 +497,56 @@ class StudentsRepository {
     return session.db.count<Students>(
       where: where?.call(Students.t),
       limit: limit,
+      transaction: transaction,
+    );
+  }
+}
+
+class StudentsAttachRowRepository {
+  const StudentsAttachRowRepository._();
+
+  /// Creates a relation between the given [Students] and [Person]
+  /// by setting the [Students]'s foreign key `personId` to refer to the [Person].
+  Future<void> person(
+    _i1.Session session,
+    Students students,
+    _i2.Person person, {
+    _i1.Transaction? transaction,
+  }) async {
+    if (students.id == null) {
+      throw ArgumentError.notNull('students.id');
+    }
+    if (person.id == null) {
+      throw ArgumentError.notNull('person.id');
+    }
+
+    var $students = students.copyWith(personId: person.id);
+    await session.db.updateRow<Students>(
+      $students,
+      columns: [Students.t.personId],
+      transaction: transaction,
+    );
+  }
+
+  /// Creates a relation between the given [Students] and [Groups]
+  /// by setting the [Students]'s foreign key `groupsId` to refer to the [Groups].
+  Future<void> groups(
+    _i1.Session session,
+    Students students,
+    _i3.Groups groups, {
+    _i1.Transaction? transaction,
+  }) async {
+    if (students.id == null) {
+      throw ArgumentError.notNull('students.id');
+    }
+    if (groups.id == null) {
+      throw ArgumentError.notNull('groups.id');
+    }
+
+    var $students = students.copyWith(groupsId: groups.id);
+    await session.db.updateRow<Students>(
+      $students,
+      columns: [Students.t.groupsId],
       transaction: transaction,
     );
   }
