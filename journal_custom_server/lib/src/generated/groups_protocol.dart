@@ -13,7 +13,6 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
 import 'teachers_protocol.dart' as _i2;
-import 'students_protocol.dart' as _i3;
 
 abstract class Groups implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
   Groups._({
@@ -21,21 +20,17 @@ abstract class Groups implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     required this.name,
     this.curatorId,
     this.curator,
-    this.groupHeadId,
-    this.groupHead,
-  });
+  }) : _teachersGroupsTeachersId = null;
 
   factory Groups({
     int? id,
     required String name,
     int? curatorId,
     _i2.Teachers? curator,
-    int? groupHeadId,
-    _i3.Students? groupHead,
   }) = _GroupsImpl;
 
   factory Groups.fromJson(Map<String, dynamic> jsonSerialization) {
-    return Groups(
+    return GroupsImplicit._(
       id: jsonSerialization['id'] as int?,
       name: jsonSerialization['name'] as String,
       curatorId: jsonSerialization['curatorId'] as int?,
@@ -43,11 +38,8 @@ abstract class Groups implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
           ? null
           : _i2.Teachers.fromJson(
               (jsonSerialization['curator'] as Map<String, dynamic>)),
-      groupHeadId: jsonSerialization['groupHeadId'] as int?,
-      groupHead: jsonSerialization['groupHead'] == null
-          ? null
-          : _i3.Students.fromJson(
-              (jsonSerialization['groupHead'] as Map<String, dynamic>)),
+      $_teachersGroupsTeachersId:
+          jsonSerialization['_teachersGroupsTeachersId'] as int?,
     );
   }
 
@@ -64,9 +56,7 @@ abstract class Groups implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
 
   _i2.Teachers? curator;
 
-  int? groupHeadId;
-
-  _i3.Students? groupHead;
+  final int? _teachersGroupsTeachersId;
 
   @override
   _i1.Table<int?> get table => t;
@@ -79,8 +69,6 @@ abstract class Groups implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
     String? name,
     int? curatorId,
     _i2.Teachers? curator,
-    int? groupHeadId,
-    _i3.Students? groupHead,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -89,8 +77,8 @@ abstract class Groups implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
       'name': name,
       if (curatorId != null) 'curatorId': curatorId,
       if (curator != null) 'curator': curator?.toJson(),
-      if (groupHeadId != null) 'groupHeadId': groupHeadId,
-      if (groupHead != null) 'groupHead': groupHead?.toJson(),
+      if (_teachersGroupsTeachersId != null)
+        '_teachersGroupsTeachersId': _teachersGroupsTeachersId,
     };
   }
 
@@ -101,19 +89,11 @@ abstract class Groups implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
       'name': name,
       if (curatorId != null) 'curatorId': curatorId,
       if (curator != null) 'curator': curator?.toJsonForProtocol(),
-      if (groupHeadId != null) 'groupHeadId': groupHeadId,
-      if (groupHead != null) 'groupHead': groupHead?.toJsonForProtocol(),
     };
   }
 
-  static GroupsInclude include({
-    _i2.TeachersInclude? curator,
-    _i3.StudentsInclude? groupHead,
-  }) {
-    return GroupsInclude._(
-      curator: curator,
-      groupHead: groupHead,
-    );
+  static GroupsInclude include({_i2.TeachersInclude? curator}) {
+    return GroupsInclude._(curator: curator);
   }
 
   static GroupsIncludeList includeList({
@@ -150,15 +130,11 @@ class _GroupsImpl extends Groups {
     required String name,
     int? curatorId,
     _i2.Teachers? curator,
-    int? groupHeadId,
-    _i3.Students? groupHead,
   }) : super._(
           id: id,
           name: name,
           curatorId: curatorId,
           curator: curator,
-          groupHeadId: groupHeadId,
-          groupHead: groupHead,
         );
 
   /// Returns a shallow copy of this [Groups]
@@ -170,19 +146,47 @@ class _GroupsImpl extends Groups {
     String? name,
     Object? curatorId = _Undefined,
     Object? curator = _Undefined,
-    Object? groupHeadId = _Undefined,
-    Object? groupHead = _Undefined,
   }) {
-    return Groups(
+    return GroupsImplicit._(
       id: id is int? ? id : this.id,
       name: name ?? this.name,
       curatorId: curatorId is int? ? curatorId : this.curatorId,
       curator: curator is _i2.Teachers? ? curator : this.curator?.copyWith(),
-      groupHeadId: groupHeadId is int? ? groupHeadId : this.groupHeadId,
-      groupHead:
-          groupHead is _i3.Students? ? groupHead : this.groupHead?.copyWith(),
+      $_teachersGroupsTeachersId: this._teachersGroupsTeachersId,
     );
   }
+}
+
+class GroupsImplicit extends _GroupsImpl {
+  GroupsImplicit._({
+    int? id,
+    required String name,
+    int? curatorId,
+    _i2.Teachers? curator,
+    int? $_teachersGroupsTeachersId,
+  })  : _teachersGroupsTeachersId = $_teachersGroupsTeachersId,
+        super(
+          id: id,
+          name: name,
+          curatorId: curatorId,
+          curator: curator,
+        );
+
+  factory GroupsImplicit(
+    Groups groups, {
+    int? $_teachersGroupsTeachersId,
+  }) {
+    return GroupsImplicit._(
+      id: groups.id,
+      name: groups.name,
+      curatorId: groups.curatorId,
+      curator: groups.curator,
+      $_teachersGroupsTeachersId: $_teachersGroupsTeachersId,
+    );
+  }
+
+  @override
+  final int? _teachersGroupsTeachersId;
 }
 
 class GroupsTable extends _i1.Table<int?> {
@@ -195,8 +199,8 @@ class GroupsTable extends _i1.Table<int?> {
       'curatorId',
       this,
     );
-    groupHeadId = _i1.ColumnInt(
-      'groupHeadId',
+    $_teachersGroupsTeachersId = _i1.ColumnInt(
+      '_teachersGroupsTeachersId',
       this,
     );
   }
@@ -207,9 +211,7 @@ class GroupsTable extends _i1.Table<int?> {
 
   _i2.TeachersTable? _curator;
 
-  late final _i1.ColumnInt groupHeadId;
-
-  _i3.StudentsTable? _groupHead;
+  late final _i1.ColumnInt $_teachersGroupsTeachersId;
 
   _i2.TeachersTable get curator {
     if (_curator != null) return _curator!;
@@ -224,25 +226,19 @@ class GroupsTable extends _i1.Table<int?> {
     return _curator!;
   }
 
-  _i3.StudentsTable get groupHead {
-    if (_groupHead != null) return _groupHead!;
-    _groupHead = _i1.createRelationTable(
-      relationFieldName: 'groupHead',
-      field: Groups.t.groupHeadId,
-      foreignField: _i3.Students.t.id,
-      tableRelation: tableRelation,
-      createTable: (foreignTableRelation) =>
-          _i3.StudentsTable(tableRelation: foreignTableRelation),
-    );
-    return _groupHead!;
-  }
-
   @override
   List<_i1.Column> get columns => [
         id,
         name,
         curatorId,
-        groupHeadId,
+        $_teachersGroupsTeachersId,
+      ];
+
+  @override
+  List<_i1.Column> get managedColumns => [
+        id,
+        name,
+        curatorId,
       ];
 
   @override
@@ -250,31 +246,19 @@ class GroupsTable extends _i1.Table<int?> {
     if (relationField == 'curator') {
       return curator;
     }
-    if (relationField == 'groupHead') {
-      return groupHead;
-    }
     return null;
   }
 }
 
 class GroupsInclude extends _i1.IncludeObject {
-  GroupsInclude._({
-    _i2.TeachersInclude? curator,
-    _i3.StudentsInclude? groupHead,
-  }) {
+  GroupsInclude._({_i2.TeachersInclude? curator}) {
     _curator = curator;
-    _groupHead = groupHead;
   }
 
   _i2.TeachersInclude? _curator;
 
-  _i3.StudentsInclude? _groupHead;
-
   @override
-  Map<String, _i1.Include?> get includes => {
-        'curator': _curator,
-        'groupHead': _groupHead,
-      };
+  Map<String, _i1.Include?> get includes => {'curator': _curator};
 
   @override
   _i1.Table<int?> get table => Groups.t;
@@ -548,29 +532,6 @@ class GroupsAttachRowRepository {
       transaction: transaction,
     );
   }
-
-  /// Creates a relation between the given [Groups] and [Students]
-  /// by setting the [Groups]'s foreign key `groupHeadId` to refer to the [Students].
-  Future<void> groupHead(
-    _i1.Session session,
-    Groups groups,
-    _i3.Students groupHead, {
-    _i1.Transaction? transaction,
-  }) async {
-    if (groups.id == null) {
-      throw ArgumentError.notNull('groups.id');
-    }
-    if (groupHead.id == null) {
-      throw ArgumentError.notNull('groupHead.id');
-    }
-
-    var $groups = groups.copyWith(groupHeadId: groupHead.id);
-    await session.db.updateRow<Groups>(
-      $groups,
-      columns: [Groups.t.groupHeadId],
-      transaction: transaction,
-    );
-  }
 }
 
 class GroupsDetachRowRepository {
@@ -594,28 +555,6 @@ class GroupsDetachRowRepository {
     await session.db.updateRow<Groups>(
       $groups,
       columns: [Groups.t.curatorId],
-      transaction: transaction,
-    );
-  }
-
-  /// Detaches the relation between this [Groups] and the [Students] set in `groupHead`
-  /// by setting the [Groups]'s foreign key `groupHeadId` to `null`.
-  ///
-  /// This removes the association between the two models without deleting
-  /// the related record.
-  Future<void> groupHead(
-    _i1.Session session,
-    Groups groups, {
-    _i1.Transaction? transaction,
-  }) async {
-    if (groups.id == null) {
-      throw ArgumentError.notNull('groups.id');
-    }
-
-    var $groups = groups.copyWith(groupHeadId: null);
-    await session.db.updateRow<Groups>(
-      $groups,
-      columns: [Groups.t.groupHeadId],
       transaction: transaction,
     );
   }

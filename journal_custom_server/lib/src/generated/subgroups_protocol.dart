@@ -21,6 +21,7 @@ abstract class Subgroups
     required this.name,
     required this.groupsId,
     this.groups,
+    this.description,
   });
 
   factory Subgroups({
@@ -28,6 +29,7 @@ abstract class Subgroups
     required String name,
     required int groupsId,
     _i2.Groups? groups,
+    String? description,
   }) = _SubgroupsImpl;
 
   factory Subgroups.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -39,6 +41,7 @@ abstract class Subgroups
           ? null
           : _i2.Groups.fromJson(
               (jsonSerialization['groups'] as Map<String, dynamic>)),
+      description: jsonSerialization['description'] as String?,
     );
   }
 
@@ -55,6 +58,8 @@ abstract class Subgroups
 
   _i2.Groups? groups;
 
+  String? description;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -66,6 +71,7 @@ abstract class Subgroups
     String? name,
     int? groupsId,
     _i2.Groups? groups,
+    String? description,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -74,6 +80,7 @@ abstract class Subgroups
       'name': name,
       'groupsId': groupsId,
       if (groups != null) 'groups': groups?.toJson(),
+      if (description != null) 'description': description,
     };
   }
 
@@ -84,6 +91,7 @@ abstract class Subgroups
       'name': name,
       'groupsId': groupsId,
       if (groups != null) 'groups': groups?.toJsonForProtocol(),
+      if (description != null) 'description': description,
     };
   }
 
@@ -125,11 +133,13 @@ class _SubgroupsImpl extends Subgroups {
     required String name,
     required int groupsId,
     _i2.Groups? groups,
+    String? description,
   }) : super._(
           id: id,
           name: name,
           groupsId: groupsId,
           groups: groups,
+          description: description,
         );
 
   /// Returns a shallow copy of this [Subgroups]
@@ -141,12 +151,14 @@ class _SubgroupsImpl extends Subgroups {
     String? name,
     int? groupsId,
     Object? groups = _Undefined,
+    Object? description = _Undefined,
   }) {
     return Subgroups(
       id: id is int? ? id : this.id,
       name: name ?? this.name,
       groupsId: groupsId ?? this.groupsId,
       groups: groups is _i2.Groups? ? groups : this.groups?.copyWith(),
+      description: description is String? ? description : this.description,
     );
   }
 }
@@ -161,6 +173,10 @@ class SubgroupsTable extends _i1.Table<int?> {
       'groupsId',
       this,
     );
+    description = _i1.ColumnString(
+      'description',
+      this,
+    );
   }
 
   late final _i1.ColumnString name;
@@ -168,6 +184,8 @@ class SubgroupsTable extends _i1.Table<int?> {
   late final _i1.ColumnInt groupsId;
 
   _i2.GroupsTable? _groups;
+
+  late final _i1.ColumnString description;
 
   _i2.GroupsTable get groups {
     if (_groups != null) return _groups!;
@@ -187,6 +205,7 @@ class SubgroupsTable extends _i1.Table<int?> {
         id,
         name,
         groupsId,
+        description,
       ];
 
   @override

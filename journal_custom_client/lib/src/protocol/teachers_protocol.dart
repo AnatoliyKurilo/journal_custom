@@ -11,18 +11,21 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
 import 'person.dart' as _i2;
+import 'groups_protocol.dart' as _i3;
 
 abstract class Teachers implements _i1.SerializableModel {
   Teachers._({
     this.id,
     required this.personId,
     this.person,
+    this.groups,
   });
 
   factory Teachers({
     int? id,
     required int personId,
     _i2.Person? person,
+    List<_i3.Groups>? groups,
   }) = _TeachersImpl;
 
   factory Teachers.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -33,6 +36,9 @@ abstract class Teachers implements _i1.SerializableModel {
           ? null
           : _i2.Person.fromJson(
               (jsonSerialization['person'] as Map<String, dynamic>)),
+      groups: (jsonSerialization['groups'] as List?)
+          ?.map((e) => _i3.Groups.fromJson((e as Map<String, dynamic>)))
+          .toList(),
     );
   }
 
@@ -45,6 +51,8 @@ abstract class Teachers implements _i1.SerializableModel {
 
   _i2.Person? person;
 
+  List<_i3.Groups>? groups;
+
   /// Returns a shallow copy of this [Teachers]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -52,6 +60,7 @@ abstract class Teachers implements _i1.SerializableModel {
     int? id,
     int? personId,
     _i2.Person? person,
+    List<_i3.Groups>? groups,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -59,6 +68,8 @@ abstract class Teachers implements _i1.SerializableModel {
       if (id != null) 'id': id,
       'personId': personId,
       if (person != null) 'person': person?.toJson(),
+      if (groups != null)
+        'groups': groups?.toJson(valueToJson: (v) => v.toJson()),
     };
   }
 
@@ -75,10 +86,12 @@ class _TeachersImpl extends Teachers {
     int? id,
     required int personId,
     _i2.Person? person,
+    List<_i3.Groups>? groups,
   }) : super._(
           id: id,
           personId: personId,
           person: person,
+          groups: groups,
         );
 
   /// Returns a shallow copy of this [Teachers]
@@ -89,11 +102,15 @@ class _TeachersImpl extends Teachers {
     Object? id = _Undefined,
     int? personId,
     Object? person = _Undefined,
+    Object? groups = _Undefined,
   }) {
     return Teachers(
       id: id is int? ? id : this.id,
       personId: personId ?? this.personId,
       person: person is _i2.Person? ? person : this.person?.copyWith(),
+      groups: groups is List<_i3.Groups>?
+          ? groups
+          : this.groups?.map((e0) => e0.copyWith()).toList(),
     );
   }
 }

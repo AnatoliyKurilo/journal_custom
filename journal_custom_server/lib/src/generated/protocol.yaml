@@ -1,6 +1,7 @@
 admin:
   - createGroup:
   - getAllGroups:
+  - getGroupByName:
   - updateGroup:
   - createTeacher:
   - createStudent:
@@ -11,6 +12,18 @@ admin:
   - searchTeachers:
   - searchGroups:
   - updateStudent:
+  - deleteGroup:
+subgroups:
+  - getCurrentUserGroup:
+  - createSubgroup:
+  - createFullGroupSubgroup:
+  - getGroupSubgroups:
+  - updateSubgroup:
+  - deleteSubgroup:
+  - getSubgroupStudents:
+  - getStudentsNotInSubgroup:
+  - addStudentToSubgroup:
+  - removeStudentFromSubgroup:
 makeUserAdmin:
   - setUserScopes:
 userRoles:

@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:journal_custom_flutter/src/admin/teacher_tab.dart';
 import 'package:journal_custom_flutter/src/serverpod_client.dart';
 import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
+import 'package:journal_custom_flutter/src/group_head/group_head_page.dart'; // Добавляем импорт страницы старосты
+import 'package:journal_custom_flutter/src/account_page.dart'; // Добавляем импорт страницы аккаунта
 
 import 'groups_tab.dart';
 import 'students_tab.dart'; // Импортируем новую вкладку
@@ -26,7 +28,12 @@ class _AdminPanelState extends State<AdminPanel> {
   Widget build(BuildContext context) {
     // Проверка роли администратора
     final isAdmin = sessionManager.signedInUser?.scopeNames.contains('serverpod.admin') ?? false;
+    // Проверка роли старосты
+    final isGroupHead = sessionManager.signedInUser?.scopeNames.contains('groupHead') ?? false;
+    // Проверка роли куратора
+    final isCurator = sessionManager.signedInUser?.scopeNames.contains('curator') ?? false;
     
+    // Проверяем, имеет ли пользователь права на доступ к админ-панели
     if (!isAdmin) {
       return Scaffold(
         appBar: AppBar(title: const Text('Доступ запрещен')),
@@ -41,6 +48,29 @@ class _AdminPanelState extends State<AdminPanel> {
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Панель администратора'),
+          actions: [
+            // Кнопка перехода на страницу аккаунта
+            // IconButton(
+            //   icon: const Icon(Icons.account_circle),
+            //   tooltip: 'Профиль',
+            //   onPressed: () {
+            //     Navigator.of(context).push(
+            //       MaterialPageRoute(builder: (context) => const AccountPage()),
+            //     );
+            //   },
+            // ),
+            // Кнопка перехода на страницу старосты (только для админов, кураторов и старост)
+            if (isAdmin || isGroupHead || isCurator)
+              IconButton(
+                icon: const Icon(Icons.group),
+                tooltip: 'Управление подгруппами',
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const GroupHeadPage()),
+                  );
+                },
+              ),
+          ],
           bottom: TabBar(tabs: _tabs),
         ),
         body: TabBarView(

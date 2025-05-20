@@ -18,6 +18,7 @@ abstract class Subgroups implements _i1.SerializableModel {
     required this.name,
     required this.groupsId,
     this.groups,
+    this.description,
   });
 
   factory Subgroups({
@@ -25,6 +26,7 @@ abstract class Subgroups implements _i1.SerializableModel {
     required String name,
     required int groupsId,
     _i2.Groups? groups,
+    String? description,
   }) = _SubgroupsImpl;
 
   factory Subgroups.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -36,6 +38,7 @@ abstract class Subgroups implements _i1.SerializableModel {
           ? null
           : _i2.Groups.fromJson(
               (jsonSerialization['groups'] as Map<String, dynamic>)),
+      description: jsonSerialization['description'] as String?,
     );
   }
 
@@ -50,6 +53,8 @@ abstract class Subgroups implements _i1.SerializableModel {
 
   _i2.Groups? groups;
 
+  String? description;
+
   /// Returns a shallow copy of this [Subgroups]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -58,6 +63,7 @@ abstract class Subgroups implements _i1.SerializableModel {
     String? name,
     int? groupsId,
     _i2.Groups? groups,
+    String? description,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -66,6 +72,7 @@ abstract class Subgroups implements _i1.SerializableModel {
       'name': name,
       'groupsId': groupsId,
       if (groups != null) 'groups': groups?.toJson(),
+      if (description != null) 'description': description,
     };
   }
 
@@ -83,11 +90,13 @@ class _SubgroupsImpl extends Subgroups {
     required String name,
     required int groupsId,
     _i2.Groups? groups,
+    String? description,
   }) : super._(
           id: id,
           name: name,
           groupsId: groupsId,
           groups: groups,
+          description: description,
         );
 
   /// Returns a shallow copy of this [Subgroups]
@@ -99,12 +108,14 @@ class _SubgroupsImpl extends Subgroups {
     String? name,
     int? groupsId,
     Object? groups = _Undefined,
+    Object? description = _Undefined,
   }) {
     return Subgroups(
       id: id is int? ? id : this.id,
       name: name ?? this.name,
       groupsId: groupsId ?? this.groupsId,
       groups: groups is _i2.Groups? ? groups : this.groups?.copyWith(),
+      description: description is String? ? description : this.description,
     );
   }
 }

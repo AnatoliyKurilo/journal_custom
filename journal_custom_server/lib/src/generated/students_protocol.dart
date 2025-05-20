@@ -23,7 +23,8 @@ abstract class Students
     this.person,
     required this.groupsId,
     this.groups,
-  });
+    bool? isGroupHead,
+  }) : isGroupHead = isGroupHead ?? false;
 
   factory Students({
     int? id,
@@ -31,6 +32,7 @@ abstract class Students
     _i2.Person? person,
     required int groupsId,
     _i3.Groups? groups,
+    bool? isGroupHead,
   }) = _StudentsImpl;
 
   factory Students.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -46,6 +48,7 @@ abstract class Students
           ? null
           : _i3.Groups.fromJson(
               (jsonSerialization['groups'] as Map<String, dynamic>)),
+      isGroupHead: jsonSerialization['isGroupHead'] as bool?,
     );
   }
 
@@ -64,6 +67,8 @@ abstract class Students
 
   _i3.Groups? groups;
 
+  bool? isGroupHead;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -76,6 +81,7 @@ abstract class Students
     _i2.Person? person,
     int? groupsId,
     _i3.Groups? groups,
+    bool? isGroupHead,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -85,6 +91,7 @@ abstract class Students
       if (person != null) 'person': person?.toJson(),
       'groupsId': groupsId,
       if (groups != null) 'groups': groups?.toJson(),
+      if (isGroupHead != null) 'isGroupHead': isGroupHead,
     };
   }
 
@@ -96,6 +103,7 @@ abstract class Students
       if (person != null) 'person': person?.toJsonForProtocol(),
       'groupsId': groupsId,
       if (groups != null) 'groups': groups?.toJsonForProtocol(),
+      if (isGroupHead != null) 'isGroupHead': isGroupHead,
     };
   }
 
@@ -144,12 +152,14 @@ class _StudentsImpl extends Students {
     _i2.Person? person,
     required int groupsId,
     _i3.Groups? groups,
+    bool? isGroupHead,
   }) : super._(
           id: id,
           personId: personId,
           person: person,
           groupsId: groupsId,
           groups: groups,
+          isGroupHead: isGroupHead,
         );
 
   /// Returns a shallow copy of this [Students]
@@ -162,6 +172,7 @@ class _StudentsImpl extends Students {
     Object? person = _Undefined,
     int? groupsId,
     Object? groups = _Undefined,
+    Object? isGroupHead = _Undefined,
   }) {
     return Students(
       id: id is int? ? id : this.id,
@@ -169,6 +180,7 @@ class _StudentsImpl extends Students {
       person: person is _i2.Person? ? person : this.person?.copyWith(),
       groupsId: groupsId ?? this.groupsId,
       groups: groups is _i3.Groups? ? groups : this.groups?.copyWith(),
+      isGroupHead: isGroupHead is bool? ? isGroupHead : this.isGroupHead,
     );
   }
 }
@@ -183,6 +195,11 @@ class StudentsTable extends _i1.Table<int?> {
       'groupsId',
       this,
     );
+    isGroupHead = _i1.ColumnBool(
+      'isGroupHead',
+      this,
+      hasDefault: true,
+    );
   }
 
   late final _i1.ColumnInt personId;
@@ -192,6 +209,8 @@ class StudentsTable extends _i1.Table<int?> {
   late final _i1.ColumnInt groupsId;
 
   _i3.GroupsTable? _groups;
+
+  late final _i1.ColumnBool isGroupHead;
 
   _i2.PersonTable get person {
     if (_person != null) return _person!;
@@ -224,6 +243,7 @@ class StudentsTable extends _i1.Table<int?> {
         id,
         personId,
         groupsId,
+        isGroupHead,
       ];
 
   @override

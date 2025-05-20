@@ -1,0 +1,130 @@
+{
+  "actions": [
+    {
+      "type": "alterTable",
+      "alterTable": {
+        "name": "person",
+        "schema": "public",
+        "addColumns": [],
+        "deleteColumns": [
+          "studentId",
+          "teacherId"
+        ],
+        "modifyColumns": [],
+        "addIndexes": [],
+        "deleteIndexes": [],
+        "addForeignKeys": [],
+        "deleteForeignKeys": [
+          "person_fk_1",
+          "person_fk_2"
+        ],
+        "warnings": [
+          {
+            "type": "columnDropped",
+            "message": "Column \"studentId\" of table \"person\" will be dropped.",
+            "table": "person",
+            "columns": [
+              "studentId"
+            ],
+            "destrucive": true
+          },
+          {
+            "type": "columnDropped",
+            "message": "Column \"teacherId\" of table \"person\" will be dropped.",
+            "table": "person",
+            "columns": [
+              "teacherId"
+            ],
+            "destrucive": true
+          },
+          {
+            "type": "columnDropped",
+            "message": "Column \"_groupsStudentsGroupsId\" of table \"students\" will be dropped.",
+            "table": "students",
+            "columns": [
+              "_groupsStudentsGroupsId"
+            ],
+            "destrucive": true
+          }
+        ]
+      }
+    },
+    {
+      "type": "alterTable",
+      "alterTable": {
+        "name": "students",
+        "schema": "public",
+        "addColumns": [],
+        "deleteColumns": [
+          "_groupsStudentsGroupsId"
+        ],
+        "modifyColumns": [],
+        "addIndexes": [],
+        "deleteIndexes": [],
+        "addForeignKeys": [],
+        "deleteForeignKeys": [
+          "students_fk_2"
+        ],
+        "warnings": [
+          {
+            "type": "columnDropped",
+            "message": "Column \"studentId\" of table \"person\" will be dropped.",
+            "table": "person",
+            "columns": [
+              "studentId"
+            ],
+            "destrucive": true
+          },
+          {
+            "type": "columnDropped",
+            "message": "Column \"teacherId\" of table \"person\" will be dropped.",
+            "table": "person",
+            "columns": [
+              "teacherId"
+            ],
+            "destrucive": true
+          },
+          {
+            "type": "columnDropped",
+            "message": "Column \"_groupsStudentsGroupsId\" of table \"students\" will be dropped.",
+            "table": "students",
+            "columns": [
+              "_groupsStudentsGroupsId"
+            ],
+            "destrucive": true
+          }
+        ]
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "type": "columnDropped",
+      "message": "Column \"studentId\" of table \"person\" will be dropped.",
+      "table": "person",
+      "columns": [
+        "studentId"
+      ],
+      "destrucive": true
+    },
+    {
+      "type": "columnDropped",
+      "message": "Column \"teacherId\" of table \"person\" will be dropped.",
+      "table": "person",
+      "columns": [
+        "teacherId"
+      ],
+      "destrucive": true
+    },
+    {
+      "type": "columnDropped",
+      "message": "Column \"_groupsStudentsGroupsId\" of table \"students\" will be dropped.",
+      "table": "students",
+      "columns": [
+        "_groupsStudentsGroupsId"
+      ],
+      "destrucive": true
+    }
+  ],
+  "migrationApiVersion": 1
+}

@@ -195,129 +195,165 @@ class _StudentsTabState extends State<StudentsTab> {
     String email = student.person?.email ?? '';
     String? phoneNumber = student.person?.phoneNumber;
     String groupName = student.groups?.name ?? '';
+    Groups? selectedGroup;
+
+    // Загрузка всех групп для выбора
+    List<Groups> availableGroups = [];
+    try {
+      availableGroups = await client.admin.getAllGroups();
+    } catch (e) {
+      print('Ошибка при загрузке списка групп: $e');
+    }
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return AlertDialog(
-          title: const Text('Редактировать студента'),
-          content: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  initialValue: firstName,
-                  decoration: const InputDecoration(labelText: 'Имя'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Введите имя';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    firstName = value!;
-                  },
+        return StatefulBuilder(
+          builder: (context, setState) {
+            return AlertDialog(
+              title: const Text('Редактировать студента'),
+              content: SingleChildScrollView(
+                child: Form(
+                  key: formKey,
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      TextFormField(
+                        initialValue: firstName,
+                        decoration: const InputDecoration(labelText: 'Имя'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Введите имя';
+                          }
+                          return null;
+                        },
+                        onSaved: (value) {
+                          firstName = value!;
+                        },
+                      ),
+                      TextFormField(
+                        initialValue: lastName,
+                        decoration: const InputDecoration(labelText: 'Фамилия'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Введите фамилию';
+                          }
+                          return null;
+                        },
+                        onSaved: (value) {
+                          lastName = value!;
+                        },
+                      ),
+                      TextFormField(
+                        initialValue: patronymic,
+                        decoration: const InputDecoration(labelText: 'Отчество (необязательно)'),
+                        onSaved: (value) {
+                          patronymic = value;
+                        },
+                      ),
+                      TextFormField(
+                        initialValue: email,
+                        decoration: const InputDecoration(labelText: 'Email'),
+                        validator: (value) {
+                          if (value == null || value.isEmpty) {
+                            return 'Введите email';
+                          }
+                          if (!value.contains('@')) {
+                            return 'Введите корректный email';
+                          }
+                          return null;
+                        },
+                        onSaved: (value) {
+                          email = value!;
+                        },
+                      ),
+                      TextFormField(
+                        initialValue: phoneNumber,
+                        decoration: const InputDecoration(labelText: 'Телефон (необязательно)'),
+                        onSaved: (value) {
+                          phoneNumber = value;
+                        },
+                      ),
+                      const SizedBox(height: 16),
+                      // Выпадающий список для выбора группы
+                      DropdownButtonFormField<Groups>(
+                        value: availableGroups.isNotEmpty 
+                            ? availableGroups.firstWhere(
+                                (g) => g.id == student.groupsId,
+                                orElse: () => availableGroups[0],
+                              )
+                            : null, // null только если список пуст
+                        decoration: const InputDecoration(labelText: 'Группа'),
+                        items: availableGroups.map((group) {
+                          return DropdownMenuItem<Groups>(
+                            value: group,
+                            child: Text(group.name),
+                          );
+                        }).toList(),
+                        onChanged: (value) {
+                          setState(() {
+                            selectedGroup = value;
+                          });
+                        },
+                        validator: (value) {
+                          if (value == null) return 'Выберите группу';
+                          return null;
+                        },
+                      ),
+                    ],
+                  ),
                 ),
-                TextFormField(
-                  initialValue: lastName,
-                  decoration: const InputDecoration(labelText: 'Фамилия'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Введите фамилию';
-                    }
-                    return null;
+              ),
+              actions: [
+                TextButton(
+                  onPressed: () {
+                    Navigator.of(context).pop();
                   },
-                  onSaved: (value) {
-                    lastName = value!;
-                  },
+                  child: const Text('Отмена'),
                 ),
-                TextFormField(
-                  initialValue: patronymic,
-                  decoration: const InputDecoration(labelText: 'Отчество (необязательно)'),
-                  onSaved: (value) {
-                    patronymic = value;
-                  },
-                ),
-                TextFormField(
-                  initialValue: email,
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Введите email';
+                ElevatedButton(
+                  onPressed: () async {
+                    if (formKey.currentState!.validate()) {
+                      formKey.currentState!.save();
+
+                      try {
+                        // Обновляем данные person
+                        var updatedPerson = student.person!.copyWith(
+                          firstName: firstName,
+                          lastName: lastName,
+                          patronymic: patronymic,
+                          email: email,
+                          phoneNumber: phoneNumber,
+                        );
+                        
+                        // Сначала обновляем запись Person
+                        await client.admin.updatePerson(updatedPerson);
+                        
+                        // Затем обновляем запись Student с новой группой, если она изменилась
+                        if (selectedGroup != null && selectedGroup!.id != student.groupsId) {
+                          var updatedStudent = student.copyWith(
+                            groupsId: selectedGroup!.id!,
+                          );
+                          await client.admin.updateStudent(updatedStudent);
+                        }
+                        
+                        Navigator.of(context).pop();
+                        _loadAllStudents(); // Обновляем список студентов
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          const SnackBar(content: Text('Данные студента успешно обновлены')),
+                        );
+                      } catch (e) {
+                        ScaffoldMessenger.of(context).showSnackBar(
+                          SnackBar(content: Text('Ошибка: $e')),
+                        );
+                      }
                     }
-                    if (!value.contains('@')) {
-                      return 'Введите корректный email';
-                    }
-                    return null;
                   },
-                  onSaved: (value) {
-                    email = value!;
-                  },
-                ),
-                TextFormField(
-                  initialValue: phoneNumber,
-                  decoration: const InputDecoration(labelText: 'Телефон (необязательно)'),
-                  onSaved: (value) {
-                    phoneNumber = value;
-                  },
-                ),
-                TextFormField(
-                  initialValue: groupName,
-                  decoration: const InputDecoration(labelText: 'Название группы'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Введите название группы';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    groupName = value!;
-                  },
+                  child: const Text('Сохранить'),
                 ),
               ],
-            ),
-          ),
-          actions: [
-            TextButton(
-              onPressed: () {
-                Navigator.of(context).pop();
-              },
-              child: const Text('Отмена'),
-            ),
-            ElevatedButton(
-              onPressed: () async {
-                if (formKey.currentState!.validate()) {
-                  formKey.currentState!.save();
-
-                  try {
-                    // Обновляем данные студента через сервер
-                    var updatedStudent = student.copyWith(
-                      person: student.person?.copyWith(
-                        firstName: firstName,
-                        lastName: lastName,
-                        patronymic: patronymic,
-                        email: email,
-                        phoneNumber: phoneNumber,
-                      ),
-                      groups: student.groups?.copyWith(name: groupName),
-                    );
-                    await client.admin.updateStudent(updatedStudent);
-                    Navigator.of(context).pop();
-                    _loadAllStudents(); // Обновляем список студентов
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Данные студента успешно обновлены')),
-                    );
-                  } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Ошибка: $e')),
-                    );
-                  }
-                }
-              },
-              child: const Text('Сохранить'),
-            ),
-          ],
+            );
+          },
         );
       },
     );

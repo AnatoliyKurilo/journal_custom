@@ -13,6 +13,7 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod/serverpod.dart' as _i1;
 import 'person.dart' as _i2;
+import 'groups_protocol.dart' as _i3;
 
 abstract class Teachers
     implements _i1.TableRow<int?>, _i1.ProtocolSerialization {
@@ -20,12 +21,14 @@ abstract class Teachers
     this.id,
     required this.personId,
     this.person,
+    this.groups,
   });
 
   factory Teachers({
     int? id,
     required int personId,
     _i2.Person? person,
+    List<_i3.Groups>? groups,
   }) = _TeachersImpl;
 
   factory Teachers.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -36,6 +39,9 @@ abstract class Teachers
           ? null
           : _i2.Person.fromJson(
               (jsonSerialization['person'] as Map<String, dynamic>)),
+      groups: (jsonSerialization['groups'] as List?)
+          ?.map((e) => _i3.Groups.fromJson((e as Map<String, dynamic>)))
+          .toList(),
     );
   }
 
@@ -50,6 +56,8 @@ abstract class Teachers
 
   _i2.Person? person;
 
+  List<_i3.Groups>? groups;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -60,6 +68,7 @@ abstract class Teachers
     int? id,
     int? personId,
     _i2.Person? person,
+    List<_i3.Groups>? groups,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -67,6 +76,8 @@ abstract class Teachers
       if (id != null) 'id': id,
       'personId': personId,
       if (person != null) 'person': person?.toJson(),
+      if (groups != null)
+        'groups': groups?.toJson(valueToJson: (v) => v.toJson()),
     };
   }
 
@@ -76,11 +87,19 @@ abstract class Teachers
       if (id != null) 'id': id,
       'personId': personId,
       if (person != null) 'person': person?.toJsonForProtocol(),
+      if (groups != null)
+        'groups': groups?.toJson(valueToJson: (v) => v.toJsonForProtocol()),
     };
   }
 
-  static TeachersInclude include({_i2.PersonInclude? person}) {
-    return TeachersInclude._(person: person);
+  static TeachersInclude include({
+    _i2.PersonInclude? person,
+    _i3.GroupsIncludeList? groups,
+  }) {
+    return TeachersInclude._(
+      person: person,
+      groups: groups,
+    );
   }
 
   static TeachersIncludeList includeList({
@@ -116,10 +135,12 @@ class _TeachersImpl extends Teachers {
     int? id,
     required int personId,
     _i2.Person? person,
+    List<_i3.Groups>? groups,
   }) : super._(
           id: id,
           personId: personId,
           person: person,
+          groups: groups,
         );
 
   /// Returns a shallow copy of this [Teachers]
@@ -130,11 +151,15 @@ class _TeachersImpl extends Teachers {
     Object? id = _Undefined,
     int? personId,
     Object? person = _Undefined,
+    Object? groups = _Undefined,
   }) {
     return Teachers(
       id: id is int? ? id : this.id,
       personId: personId ?? this.personId,
       person: person is _i2.Person? ? person : this.person?.copyWith(),
+      groups: groups is List<_i3.Groups>?
+          ? groups
+          : this.groups?.map((e0) => e0.copyWith()).toList(),
     );
   }
 }
@@ -151,6 +176,10 @@ class TeachersTable extends _i1.Table<int?> {
 
   _i2.PersonTable? _person;
 
+  _i3.GroupsTable? ___groups;
+
+  _i1.ManyRelation<_i3.GroupsTable>? _groups;
+
   _i2.PersonTable get person {
     if (_person != null) return _person!;
     _person = _i1.createRelationTable(
@@ -164,6 +193,37 @@ class TeachersTable extends _i1.Table<int?> {
     return _person!;
   }
 
+  _i3.GroupsTable get __groups {
+    if (___groups != null) return ___groups!;
+    ___groups = _i1.createRelationTable(
+      relationFieldName: '__groups',
+      field: Teachers.t.id,
+      foreignField: _i3.Groups.t.$_teachersGroupsTeachersId,
+      tableRelation: tableRelation,
+      createTable: (foreignTableRelation) =>
+          _i3.GroupsTable(tableRelation: foreignTableRelation),
+    );
+    return ___groups!;
+  }
+
+  _i1.ManyRelation<_i3.GroupsTable> get groups {
+    if (_groups != null) return _groups!;
+    var relationTable = _i1.createRelationTable(
+      relationFieldName: 'groups',
+      field: Teachers.t.id,
+      foreignField: _i3.Groups.t.$_teachersGroupsTeachersId,
+      tableRelation: tableRelation,
+      createTable: (foreignTableRelation) =>
+          _i3.GroupsTable(tableRelation: foreignTableRelation),
+    );
+    _groups = _i1.ManyRelation<_i3.GroupsTable>(
+      tableWithRelations: relationTable,
+      table: _i3.GroupsTable(
+          tableRelation: relationTable.tableRelation!.lastRelation),
+    );
+    return _groups!;
+  }
+
   @override
   List<_i1.Column> get columns => [
         id,
@@ -175,19 +235,31 @@ class TeachersTable extends _i1.Table<int?> {
     if (relationField == 'person') {
       return person;
     }
+    if (relationField == 'groups') {
+      return __groups;
+    }
     return null;
   }
 }
 
 class TeachersInclude extends _i1.IncludeObject {
-  TeachersInclude._({_i2.PersonInclude? person}) {
+  TeachersInclude._({
+    _i2.PersonInclude? person,
+    _i3.GroupsIncludeList? groups,
+  }) {
     _person = person;
+    _groups = groups;
   }
 
   _i2.PersonInclude? _person;
 
+  _i3.GroupsIncludeList? _groups;
+
   @override
-  Map<String, _i1.Include?> get includes => {'person': _person};
+  Map<String, _i1.Include?> get includes => {
+        'person': _person,
+        'groups': _groups,
+      };
 
   @override
   _i1.Table<int?> get table => Teachers.t;
@@ -216,7 +288,13 @@ class TeachersIncludeList extends _i1.IncludeList {
 class TeachersRepository {
   const TeachersRepository._();
 
+  final attach = const TeachersAttachRepository._();
+
   final attachRow = const TeachersAttachRowRepository._();
+
+  final detach = const TeachersDetachRepository._();
+
+  final detachRow = const TeachersDetachRowRepository._();
 
   /// Returns a list of [Teachers]s matching the given query parameters.
   ///
@@ -434,6 +512,38 @@ class TeachersRepository {
   }
 }
 
+class TeachersAttachRepository {
+  const TeachersAttachRepository._();
+
+  /// Creates a relation between this [Teachers] and the given [Groups]s
+  /// by setting each [Groups]'s foreign key `_teachersGroupsTeachersId` to refer to this [Teachers].
+  Future<void> groups(
+    _i1.Session session,
+    Teachers teachers,
+    List<_i3.Groups> groups, {
+    _i1.Transaction? transaction,
+  }) async {
+    if (groups.any((e) => e.id == null)) {
+      throw ArgumentError.notNull('groups.id');
+    }
+    if (teachers.id == null) {
+      throw ArgumentError.notNull('teachers.id');
+    }
+
+    var $groups = groups
+        .map((e) => _i3.GroupsImplicit(
+              e,
+              $_teachersGroupsTeachersId: teachers.id,
+            ))
+        .toList();
+    await session.db.update<_i3.Groups>(
+      $groups,
+      columns: [_i3.Groups.t.$_teachersGroupsTeachersId],
+      transaction: transaction,
+    );
+  }
+}
+
 class TeachersAttachRowRepository {
   const TeachersAttachRowRepository._();
 
@@ -456,6 +566,92 @@ class TeachersAttachRowRepository {
     await session.db.updateRow<Teachers>(
       $teachers,
       columns: [Teachers.t.personId],
+      transaction: transaction,
+    );
+  }
+
+  /// Creates a relation between this [Teachers] and the given [Groups]
+  /// by setting the [Groups]'s foreign key `_teachersGroupsTeachersId` to refer to this [Teachers].
+  Future<void> groups(
+    _i1.Session session,
+    Teachers teachers,
+    _i3.Groups groups, {
+    _i1.Transaction? transaction,
+  }) async {
+    if (groups.id == null) {
+      throw ArgumentError.notNull('groups.id');
+    }
+    if (teachers.id == null) {
+      throw ArgumentError.notNull('teachers.id');
+    }
+
+    var $groups = _i3.GroupsImplicit(
+      groups,
+      $_teachersGroupsTeachersId: teachers.id,
+    );
+    await session.db.updateRow<_i3.Groups>(
+      $groups,
+      columns: [_i3.Groups.t.$_teachersGroupsTeachersId],
+      transaction: transaction,
+    );
+  }
+}
+
+class TeachersDetachRepository {
+  const TeachersDetachRepository._();
+
+  /// Detaches the relation between this [Teachers] and the given [Groups]
+  /// by setting the [Groups]'s foreign key `_teachersGroupsTeachersId` to `null`.
+  ///
+  /// This removes the association between the two models without deleting
+  /// the related record.
+  Future<void> groups(
+    _i1.Session session,
+    List<_i3.Groups> groups, {
+    _i1.Transaction? transaction,
+  }) async {
+    if (groups.any((e) => e.id == null)) {
+      throw ArgumentError.notNull('groups.id');
+    }
+
+    var $groups = groups
+        .map((e) => _i3.GroupsImplicit(
+              e,
+              $_teachersGroupsTeachersId: null,
+            ))
+        .toList();
+    await session.db.update<_i3.Groups>(
+      $groups,
+      columns: [_i3.Groups.t.$_teachersGroupsTeachersId],
+      transaction: transaction,
+    );
+  }
+}
+
+class TeachersDetachRowRepository {
+  const TeachersDetachRowRepository._();
+
+  /// Detaches the relation between this [Teachers] and the given [Groups]
+  /// by setting the [Groups]'s foreign key `_teachersGroupsTeachersId` to `null`.
+  ///
+  /// This removes the association between the two models without deleting
+  /// the related record.
+  Future<void> groups(
+    _i1.Session session,
+    _i3.Groups groups, {
+    _i1.Transaction? transaction,
+  }) async {
+    if (groups.id == null) {
+      throw ArgumentError.notNull('groups.id');
+    }
+
+    var $groups = _i3.GroupsImplicit(
+      groups,
+      $_teachersGroupsTeachersId: null,
+    );
+    await session.db.updateRow<_i3.Groups>(
+      $groups,
+      columns: [_i3.Groups.t.$_teachersGroupsTeachersId],
       transaction: transaction,
     );
   }

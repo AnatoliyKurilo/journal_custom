@@ -31,6 +31,8 @@ import 'package:journal_custom_server/src/generated/teachers_protocol.dart'
     as _i18;
 import 'package:journal_custom_server/src/generated/students_protocol.dart'
     as _i19;
+import 'package:journal_custom_server/src/generated/subgroups_protocol.dart'
+    as _i20;
 export 'greeting.dart';
 export 'attendance_protocol.dart';
 export 'class_types_protocol.dart';
@@ -313,7 +315,7 @@ class Protocol extends _i1.SerializationManagerServer {
           dartType: 'int?',
         ),
         _i2.ColumnDefinition(
-          name: 'groupHeadId',
+          name: '_teachersGroupsTeachersId',
           columnType: _i2.ColumnType.bigint,
           isNullable: true,
           dartType: 'int?',
@@ -332,8 +334,8 @@ class Protocol extends _i1.SerializationManagerServer {
         ),
         _i2.ForeignKeyDefinition(
           constraintName: 'groups_fk_1',
-          columns: ['groupHeadId'],
-          referenceTable: 'students',
+          columns: ['_teachersGroupsTeachersId'],
+          referenceTable: 'teachers',
           referenceTableSchema: 'public',
           referenceColumns: ['id'],
           onUpdate: _i2.ForeignKeyAction.noAction,
@@ -362,19 +364,6 @@ class Protocol extends _i1.SerializationManagerServer {
             _i2.IndexElementDefinition(
               type: _i2.IndexElementDefinitionType.column,
               definition: 'curatorId',
-            )
-          ],
-          type: 'btree',
-          isUnique: true,
-          isPrimary: false,
-        ),
-        _i2.IndexDefinition(
-          indexName: 'unique_group_head',
-          tableSpace: null,
-          elements: [
-            _i2.IndexElementDefinition(
-              type: _i2.IndexElementDefinitionType.column,
-              definition: 'groupHeadId',
             )
           ],
           type: 'btree',
@@ -671,6 +660,13 @@ class Protocol extends _i1.SerializationManagerServer {
           isNullable: false,
           dartType: 'int',
         ),
+        _i2.ColumnDefinition(
+          name: 'isGroupHead',
+          columnType: _i2.ColumnType.boolean,
+          isNullable: true,
+          dartType: 'bool?',
+          columnDefault: 'false',
+        ),
       ],
       foreignKeys: [
         _i2.ForeignKeyDefinition(
@@ -748,6 +744,12 @@ class Protocol extends _i1.SerializationManagerServer {
           columnType: _i2.ColumnType.bigint,
           isNullable: false,
           dartType: 'int',
+        ),
+        _i2.ColumnDefinition(
+          name: 'description',
+          columnType: _i2.ColumnType.text,
+          isNullable: true,
+          dartType: 'String?',
         ),
       ],
       foreignKeys: [
@@ -973,6 +975,11 @@ class Protocol extends _i1.SerializationManagerServer {
     if (t == _i1.getType<_i16.Teachers?>()) {
       return (data != null ? _i16.Teachers.fromJson(data) : null) as T;
     }
+    if (t == _i1.getType<List<_i8.Groups>?>()) {
+      return (data != null
+          ? (data as List).map((e) => deserialize<_i8.Groups>(e)).toList()
+          : null) as T;
+    }
     if (t == List<_i17.Groups>) {
       return (data as List).map((e) => deserialize<_i17.Groups>(e)).toList()
           as T;
@@ -983,6 +990,10 @@ class Protocol extends _i1.SerializationManagerServer {
     }
     if (t == List<_i19.Students>) {
       return (data as List).map((e) => deserialize<_i19.Students>(e)).toList()
+          as T;
+    }
+    if (t == List<_i20.Subgroups>) {
+      return (data as List).map((e) => deserialize<_i20.Subgroups>(e)).toList()
           as T;
     }
     if (t == List<String>) {

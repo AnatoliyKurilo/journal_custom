@@ -3,6 +3,7 @@ table: teachers
 fields:
   # personId: int, relation(parent=person)
   person: Person?, relation
+  groups: List<Groups>?, relation(optional)
 indexes:
   teachers_person_unique_idx:
     fields: personId

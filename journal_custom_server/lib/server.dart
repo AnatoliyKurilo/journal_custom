@@ -82,13 +82,19 @@ void run(List<String> args) async {
           scopes.add('teacher');
         }
         
-        // Проверяем, является ли студент старостой
-        var isGroupHead = await Groups.db.findFirstRow(
-          session,
-          where: (g) => g.groupHeadId.equals(student?.id ?? -1),
-        );
+        // // Проверяем, является ли студент старостой
+        // var isGroupHead = await Groups.db.findFirstRow(
+        //   session,
+        //   where: (g) => g.groupHeadId.equals(student?.id ?? -1),
+        // );
         
-        if (isGroupHead != null) {
+        // if (isGroupHead != null) {
+        //   // Если это староста, добавляем роль groupHead
+        //   scopes.add('groupHead');
+        // }
+        
+        // Проверяем, является ли студент старостой по прямому флагу в таблице Students
+        if (student?.isGroupHead == true) {
           // Если это староста, добавляем роль groupHead
           scopes.add('groupHead');
         }

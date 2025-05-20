@@ -17,9 +17,11 @@ import 'package:journal_custom_client/src/protocol/teachers_protocol.dart'
 import 'package:journal_custom_client/src/protocol/students_protocol.dart'
     as _i5;
 import 'package:journal_custom_client/src/protocol/person.dart' as _i6;
-import 'package:journal_custom_client/src/protocol/greeting.dart' as _i7;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i8;
-import 'protocol.dart' as _i9;
+import 'package:journal_custom_client/src/protocol/subgroups_protocol.dart'
+    as _i7;
+import 'package:journal_custom_client/src/protocol/greeting.dart' as _i8;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i9;
+import 'protocol.dart' as _i10;
 
 /// {@category Endpoint}
 class EndpointAdmin extends _i1.EndpointRef {
@@ -31,7 +33,6 @@ class EndpointAdmin extends _i1.EndpointRef {
   _i2.Future<_i3.Groups> createGroup(
     String name,
     int? curatorId,
-    int? groupHeadId,
   ) =>
       caller.callServerEndpoint<_i3.Groups>(
         'admin',
@@ -39,7 +40,6 @@ class EndpointAdmin extends _i1.EndpointRef {
         {
           'name': name,
           'curatorId': curatorId,
-          'groupHeadId': groupHeadId,
         },
       );
 
@@ -50,18 +50,25 @@ class EndpointAdmin extends _i1.EndpointRef {
         {},
       );
 
+  _i2.Future<_i3.Groups?> getGroupByName(String groupName) =>
+      caller.callServerEndpoint<_i3.Groups?>(
+        'admin',
+        'getGroupByName',
+        {'groupName': groupName},
+      );
+
   _i2.Future<_i3.Groups> updateGroup(
-    _i3.Groups group, {
-    int? curatorId,
-    int? groupHeadId,
+    _i3.Groups clientProvidedGroup, {
+    int? newCuratorId,
+    int? newGroupHeadId,
   }) =>
       caller.callServerEndpoint<_i3.Groups>(
         'admin',
         'updateGroup',
         {
-          'group': group,
-          'curatorId': curatorId,
-          'groupHeadId': groupHeadId,
+          'clientProvidedGroup': clientProvidedGroup,
+          'newCuratorId': newCuratorId,
+          'newGroupHeadId': newGroupHeadId,
         },
       );
 
@@ -153,6 +160,126 @@ class EndpointAdmin extends _i1.EndpointRef {
         'updateStudent',
         {'student': student},
       );
+
+  _i2.Future<bool> deleteGroup(int groupId) => caller.callServerEndpoint<bool>(
+        'admin',
+        'deleteGroup',
+        {'groupId': groupId},
+      );
+}
+
+/// {@category Endpoint}
+class EndpointSubgroups extends _i1.EndpointRef {
+  EndpointSubgroups(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'subgroups';
+
+  _i2.Future<_i3.Groups?> getCurrentUserGroup() =>
+      caller.callServerEndpoint<_i3.Groups?>(
+        'subgroups',
+        'getCurrentUserGroup',
+        {},
+      );
+
+  _i2.Future<_i7.Subgroups> createSubgroup(
+    int groupId,
+    String name,
+    String? description,
+  ) =>
+      caller.callServerEndpoint<_i7.Subgroups>(
+        'subgroups',
+        'createSubgroup',
+        {
+          'groupId': groupId,
+          'name': name,
+          'description': description,
+        },
+      );
+
+  _i2.Future<_i7.Subgroups> createFullGroupSubgroup(
+    int groupId,
+    String name,
+    String? description,
+  ) =>
+      caller.callServerEndpoint<_i7.Subgroups>(
+        'subgroups',
+        'createFullGroupSubgroup',
+        {
+          'groupId': groupId,
+          'name': name,
+          'description': description,
+        },
+      );
+
+  _i2.Future<List<_i7.Subgroups>> getGroupSubgroups(int groupId) =>
+      caller.callServerEndpoint<List<_i7.Subgroups>>(
+        'subgroups',
+        'getGroupSubgroups',
+        {'groupId': groupId},
+      );
+
+  _i2.Future<_i7.Subgroups> updateSubgroup(
+    int subgroupId,
+    String name,
+    String? description,
+  ) =>
+      caller.callServerEndpoint<_i7.Subgroups>(
+        'subgroups',
+        'updateSubgroup',
+        {
+          'subgroupId': subgroupId,
+          'name': name,
+          'description': description,
+        },
+      );
+
+  _i2.Future<bool> deleteSubgroup(int subgroupId) =>
+      caller.callServerEndpoint<bool>(
+        'subgroups',
+        'deleteSubgroup',
+        {'subgroupId': subgroupId},
+      );
+
+  _i2.Future<List<_i5.Students>> getSubgroupStudents(int subgroupId) =>
+      caller.callServerEndpoint<List<_i5.Students>>(
+        'subgroups',
+        'getSubgroupStudents',
+        {'subgroupId': subgroupId},
+      );
+
+  _i2.Future<List<_i5.Students>> getStudentsNotInSubgroup(int subgroupId) =>
+      caller.callServerEndpoint<List<_i5.Students>>(
+        'subgroups',
+        'getStudentsNotInSubgroup',
+        {'subgroupId': subgroupId},
+      );
+
+  _i2.Future<bool> addStudentToSubgroup(
+    int subgroupId,
+    int studentId,
+  ) =>
+      caller.callServerEndpoint<bool>(
+        'subgroups',
+        'addStudentToSubgroup',
+        {
+          'subgroupId': subgroupId,
+          'studentId': studentId,
+        },
+      );
+
+  _i2.Future<bool> removeStudentFromSubgroup(
+    int subgroupId,
+    int studentId,
+  ) =>
+      caller.callServerEndpoint<bool>(
+        'subgroups',
+        'removeStudentFromSubgroup',
+        {
+          'subgroupId': subgroupId,
+          'studentId': studentId,
+        },
+      );
 }
 
 /// {@category Endpoint}
@@ -220,8 +347,8 @@ class EndpointGreeting extends _i1.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i2.Future<_i7.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i7.Greeting>(
+  _i2.Future<_i8.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i8.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -230,10 +357,10 @@ class EndpointGreeting extends _i1.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i8.Caller(client);
+    auth = _i9.Caller(client);
   }
 
-  late final _i8.Caller auth;
+  late final _i9.Caller auth;
 }
 
 class Client extends _i1.ServerpodClientShared {
@@ -252,7 +379,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
           host,
-          _i9.Protocol(),
+          _i10.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,
@@ -263,6 +390,7 @@ class Client extends _i1.ServerpodClientShared {
               disconnectStreamsOnLostInternetConnection,
         ) {
     admin = EndpointAdmin(this);
+    subgroups = EndpointSubgroups(this);
     makeUserAdmin = EndpointMakeUserAdmin(this);
     userRoles = EndpointUserRoles(this);
     greeting = EndpointGreeting(this);
@@ -270,6 +398,8 @@ class Client extends _i1.ServerpodClientShared {
   }
 
   late final EndpointAdmin admin;
+
+  late final EndpointSubgroups subgroups;
 
   late final EndpointMakeUserAdmin makeUserAdmin;
 
@@ -282,6 +412,7 @@ class Client extends _i1.ServerpodClientShared {
   @override
   Map<String, _i1.EndpointRef> get endpointRefLookup => {
         'admin': admin,
+        'subgroups': subgroups,
         'makeUserAdmin': makeUserAdmin,
         'userRoles': userRoles,
         'greeting': greeting,

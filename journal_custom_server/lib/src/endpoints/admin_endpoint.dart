@@ -9,11 +9,10 @@ class AdminEndpoint extends Endpoint {
   Set<String> get requiredRoles => {'serverpod.admin'};
 
   // Метод для создания группы
-  Future<Groups> createGroup(Session session, String name, int? curatorId, int? groupHeadId) async {
+  Future<Groups> createGroup(Session session, String name, int? curatorId) async {
     var group = Groups(
       name: name,
       curatorId: curatorId,
-      groupHeadId: groupHeadId,
     );
 
     return await Groups.db.insertRow(session, group);
@@ -21,39 +20,163 @@ class AdminEndpoint extends Endpoint {
 
   // Метод для получения всех групп с использованием include
   Future<List<Groups>> getAllGroups(Session session) async {
-    return await Groups.db.find(
+    var groups = await Groups.db.find(
       session,
       include: Groups.include(
         curator: Teachers.include(person: Person.include()),
-        groupHead: Students.include(person: Person.include()),
       ),
     );
+
+    // // Добавляем информацию о старосте для каждой группы
+    // for (var group in groups) {
+    //   var groupHead = await Students.db.findFirstRow(
+    //     session,
+    //     where: (s) => s.groupsId.equals(group.id!) & s.isGroupHead.equals(true),
+    //     include: Students.include(person: Person.include()),
+    //   );
+    //   group = group.copyWith(extraData: {'groupHead': groupHead}); // Сохраняем старосту в extraData
+    // }
+
+    return groups;
   }
 
+  // Метод для получения группы по названию
+  Future<Groups?> getGroupByName(Session session, String groupName) async {
+    try {
+      var group = await Groups.db.findFirstRow(
+        session,
+        where: (g) => g.name.equals(groupName),
+        include: Groups.include(
+          curator: Teachers.include(person: Person.include()),
+        ),
+      );
 
+      // if (group != null) {
+      //   var groupHead = await Students.db.findFirstRow(
+      //     session,
+      //     where: (s) => s.groupsId.equals(group.id!) & s.isGroupHead.equals(true),
+      //     include: Students.include(person: Person.include()),
+      //   );
+      //   group = group.copyWith(extraData: {'groupHead': groupHead}); // Сохраняем старосту в extraData
+      // }
+
+      return group;
+    } catch (e, stackTrace) {
+      session.log(
+        'Ошибка при поиске группы по названию: $e',
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
+      return null;
+    }
+  }
 
   // Метод для обновления данных группы
   Future<Groups> updateGroup(
     Session session,
-    Groups group, {
-    int? curatorId,
-    int? groupHeadId,
-  }) async {
-    // Проверяем, существует ли группа с таким ID
-    var existingGroup = await Groups.db.findById(session, group.id!);
+    Groups clientProvidedGroup, // Переименовано для ясности, содержит в основном ID
+    {int? newCuratorId, // Переименовано для ясности
+    int? newGroupHeadId} // Переименовано для ясности
+  ) async {
+    session.log('AdminEndpoint.updateGroup called. Group ID: ${clientProvidedGroup.id}, New Curator ID: $newCuratorId, New GroupHead ID: $newGroupHeadId');
+
+    var existingGroup = await Groups.db.findById(session, clientProvidedGroup.id!);
     if (existingGroup == null) {
-      throw Exception('Группа с ID ${group.id} не найдена');
+      throw Exception('Группа с ID ${clientProvidedGroup.id} не найдена');
     }
 
-    // // Обновляем данные группы
-    // var updatedGroup = existingGroup.copyWith(
-    //   curatorId: curatorId ?? existingGroup.curatorId,
-    //   groupHeadId: groupHeadId ?? existingGroup.groupHeadId,
-    // );
+    var groupToUpdate = existingGroup;
 
-    await Groups.db.updateRow(session, group);
+    // Логика обновления куратора
+    // Если newCuratorId предоставлен (даже если null, что означает "снять куратора")
+    // Мы должны обновить поле curatorId.
+    // Проблема в том, что если мы обновляем старосту, newCuratorId будет null по умолчанию.
+    // Нам нужен способ понять, был ли newCuratorId *намеренно* частью запроса.
+    // С текущим клиентом, если newCuratorId не null, значит обновляем куратора.
+    // Если newCuratorId null, это может быть "снять куратора" ИЛИ "обновляли старосту".
 
-    return group; // Возвращаем обновленную группу
+    // Решение: если мы обновляем куратора, то newGroupHeadId будет null.
+    // Если мы обновляем старосту, то newCuratorId будет null.
+    // Мы не можем обновить оба одновременно этим методом с текущим клиентом.
+
+    bool curatorChanged = false;
+    if (newCuratorId != null) { // Если передан конкретный ID для нового куратора
+        if (groupToUpdate.curatorId != newCuratorId) {
+            groupToUpdate = groupToUpdate.copyWith(curatorId: newCuratorId);
+            curatorChanged = true;
+            session.log('Set curator to $newCuratorId');
+        }
+    } else { // newCuratorId равен null
+        // Это может означать "снять куратора" ИЛИ "curatorId не был целью этого обновления (обновляли старосту)".
+        // Если newGroupHeadId ТОЖЕ null, то, возможно, это запрос на снятие куратора (или пустой вызов).
+        // Если newGroupHeadId НЕ null, значит, мы обновляем старосту, и newCuratorId (который null) нужно игнорировать.
+        if (newGroupHeadId == null && groupToUpdate.curatorId != null) { // Снимаем куратора, только если не обновляем старосту и куратор был
+            groupToUpdate = groupToUpdate.copyWith(curatorId: null); // Явно устанавливаем null
+            curatorChanged = true;
+            session.log('Removed curator (set to null)');
+        } else if (newGroupHeadId == null && newCuratorId == null && groupToUpdate.curatorId != null) {
+            // Если оба null, и куратор был, снимаем его
+             groupToUpdate = groupToUpdate.copyWith(curatorId: null);
+             curatorChanged = true;
+             session.log('Both new IDs are null, removing curator.');
+        }
+    }
+
+
+    if (curatorChanged) {
+        session.log('Updating group row for curator change. Group to save: ${groupToUpdate.toJson()}');
+        await Groups.db.updateRow(session, groupToUpdate);
+    } else {
+        session.log('No changes to curatorId.');
+    }
+
+    // Логика обновления старосты (isGroupHead в таблице Students)
+    if (newGroupHeadId != null) {
+      // Сначала снимаем флаг isGroupHead со старого старосты этой группы (если он был)
+      var oldGroupHeads = await Students.db.find(
+        session,
+        where: (s) => s.groupsId.equals(existingGroup.id!) & s.isGroupHead.equals(true),
+      );
+
+      for (var oldHead in oldGroupHeads) {
+        if (oldHead.id != newGroupHeadId) { // Не снимаем флаг, если это тот же студент
+          await Students.db.updateRow(session, oldHead.copyWith(isGroupHead: false));
+          session.log('Reset old group head (ID: ${oldHead.id}) for group ${existingGroup.id}');
+        }
+      }
+
+      // Затем устанавливаем флаг isGroupHead новому старосте
+      var studentToMakeHead = await Students.db.findById(session, newGroupHeadId);
+      if (studentToMakeHead != null && studentToMakeHead.groupsId == existingGroup.id) {
+        if (studentToMakeHead.isGroupHead != true) {
+            await Students.db.updateRow(session, studentToMakeHead.copyWith(isGroupHead: true));
+            session.log('Set student $newGroupHeadId as new group head for group ${existingGroup.id}');
+        }
+      } else {
+        session.log('Student $newGroupHeadId not found or not in group ${existingGroup.id} to be made head.');
+      }
+    } else if (newCuratorId == null && newGroupHeadId == null) { // Если оба null, возможно, это запрос на снятие старосты
+        // Снимаем флаг isGroupHead со всех старост этой группы
+        var currentHeads = await Students.db.find(
+            session, 
+            where: (s) => s.groupsId.equals(existingGroup.id!) & s.isGroupHead.equals(true)
+        );
+        for (var head in currentHeads) {
+            await Students.db.updateRow(session, head.copyWith(isGroupHead: false));
+            session.log('Removed group head (ID: ${head.id}) for group ${existingGroup.id} because newGroupHeadId and newCuratorId were null.');
+        }
+    }
+
+
+    // Возвращаем обновленное состояние группы из БД, чтобы убедиться, что все связи корректны
+    var reloadedGroup = await Groups.db.findById(
+        session, 
+        existingGroup.id!,
+        include: Groups.include(curator: Teachers.include(person: Person.include())) // Включаем куратора для актуальности
+    );
+    
+    session.log('AdminEndpoint.updateGroup finished. Reloaded group: ${reloadedGroup?.toJson()}');
+    return reloadedGroup ?? groupToUpdate; // Возвращаем перезагруженную или обновленную группу
   }
 
   // Метод для создания преподавателя
@@ -308,7 +431,6 @@ class AdminEndpoint extends Endpoint {
         session,
         include: Groups.include(
           curator: Teachers.include(person: Person.include()),
-          groupHead: Students.include(person: Person.include()),
         ),
       );
     }
@@ -320,9 +442,8 @@ class AdminEndpoint extends Endpoint {
       conditions.add(
         Groups.t.name.ilike(pattern) |
         Groups.t.curator.person.firstName.ilike(pattern) |
-        Groups.t.curator.person.lastName.ilike(pattern) |
-        Groups.t.groupHead.person.firstName.ilike(pattern) |
-        Groups.t.groupHead.person.lastName.ilike(pattern),
+        Groups.t.curator.person.lastName.ilike(pattern)
+        // Удалены ссылки на groupHead
       );
     }
 
@@ -335,7 +456,6 @@ class AdminEndpoint extends Endpoint {
       where: (t) => combinedCondition,
       include: Groups.include(
         curator: Teachers.include(person: Person.include()),
-        groupHead: Students.include(person: Person.include()),
       ),
     );
   }
@@ -355,6 +475,70 @@ class AdminEndpoint extends Endpoint {
     await Students.db.updateRow(session, student);
 
     return student;
+  }
+
+  // Дополненный метод для удаления группы, студентов и связанных записей Person
+  Future<bool> deleteGroup(Session session, int groupId) async {
+    session.log('AdminEndpoint.deleteGroup called. Group ID: $groupId');
+
+    // Проверяем, существует ли группа
+    var group = await Groups.db.findById(session, groupId);
+    if (group == null) {
+      throw Exception('Группа с ID $groupId не найдена');
+    }
+
+    // Транзакция для обеспечения атомарности операций
+    return await session.db.transaction((transaction) async {
+      try {
+        // 1. Находим всех студентов группы
+        var students = await Students.db.find(
+          session,
+          where: (s) => s.groupsId.equals(groupId),
+          transaction: transaction,
+          include: Students.include(person: Person.include()),
+        );
+        
+        // 2. Для каждого студента удаляем запись в таблице Students и Person
+        for (var student in students) {
+          // Сохраняем ID человека для последующего удаления
+          final personId = student.personId;
+          
+          // Удаляем запись студента
+          await Students.db.deleteRow(session, student, transaction: transaction);
+          
+          // Получаем запись человека
+          final person = await Person.db.findById(session, personId, transaction: transaction);
+          if (person != null) {
+            // Проверяем, нет ли других связей (например, если человек одновременно студент и преподаватель)
+            final hasOtherStudentRecords = await Students.db.count(
+              session, 
+              where: (s) => s.personId.equals(personId),
+              transaction: transaction
+            ) > 0;
+            
+            final hasTeacherRecords = await Teachers.db.count(
+              session, 
+              where: (t) => t.personId.equals(personId),
+              transaction: transaction
+            ) > 0;
+            
+            // Удаляем запись Person только если нет других связей
+            if (!hasOtherStudentRecords && !hasTeacherRecords) {
+              await Person.db.deleteRow(session, person, transaction: transaction);
+            }
+          }
+        }
+        
+        // 3. Удаляем саму группу
+        await Groups.db.deleteRow(session, group, transaction: transaction);
+        
+        session.log('Группа и все связанные записи успешно удалены. ID: $groupId');
+        return true;
+      } catch (e, stackTrace) {
+        session.log('Ошибка при удалении группы: $e', level: LogLevel.error, stackTrace: stackTrace);
+        return false;
+      }
+    });
   }
 
   // Вспомогательный метод для обработки ошибок

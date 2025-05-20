@@ -4,3 +4,4 @@ fields:
   name: String
   # groupId: int, relation(parent=groups)
   groups: Groups?, relation
+  description: String?
