@@ -18,6 +18,7 @@ abstract class Semesters
     required this.name,
     required this.startDate,
     required this.endDate,
+    required this.year,
   });
 
   factory Semesters({
@@ -25,6 +26,7 @@ abstract class Semesters
     required String name,
     required DateTime startDate,
     required DateTime endDate,
+    required int year,
   }) = _SemestersImpl;
 
   factory Semesters.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -34,6 +36,7 @@ abstract class Semesters
       startDate:
           _i1.DateTimeJsonExtension.fromJson(jsonSerialization['startDate']),
       endDate: _i1.DateTimeJsonExtension.fromJson(jsonSerialization['endDate']),
+      year: jsonSerialization['year'] as int,
     );
   }
 
@@ -50,6 +53,8 @@ abstract class Semesters
 
   DateTime endDate;
 
+  int year;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -61,6 +66,7 @@ abstract class Semesters
     String? name,
     DateTime? startDate,
     DateTime? endDate,
+    int? year,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -69,6 +75,7 @@ abstract class Semesters
       'name': name,
       'startDate': startDate.toJson(),
       'endDate': endDate.toJson(),
+      'year': year,
     };
   }
 
@@ -79,6 +86,7 @@ abstract class Semesters
       'name': name,
       'startDate': startDate.toJson(),
       'endDate': endDate.toJson(),
+      'year': year,
     };
   }
 
@@ -120,11 +128,13 @@ class _SemestersImpl extends Semesters {
     required String name,
     required DateTime startDate,
     required DateTime endDate,
+    required int year,
   }) : super._(
           id: id,
           name: name,
           startDate: startDate,
           endDate: endDate,
+          year: year,
         );
 
   /// Returns a shallow copy of this [Semesters]
@@ -136,12 +146,14 @@ class _SemestersImpl extends Semesters {
     String? name,
     DateTime? startDate,
     DateTime? endDate,
+    int? year,
   }) {
     return Semesters(
       id: id is int? ? id : this.id,
       name: name ?? this.name,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
+      year: year ?? this.year,
     );
   }
 }
@@ -160,6 +172,10 @@ class SemestersTable extends _i1.Table<int?> {
       'endDate',
       this,
     );
+    year = _i1.ColumnInt(
+      'year',
+      this,
+    );
   }
 
   late final _i1.ColumnString name;
@@ -168,12 +184,15 @@ class SemestersTable extends _i1.Table<int?> {
 
   late final _i1.ColumnDateTime endDate;
 
+  late final _i1.ColumnInt year;
+
   @override
   List<_i1.Column> get columns => [
         id,
         name,
         startDate,
         endDate,
+        year,
       ];
 }
 

@@ -20,7 +20,7 @@ abstract class Attendance implements _i1.SerializableModel {
     this.classes,
     required this.studentsId,
     this.students,
-    required this.status,
+    required this.isPresent,
     this.comment,
   });
 
@@ -30,7 +30,7 @@ abstract class Attendance implements _i1.SerializableModel {
     _i2.Classes? classes,
     required int studentsId,
     _i3.Students? students,
-    required String status,
+    required bool isPresent,
     String? comment,
   }) = _AttendanceImpl;
 
@@ -47,7 +47,7 @@ abstract class Attendance implements _i1.SerializableModel {
           ? null
           : _i3.Students.fromJson(
               (jsonSerialization['students'] as Map<String, dynamic>)),
-      status: jsonSerialization['status'] as String,
+      isPresent: jsonSerialization['isPresent'] as bool,
       comment: jsonSerialization['comment'] as String?,
     );
   }
@@ -65,7 +65,7 @@ abstract class Attendance implements _i1.SerializableModel {
 
   _i3.Students? students;
 
-  String status;
+  bool isPresent;
 
   String? comment;
 
@@ -78,7 +78,7 @@ abstract class Attendance implements _i1.SerializableModel {
     _i2.Classes? classes,
     int? studentsId,
     _i3.Students? students,
-    String? status,
+    bool? isPresent,
     String? comment,
   });
   @override
@@ -89,7 +89,7 @@ abstract class Attendance implements _i1.SerializableModel {
       if (classes != null) 'classes': classes?.toJson(),
       'studentsId': studentsId,
       if (students != null) 'students': students?.toJson(),
-      'status': status,
+      'isPresent': isPresent,
       if (comment != null) 'comment': comment,
     };
   }
@@ -109,7 +109,7 @@ class _AttendanceImpl extends Attendance {
     _i2.Classes? classes,
     required int studentsId,
     _i3.Students? students,
-    required String status,
+    required bool isPresent,
     String? comment,
   }) : super._(
           id: id,
@@ -117,7 +117,7 @@ class _AttendanceImpl extends Attendance {
           classes: classes,
           studentsId: studentsId,
           students: students,
-          status: status,
+          isPresent: isPresent,
           comment: comment,
         );
 
@@ -131,7 +131,7 @@ class _AttendanceImpl extends Attendance {
     Object? classes = _Undefined,
     int? studentsId,
     Object? students = _Undefined,
-    String? status,
+    bool? isPresent,
     Object? comment = _Undefined,
   }) {
     return Attendance(
@@ -141,7 +141,7 @@ class _AttendanceImpl extends Attendance {
       studentsId: studentsId ?? this.studentsId,
       students:
           students is _i3.Students? ? students : this.students?.copyWith(),
-      status: status ?? this.status,
+      isPresent: isPresent ?? this.isPresent,
       comment: comment is String? ? comment : this.comment,
     );
   }

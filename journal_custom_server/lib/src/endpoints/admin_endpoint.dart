@@ -1,5 +1,7 @@
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
+import 'package:collection/collection.dart';
+
 
 class AdminEndpoint extends Endpoint {
   @override
@@ -365,54 +367,7 @@ class AdminEndpoint extends Endpoint {
     );
   }
 
-  // Метод для поиска преподавателей
-  Future<List<Teachers>> searchTeachers(
-    Session session, {
-    required String query, // Принимаем строку запроса
-  }) async {
-    // 1. Разделяем строку на слова
-    final tokens = query
-        .trim()
-        .split(RegExp(r'\s+'))
-        .where((t) => t.isNotEmpty)
-        .toList();
-
-    // Если строка пуста, возвращаем всех преподавателей
-    if (tokens.isEmpty) {
-      return await Teachers.db.find(
-        session,
-        include: Teachers.include(
-          person: Person.include(),
-        ),
-      );
-    }
-
-    // 2. Построение списка условий
-    var conditions = <Expression<dynamic>>[];
-    for (var token in tokens) {
-      final pattern = '%${token.toLowerCase()}%';
-      conditions.add(
-        Teachers.t.person.firstName.ilike(pattern) |
-        Teachers.t.person.lastName.ilike(pattern) |
-        Teachers.t.person.patronymic.ilike(pattern) |
-        Teachers.t.person.email.ilike(pattern) |
-        Teachers.t.person.phoneNumber.ilike(pattern),
-      );
-    }
-
-    // 3. Объединение условий через AND
-    var combinedCondition = conditions.reduce((a, b) => a & b);
-
-    // 4. Выполняем запрос с использованием include
-    return await Teachers.db.find(
-      session,
-      where: (t) => combinedCondition,
-      include: Teachers.include(
-        person: Person.include(),
-      ),
-    );
-  }
-
+  
   // Метод для поиска групп
   Future<List<Groups>> searchGroups(
     Session session, {
@@ -539,6 +494,77 @@ class AdminEndpoint extends Endpoint {
         return false;
       }
     });
+  }
+
+  // Метод для получения всех записей о посещаемости для конкретного студента
+  Future<List<StudentOverallAttendanceRecord>> getStudentOverallAttendanceRecords(Session session, int studentId) async {
+    // 1. Проверить, существует ли студент
+    final student = await Students.db.findById(
+      session,
+      studentId,
+      // Можно включить person, если нужно будет отображать ФИО на странице, но оно уже есть в объекте Student, передаваемом на страницу
+      // include: Students.include(person: Person.include()),
+    );
+    if (student == null) {
+      throw Exception('Студент с ID $studentId не найден.');
+    }
+
+    // 2. Найти все связи студент-подгруппа для этого студента
+    // Это необходимо, чтобы определить, на каких занятиях студент должен был быть
+    final studentSubgroupLinks = await StudentSubgroup.db.find(
+      session,
+      where: (ss) => ss.studentsId.equals(studentId),
+    );
+
+    if (studentSubgroupLinks.isEmpty) {
+      return []; // Студент не состоит ни в одной подгруппе, значит, нет занятий для отслеживания
+    }
+    final subgroupIds = studentSubgroupLinks.map((link) => link.subgroupsId).toSet();
+
+    // 3. Найти все занятия (Classes), связанные с этими подгруппами
+    // Это все занятия, на которых студент потенциально мог быть
+    final classes = await Classes.db.find(
+      session,
+      where: (c) => c.subgroupsId.inSet(subgroupIds), // Занятия только для подгрупп студента
+      include: Classes.include(
+        subjects: Subjects.include(),
+        class_types: ClassTypes.include(),
+        subgroups: Subgroups.include(), // Для subgroupName
+      ),
+      orderBy: (c) => c.date, // Сортируем по дате
+      orderDescending: true, // Сначала новые
+    );
+
+    if (classes.isEmpty) {
+      return []; // Для подгрупп студента нет зарегистрированных занятий
+    }
+    final classIds = classes.map((c) => c.id!).toSet();
+
+    // 4. Найти все записи о посещаемости (Attendance) для этого студента по этим занятиям
+    final attendanceRecords = await Attendance.db.find(
+      session,
+      where: (a) => a.studentsId.equals(studentId) & a.classesId.inSet(classIds),
+    );
+
+    // 5. Сформировать результат
+    final List<StudentOverallAttendanceRecord> result = [];
+    for (var classItem in classes) {
+      // Для каждого занятия, на котором студент должен был быть, ищем его отметку
+      final attendance = attendanceRecords.firstWhereOrNull(
+        (ar) => ar.classesId == classItem.id,
+      );
+
+      result.add(StudentOverallAttendanceRecord(
+        subjectName: classItem.subjects?.name ?? 'Неизвестный предмет',
+        classTopic: classItem.topic,
+        classTypeName: classItem.class_types?.name,
+        classDate: classItem.date,
+        isPresent: attendance?.isPresent ?? false, // Если отметки нет, считаем, что отсутствовал
+        comment: attendance?.comment,
+        subgroupName: classItem.subgroups?.name, // Имя подгруппы, к которой привязано занятие
+      ));
+    }
+    return result;
   }
 
   // Вспомогательный метод для обработки ошибок

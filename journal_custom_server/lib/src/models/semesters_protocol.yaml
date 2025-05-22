@@ -4,3 +4,4 @@ fields:
   name: String
   startDate: DateTime
   endDate: DateTime
+  year: int

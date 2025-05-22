@@ -1,0 +1,10 @@
+class: StudentOverallAttendanceRecord
+# serverOnly: false # Оставляем false (по умолчанию), чтобы модель была доступна на клиенте
+fields:
+  subjectName: String # Название предмета
+  classTopic: String? # Тема занятия из Classes.topic
+  classTypeName: String? # Название типа занятия из Classes.class_types.name
+  classDate: DateTime # Дата и время занятия
+  isPresent: bool # Статус присутствия
+  comment: String? # Комментарий к посещаемости
+  subgroupName: String? # Название подгруппы, к которой относится занятие

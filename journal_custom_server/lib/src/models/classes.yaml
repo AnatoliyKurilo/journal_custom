@@ -13,3 +13,7 @@ fields:
   # subgroupId: int?, relation(parent=subgroups)
   subgroups: Subgroups?, relation
   date: DateTime
+  # subjects: List<Subjects>?, relation
+    # groups: List<Groups>?, relation(optional)
+  topic: String? # Новое поле "Тема занятия"
+  notes: String? # Новое поле "Комментарии/Примечание"

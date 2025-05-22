@@ -17,6 +17,7 @@ abstract class Semesters implements _i1.SerializableModel {
     required this.name,
     required this.startDate,
     required this.endDate,
+    required this.year,
   });
 
   factory Semesters({
@@ -24,6 +25,7 @@ abstract class Semesters implements _i1.SerializableModel {
     required String name,
     required DateTime startDate,
     required DateTime endDate,
+    required int year,
   }) = _SemestersImpl;
 
   factory Semesters.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -33,6 +35,7 @@ abstract class Semesters implements _i1.SerializableModel {
       startDate:
           _i1.DateTimeJsonExtension.fromJson(jsonSerialization['startDate']),
       endDate: _i1.DateTimeJsonExtension.fromJson(jsonSerialization['endDate']),
+      year: jsonSerialization['year'] as int,
     );
   }
 
@@ -47,6 +50,8 @@ abstract class Semesters implements _i1.SerializableModel {
 
   DateTime endDate;
 
+  int year;
+
   /// Returns a shallow copy of this [Semesters]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -55,6 +60,7 @@ abstract class Semesters implements _i1.SerializableModel {
     String? name,
     DateTime? startDate,
     DateTime? endDate,
+    int? year,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -63,6 +69,7 @@ abstract class Semesters implements _i1.SerializableModel {
       'name': name,
       'startDate': startDate.toJson(),
       'endDate': endDate.toJson(),
+      'year': year,
     };
   }
 
@@ -80,11 +87,13 @@ class _SemestersImpl extends Semesters {
     required String name,
     required DateTime startDate,
     required DateTime endDate,
+    required int year,
   }) : super._(
           id: id,
           name: name,
           startDate: startDate,
           endDate: endDate,
+          year: year,
         );
 
   /// Returns a shallow copy of this [Semesters]
@@ -96,12 +105,14 @@ class _SemestersImpl extends Semesters {
     String? name,
     DateTime? startDate,
     DateTime? endDate,
+    int? year,
   }) {
     return Semesters(
       id: id is int? ? id : this.id,
       name: name ?? this.name,
       startDate: startDate ?? this.startDate,
       endDate: endDate ?? this.endDate,
+      year: year ?? this.year,
     );
   }
 }

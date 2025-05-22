@@ -30,6 +30,8 @@ abstract class Classes implements _i1.SerializableModel {
     required this.subgroupsId,
     this.subgroups,
     required this.date,
+    this.topic,
+    this.notes,
   });
 
   factory Classes({
@@ -45,6 +47,8 @@ abstract class Classes implements _i1.SerializableModel {
     required int subgroupsId,
     _i6.Subgroups? subgroups,
     required DateTime date,
+    String? topic,
+    String? notes,
   }) = _ClassesImpl;
 
   factory Classes.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -76,6 +80,8 @@ abstract class Classes implements _i1.SerializableModel {
           : _i6.Subgroups.fromJson(
               (jsonSerialization['subgroups'] as Map<String, dynamic>)),
       date: _i1.DateTimeJsonExtension.fromJson(jsonSerialization['date']),
+      topic: jsonSerialization['topic'] as String?,
+      notes: jsonSerialization['notes'] as String?,
     );
   }
 
@@ -106,6 +112,10 @@ abstract class Classes implements _i1.SerializableModel {
 
   DateTime date;
 
+  String? topic;
+
+  String? notes;
+
   /// Returns a shallow copy of this [Classes]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -122,6 +132,8 @@ abstract class Classes implements _i1.SerializableModel {
     int? subgroupsId,
     _i6.Subgroups? subgroups,
     DateTime? date,
+    String? topic,
+    String? notes,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -138,6 +150,8 @@ abstract class Classes implements _i1.SerializableModel {
       'subgroupsId': subgroupsId,
       if (subgroups != null) 'subgroups': subgroups?.toJson(),
       'date': date.toJson(),
+      if (topic != null) 'topic': topic,
+      if (notes != null) 'notes': notes,
     };
   }
 
@@ -163,6 +177,8 @@ class _ClassesImpl extends Classes {
     required int subgroupsId,
     _i6.Subgroups? subgroups,
     required DateTime date,
+    String? topic,
+    String? notes,
   }) : super._(
           id: id,
           subjectsId: subjectsId,
@@ -176,6 +192,8 @@ class _ClassesImpl extends Classes {
           subgroupsId: subgroupsId,
           subgroups: subgroups,
           date: date,
+          topic: topic,
+          notes: notes,
         );
 
   /// Returns a shallow copy of this [Classes]
@@ -195,6 +213,8 @@ class _ClassesImpl extends Classes {
     int? subgroupsId,
     Object? subgroups = _Undefined,
     DateTime? date,
+    Object? topic = _Undefined,
+    Object? notes = _Undefined,
   }) {
     return Classes(
       id: id is int? ? id : this.id,
@@ -215,6 +235,8 @@ class _ClassesImpl extends Classes {
       subgroups:
           subgroups is _i6.Subgroups? ? subgroups : this.subgroups?.copyWith(),
       date: date ?? this.date,
+      topic: topic is String? ? topic : this.topic,
+      notes: notes is String? ? notes : this.notes,
     );
   }
 }

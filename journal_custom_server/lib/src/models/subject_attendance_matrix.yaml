@@ -1,0 +1,9 @@
+class: SubjectAttendanceMatrix
+# serverOnly: true
+fields:
+  students: List<Students> # Список студентов (с Person)
+  classes: List<Classes>   # Список занятий (с датой, можно и типом/темой, если нужно в заголовке)
+  attendanceData: Map<int, Map<int, bool>> # studentId -> { classId -> isPresent }
+  # Если нужны комментарии, можно усложнить:
+  # attendanceData: Map<int, Map<int, AttendanceStatus>>
+  # где AttendanceStatus - еще одна serverOnly модель с isPresent: bool и comment: String?

@@ -9,10 +9,21 @@ admin:
   - getAllStudents:
   - updatePerson:
   - searchStudents:
-  - searchTeachers:
   - searchGroups:
   - updateStudent:
   - deleteGroup:
+  - getStudentOverallAttendanceRecords:
+classTypes:
+  - searchClassTypes:
+classes:
+  - createClass:
+  - getSubjectsWithClasses:
+  - getClassesBySubject:
+  - getStudentsForClassWithAttendance:
+  - updateStudentAttendance:
+  - getSubjectOverallAttendance:
+semesters:
+  - searchSemesters:
 subgroups:
   - getCurrentUserGroup:
   - createSubgroup:
@@ -24,6 +35,13 @@ subgroups:
   - getStudentsNotInSubgroup:
   - addStudentToSubgroup:
   - removeStudentFromSubgroup:
+  - searchSubgroups:
+subjectAttendanceMatrix:
+  - getSubjectAttendanceMatrix:
+subjects:
+  - searchSubjects:
+teacherSearch:
+  - searchTeachers:
 makeUserAdmin:
   - setUserScopes:
 userRoles:

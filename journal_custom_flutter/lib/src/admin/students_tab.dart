@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:journal_custom_client/journal_custom_client.dart';
 import 'package:journal_custom_flutter/src/serverpod_client.dart';
+import 'package:journal_custom_flutter/src/utils/search_utils.dart';
+import 'package:journal_custom_flutter/src/admin/student_overall_attendance_page.dart'; // <-- Новый импорт
 
 class StudentsTab extends StatefulWidget {
   @override
@@ -11,6 +13,7 @@ class _StudentsTabState extends State<StudentsTab> {
   bool isLoading = true;
   List<Students> students = [];
   String? errorMessage;
+  final TextEditingController _searchController = TextEditingController();
 
   @override
   void initState() {
@@ -68,81 +71,84 @@ class _StudentsTabState extends State<StudentsTab> {
     String email = '';
     String? phoneNumber;
     String groupName = ''; // Название группы
+    final isMobile = MediaQuery.of(context).size.width < 600;
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
         return AlertDialog(
           title: const Text('Добавить студента'),
-          content: Form(
-            key: formKey,
-            child: Column(
-              mainAxisSize: MainAxisSize.min,
-              children: [
-                TextFormField(
-                  decoration: const InputDecoration(labelText: 'Имя'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Введите имя';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    firstName = value!;
-                  },
-                ),
-                TextFormField(
-                  decoration: const InputDecoration(labelText: 'Фамилия'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Введите фамилию';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    lastName = value!;
-                  },
-                ),
-                TextFormField(
-                  decoration: const InputDecoration(labelText: 'Отчество (необязательно)'),
-                  onSaved: (value) {
-                    patronymic = value;
-                  },
-                ),
-                TextFormField(
-                  decoration: const InputDecoration(labelText: 'Email'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Введите email';
-                    }
-                    if (!value.contains('@')) {
-                      return 'Введите корректный email';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    email = value!;
-                  },
-                ),
-                TextFormField(
-                  decoration: const InputDecoration(labelText: 'Телефон (необязательно)'),
-                  onSaved: (value) {
-                    phoneNumber = value;
-                  },
-                ),
-                TextFormField(
-                  decoration: const InputDecoration(labelText: 'Название группы'),
-                  validator: (value) {
-                    if (value == null || value.isEmpty) {
-                      return 'Введите название группы';
-                    }
-                    return null;
-                  },
-                  onSaved: (value) {
-                    groupName = value!;
-                  },
-                ),
-              ],
+          content: SingleChildScrollView( // Обертка для прокрутки
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    decoration: const InputDecoration(labelText: 'Имя'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Введите имя';
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      firstName = value!;
+                    },
+                  ),
+                  TextFormField(
+                    decoration: const InputDecoration(labelText: 'Фамилия'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Введите фамилию';
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      lastName = value!;
+                    },
+                  ),
+                  TextFormField(
+                    decoration: const InputDecoration(labelText: 'Отчество (необязательно)'),
+                    onSaved: (value) {
+                      patronymic = value;
+                    },
+                  ),
+                  TextFormField(
+                    decoration: const InputDecoration(labelText: 'Email'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Введите email';
+                      }
+                      if (!value.contains('@')) {
+                        return 'Введите корректный email';
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      email = value!;
+                    },
+                  ),
+                  TextFormField(
+                    decoration: const InputDecoration(labelText: 'Телефон (необязательно)'),
+                    onSaved: (value) {
+                      phoneNumber = value;
+                    },
+                  ),
+                  TextFormField(
+                    decoration: const InputDecoration(labelText: 'Название группы'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Введите название группы';
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      groupName = value!;
+                    },
+                  ),
+                ],
+              ),
             ),
           ),
           actions: [
@@ -187,15 +193,15 @@ class _StudentsTabState extends State<StudentsTab> {
     );
   }
 
-  Future<void> _showEditStudentDialog(Students student) async {
+  Future<void> _showEditStudentDialog(Students? student) async { 
     final formKey = GlobalKey<FormState>();
-    String firstName = student.person?.firstName ?? '';
-    String lastName = student.person?.lastName ?? '';
-    String? patronymic = student.person?.patronymic;
-    String email = student.person?.email ?? '';
-    String? phoneNumber = student.person?.phoneNumber;
-    String groupName = student.groups?.name ?? '';
-    Groups? selectedGroup;
+    String firstName = student?.person?.firstName ?? '';
+    String lastName = student?.person?.lastName ?? '';
+    String? patronymic = student?.person?.patronymic;
+    String email = student?.person?.email ?? '';
+    String? phoneNumber = student?.person?.phoneNumber;
+    Groups? selectedGroup = student?.groups; // Инициализируем выбранную группу
+    final isMobile = MediaQuery.of(context).size.width < 600;
 
     // Загрузка всех групп для выбора
     List<Groups> availableGroups = [];
@@ -212,7 +218,7 @@ class _StudentsTabState extends State<StudentsTab> {
           builder: (context, setState) {
             return AlertDialog(
               title: const Text('Редактировать студента'),
-              content: SingleChildScrollView(
+              content: SingleChildScrollView( // Обертка для прокрутки
                 child: Form(
                   key: formKey,
                   child: Column(
@@ -277,12 +283,7 @@ class _StudentsTabState extends State<StudentsTab> {
                       const SizedBox(height: 16),
                       // Выпадающий список для выбора группы
                       DropdownButtonFormField<Groups>(
-                        value: availableGroups.isNotEmpty 
-                            ? availableGroups.firstWhere(
-                                (g) => g.id == student.groupsId,
-                                orElse: () => availableGroups[0],
-                              )
-                            : null, // null только если список пуст
+                        value: selectedGroup, // Используем selectedGroup
                         decoration: const InputDecoration(labelText: 'Группа'),
                         items: availableGroups.map((group) {
                           return DropdownMenuItem<Groups>(
@@ -291,7 +292,7 @@ class _StudentsTabState extends State<StudentsTab> {
                           );
                         }).toList(),
                         onChanged: (value) {
-                          setState(() {
+                          setState(() { // Используем setState из StatefulBuilder
                             selectedGroup = value;
                           });
                         },
@@ -318,7 +319,7 @@ class _StudentsTabState extends State<StudentsTab> {
 
                       try {
                         // Обновляем данные person
-                        var updatedPerson = student.person!.copyWith(
+                        var updatedPerson = student!.person!.copyWith(
                           firstName: firstName,
                           lastName: lastName,
                           patronymic: patronymic,
@@ -361,81 +362,134 @@ class _StudentsTabState extends State<StudentsTab> {
 
   @override
   Widget build(BuildContext context) {
-    if (isLoading) {
-      return const Center(child: CircularProgressIndicator());
-    }
+    final isMobile = MediaQuery.of(context).size.width < 600;
+    List<Students> displayStudents = students;
 
-    if (errorMessage != null) {
-      return Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(errorMessage!),
-            const SizedBox(height: 20),
-            ElevatedButton(
-              onPressed: _loadAllStudents,
-              child: const Text('Попробовать снова'),
-            ),
-          ],
-        ),
-      );
+    if (_searchController.text.isNotEmpty) {
+      displayStudents = filterStudents(students, _searchController.text);
     }
 
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
+          padding: EdgeInsets.all(isMobile ? 8.0 : 16.0),
+          child: Flex( // Используем Flex для адаптивного расположения
+            direction: isMobile ? Axis.vertical : Axis.horizontal,
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Expanded(
+              Expanded( // Expanded для поля поиска
                 child: TextField(
-                  decoration: const InputDecoration(
-                    labelText: 'Поиск по имени, фамилии, email или группе',
-                    prefixIcon: Icon(Icons.search),
+                  controller: _searchController,
+                  decoration: InputDecoration(
+                    labelText: 'Поиск студентов',
+                    hintText: 'Введите имя, фамилию или группу...',
+                    prefixIcon: const Icon(Icons.search),
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
+                    contentPadding: isMobile ? const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0) : null,
                   ),
-                  onSubmitted: (value) {
-                    _searchStudents(value);
+                  onChanged: (value) {
+                    setState(() {
+                      // Фильтрация будет происходить при построении списка
+                    });
                   },
                 ),
               ),
-              const SizedBox(width: 16),
+              SizedBox(width: isMobile ? 0 : 16.0, height: isMobile ? 8.0 : 0), // Отступ
               ElevatedButton.icon(
                 icon: const Icon(Icons.add),
-                label: const Text('Добавить'),
-                onPressed: _showCreateStudentDialog, // Открываем диалог добавления студента
+                label: Text(isMobile ? 'Добавить' : 'Добавить студента'),
+                onPressed: _showCreateStudentDialog,
+                style: ElevatedButton.styleFrom(
+                  padding: isMobile ? const EdgeInsets.symmetric(horizontal: 12, vertical: 12) : null,
+                  textStyle: isMobile ? const TextStyle(fontSize: 14) : null,
+                ),
               ),
             ],
           ),
         ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: students.length,
-            itemBuilder: (context, index) {
-              final student = students[index];
-              final person = student.person;
+        if (isLoading)
+          const Expanded(child: Center(child: CircularProgressIndicator()))
+        else if (errorMessage != null)
+          Expanded(child: Center(child: Text(errorMessage!)))
+        else if (displayStudents.isEmpty)
+          const Expanded(child: Center(child: Text('Студенты не найдены')))
+        else
+          Expanded(
+            child: ListView.builder(
+              itemCount: displayStudents.length,
+              itemBuilder: (context, index) {
+                final student = displayStudents[index];
+                final person = student.person;
+                final group = student.groups;
+                String fullName = person?.firstName ?? '';
+                if (person?.lastName != null && person!.lastName.isNotEmpty) {
+                  fullName += ' ${person.lastName}';
+                }
+                if (person?.patronymic != null && person!.patronymic!.isNotEmpty) {
+                  fullName += ' ${person.patronymic}';
+                }
 
-              if (person == null) {
-                return ListTile(
-                  title: Text('ID: ${student.id}'),
-                  subtitle: const Text('Данные о человеке отсутствуют'),
+                return Card(
+                  margin: EdgeInsets.symmetric(horizontal: isMobile ? 8.0 : 16.0, vertical: 4.0),
+                  child: ListTile(
+                    contentPadding: isMobile ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8) : null,
+                    title: Text(fullName.isNotEmpty ? fullName : 'Имя не указано'),
+                    subtitle: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        Text('Email: ${person?.email ?? 'Не указан'}'),
+                        Text('Группа: ${group?.name ?? 'Не указана'}'),
+                        if (student.isGroupHead ?? false)
+                          const Text('Староста группы', style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue)),
+                      ],
+                    ),
+                    trailing: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        IconButton(
+                          icon: const Icon(Icons.visibility),
+                          tooltip: 'Посмотреть посещаемость',
+                          onPressed: () {
+                            Navigator.push(
+                              context,
+                              MaterialPageRoute(
+                                builder: (context) => StudentOverallAttendancePage(student: student),
+                              ),
+                            );
+                          },
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.edit),
+                          tooltip: 'Редактировать',
+                          onPressed: () => _showEditStudentDialog(student),
+                        ),
+                      ],
+                    ),
+                  ),
                 );
-              }
-
-              return ListTile(
-                title: Text('${person.firstName} ${person.lastName}'),
-                subtitle: Text('Email: ${person.email ?? 'Не указан'}'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    _showEditStudentDialog(student);
-                  },
-                ),
-              );
-            },
+              },
+            ),
           ),
-        ),
       ],
     );
   }
+}
+
+// Функция filterStudents должна быть определена где-то, например, в search_utils.dart
+// или прямо в этом файле, если она специфична только для этого виджета.
+// Для примера, если она еще не определена:
+List<Students> filterStudents(List<Students> allStudents, String query) {
+  if (query.isEmpty) {
+    return allStudents;
+  }
+  final lowerCaseQuery = query.toLowerCase();
+  return allStudents.where((student) {
+    final person = student.person;
+    final group = student.groups;
+    final fullName = '${person?.firstName ?? ''} ${person?.lastName ?? ''} ${person?.patronymic ?? ''}'.toLowerCase();
+    final groupName = group?.name.toLowerCase() ?? '';
+    return fullName.contains(lowerCaseQuery) || groupName.contains(lowerCaseQuery);
+  }).toList();
 }

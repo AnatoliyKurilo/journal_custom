@@ -1,40 +1,69 @@
 import 'dart:io';
+import 'package:collection/collection.dart';
 import 'package:journal_custom_client/journal_custom_client.dart';
-import 'package:path_provider/path_provider.dart';
 import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
 
-Future<void> exportGroupsToCsv(List<Groups> groups) async {
+// Обновленная функция, принимающая список всех студентов
+Future<void> exportGroupsToCsv(List<Groups> groups, List<Students> allStudents) async {
   try {
     // Создаем заголовки для CSV
     List<List<dynamic>> rows = [
-      ['ID', 'Название группы', 'Куратор', 'Староста']
+      ['ID', 'Название группы', 'Куратор ФИО', 'Староста ФИО']
     ];
 
-    // // Добавляем данные групп
-    // for (var group in groups) {
-    //   rows.add([
-    //     group.id,
-    //     group.name,
-    //     '${group.curator?.person?.firstName ?? ''} ${group.curator?.person?.lastName ?? ''}',
-    //     '${group.groupHead?.person?.firstName ?? ''} ${group.groupHead?.person?.lastName ?? ''}',
-    //   ]);
-    // }
+    for (var group in groups) {
+      String curatorFullName = [
+        group.curator?.person?.lastName ?? '',
+        group.curator?.person?.firstName ?? '',
+        group.curator?.person?.patronymic ?? ''
+      ].where((namePart) => namePart.isNotEmpty).join(' ').trim();
+      if (curatorFullName.isEmpty) curatorFullName = 'Не назначен';
 
-    // Генерируем CSV-строку
+      // Поиск старосты для текущей группы
+      Students? groupHeadStudent;
+      if (group.id != null) {
+        groupHeadStudent = allStudents.firstWhereOrNull( // Используем firstWhereOrNull
+          (student) => student.groupsId == group.id && student.isGroupHead == true,
+        );
+      }
+      
+      String groupHeadFullName = 'Не назначен';
+      if (groupHeadStudent != null && groupHeadStudent.person != null) {
+        groupHeadFullName = [
+          groupHeadStudent.person!.lastName ?? '',
+          groupHeadStudent.person!.firstName ?? '',
+          groupHeadStudent.person!.patronymic ?? ''
+        ].where((namePart) => namePart.isNotEmpty).join(' ').trim();
+        if (groupHeadFullName.isEmpty) groupHeadFullName = 'Не назначен'; // На случай, если у Person нет имени
+      }
+      
+      rows.add([
+        group.id ?? 'N/A',
+        group.name ?? 'Без названия',
+        curatorFullName,
+        groupHeadFullName,
+      ]);
+    }
+
     String csvData = const ListToCsvConverter().convert(rows);
 
-    // Получаем путь для сохранения файла
-    final directory = await getApplicationDocumentsDirectory();
-    final path = '${directory.path}/groups_export.csv';
+    String? outputFilePath = await FilePicker.platform.saveFile(
+      dialogTitle: 'Выберите место для сохранения файла экспорта групп',
+      fileName: 'all_groups_export.csv',
+    );
 
-    // Сохраняем файл
-    final file = File(path);
+    if (outputFilePath == null) {
+      print('Экспорт отменен пользователем.');
+      return;
+    }
+
+    final file = File(outputFilePath);
     await file.writeAsString(csvData);
 
-    print('Файл успешно сохранен: $path');
+    print('Файл успешно сохранен: $outputFilePath');
   } catch (e) {
-    print('Ошибка при экспорте данных: $e');
+    print('Ошибка при экспорте данных всех групп: $e');
   }
 }
 
@@ -43,7 +72,7 @@ Future<void> exportGroupToCsv(Groups group, List<Students> students) async {
     // Фильтруем студентов, которые принадлежат к этой группе
     List<Students> groupStudents = students.where((student) => student.groupsId == group.id).toList();
 
-    // Создаем заголовки для CSV
+    // Создаем заголовки для CSV, соответствующие ожиданиям импорта
     List<List<dynamic>> rows = [
       ['Имя', 'Фамилия', 'Отчество', 'Email', 'Телефон']
     ];
@@ -53,9 +82,9 @@ Future<void> exportGroupToCsv(Groups group, List<Students> students) async {
       rows.add([
         student.person?.firstName ?? '',
         student.person?.lastName ?? '',
-        student.person?.patronymic ?? '', // Добавляем отчество
-        student.person?.email ?? 'Не указан',
-        student.person?.phoneNumber ?? 'Не указан', // Добавляем телефон
+        student.person?.patronymic ?? '', 
+        student.person?.email ?? '', // Если email null, экспортируем пустую строку
+        student.person?.phoneNumber ?? '', // Если телефон null, экспортируем пустую строку
       ]);
     }
 
@@ -78,7 +107,9 @@ Future<void> exportGroupToCsv(Groups group, List<Students> students) async {
     await file.writeAsString(csvData);
 
     print('Файл успешно сохранен: $outputFilePath');
+    // Здесь можно добавить SnackBar для уведомления пользователя в UI
   } catch (e) {
     print('Ошибка при экспорте группы: $e');
+    // Здесь можно добавить SnackBar для уведомления пользователя в UI
   }
 }

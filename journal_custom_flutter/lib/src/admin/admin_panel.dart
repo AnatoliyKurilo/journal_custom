@@ -23,7 +23,7 @@ class _AdminPanelState extends State<AdminPanel> {
     const Tab(text: 'Студенты'), // Новая вкладка
     const Tab(text: 'Настройки'),
   ];
-  
+
   @override
   Widget build(BuildContext context) {
     // Проверка роли администратора
@@ -32,7 +32,7 @@ class _AdminPanelState extends State<AdminPanel> {
     final isGroupHead = sessionManager.signedInUser?.scopeNames.contains('groupHead') ?? false;
     // Проверка роли куратора
     final isCurator = sessionManager.signedInUser?.scopeNames.contains('curator') ?? false;
-    
+
     // Проверяем, имеет ли пользователь права на доступ к админ-панели
     if (!isAdmin) {
       return Scaffold(
@@ -42,23 +42,13 @@ class _AdminPanelState extends State<AdminPanel> {
         ),
       );
     }
-    
+
     return DefaultTabController(
       length: _tabs.length,
       child: Scaffold(
         appBar: AppBar(
           title: const Text('Панель администратора'),
           actions: [
-            // Кнопка перехода на страницу аккаунта
-            // IconButton(
-            //   icon: const Icon(Icons.account_circle),
-            //   tooltip: 'Профиль',
-            //   onPressed: () {
-            //     Navigator.of(context).push(
-            //       MaterialPageRoute(builder: (context) => const AccountPage()),
-            //     );
-            //   },
-            // ),
             // Кнопка перехода на страницу старосты (только для админов, кураторов и старост)
             if (isAdmin || isGroupHead || isCurator)
               IconButton(
@@ -71,7 +61,10 @@ class _AdminPanelState extends State<AdminPanel> {
                 },
               ),
           ],
-          bottom: TabBar(tabs: _tabs),
+          bottom: TabBar(
+            isScrollable: true, // Make TabBar scrollable
+            tabs: _tabs,
+          ),
         ),
         body: TabBarView(
           children: [
@@ -97,30 +90,22 @@ class _UsersTabState extends State<UsersTab> {
   bool isLoading = true;
   List<dynamic> users = [];
   String? errorMessage;
-  
+
   @override
   void initState() {
     super.initState();
     _loadUsers();
   }
-  
+
   Future<void> _loadUsers() async {
     setState(() {
       isLoading = true;
       errorMessage = null;
     });
-    
+
     try {
-      // Здесь будет запрос на получение всех пользователей
-      // Пример:
-      // var result = await client.adminEndpoint.getAllUsers();
-      // setState(() {
-      //   users = result;
-      //   isLoading = false;
-      // });
-      
       // Пока используем заглушку:
-      await Future.delayed(Duration(seconds: 1));
+      await Future.delayed(const Duration(seconds: 1));
       setState(() {
         users = [
           {'id': 1, 'name': 'Администратор', 'email': 'admin@example.com', 'roles': ['admin']},
@@ -129,7 +114,7 @@ class _UsersTabState extends State<UsersTab> {
         ];
         isLoading = false;
       });
-      
+
     } catch (e) {
       setState(() {
         errorMessage = 'Ошибка загрузки: $e';
@@ -137,17 +122,17 @@ class _UsersTabState extends State<UsersTab> {
       });
     }
   }
-  
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
-    
+
     if (errorMessage != null) {
       return Center(child: Text(errorMessage!));
     }
-    
+
     return ListView.builder(
       itemCount: users.length,
       itemBuilder: (context, index) {
@@ -178,22 +163,9 @@ class _UsersTabState extends State<UsersTab> {
   }
 }
 
-// // Заглушки для остальных вкладок
-// class GroupsTab extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return const Center(child: Text('Управление группами'));
-//   }
-// }
-
-// class TeachersTab extends StatelessWidget {
-//   @override
-//   Widget build(BuildContext context) {
-//     return const Center(child: Text('Управление преподавателями'));
-//   }
-// }
-
 class SettingsTab extends StatelessWidget {
+  const SettingsTab({super.key});
+
   @override
   Widget build(BuildContext context) {
     return const Center(child: Text('Настройки системы'));

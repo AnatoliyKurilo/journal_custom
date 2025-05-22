@@ -5,7 +5,7 @@ class SearchUtils {
   static Future<List<Teachers>> searchTeachers(String query) async {
     try {
       // Выполняем поиск преподавателей через сервер
-      return await client.admin.searchTeachers(query: query);
+      return await client.teacherSearch.searchTeachers(query: query);
     } catch (e) {
       throw Exception('Ошибка поиска преподавателей: $e');
     }

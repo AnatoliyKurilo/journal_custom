@@ -25,18 +25,31 @@ Future<void> importGroupFromCsv(BuildContext context) async {
     final csvData = await file.readAsString();
 
     // 3. Преобразуем CSV в список строк - пробуем несколько разделителей
-    // Сначала пытаемся с запятой, затем с точкой с запятой
+    // Используем CsvToListConverter без явного eol для авто-определения конца строки.
     List<List<dynamic>> rows;
     try {
-      rows = const CsvToListConverter(fieldDelimiter: ',').convert(csvData, eol: '\n');
-      // Если после первого преобразования получили только одно поле в каждой строке,
-      // то вероятно разделитель - точка с запятой
+      // Попытка 1: разделитель - запятая
+      rows = const CsvToListConverter(fieldDelimiter: ',').convert(csvData);
+      
+      // Если после первого преобразования в первой строке (если она есть) только одно поле,
+      // это может означать, что фактический разделитель - точка с запятой.
+      // Эта проверка является эвристикой.
       if (rows.isNotEmpty && rows[0].length == 1) {
-        rows = const CsvToListConverter(fieldDelimiter: ';').convert(csvData, eol: '\n');
+        // Попытка 2: разделитель - точка с запятой
+        rows = const CsvToListConverter(fieldDelimiter: ';').convert(csvData);
       }
     } catch (e) {
-      // Если произошла ошибка, пробуем с другим разделителем
-      rows = const CsvToListConverter(fieldDelimiter: ';').convert(csvData, eol: '\n');
+      // Если при разборе с запятой произошла ошибка, пробуем с точкой с запятой.
+      try {
+        rows = const CsvToListConverter(fieldDelimiter: ';').convert(csvData);
+      } catch (fallbackError) {
+        // Если и вторая попытка не удалась, значит, файл либо не CSV,
+        // либо использует другой разделитель, либо серьезно поврежден.
+        // Выбрасываем ошибку, чтобы она была обработана выше в вызывающем коде.
+        print('Ошибка при разборе CSV с разделителем ",": $e');
+        print('Ошибка при разборе CSV с разделителем ";": $fallbackError');
+        throw Exception('Не удалось разобрать CSV файл. Убедитесь, что используются разделители "," или ";".');
+      }
     }
 
     if (rows.isEmpty) {

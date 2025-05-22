@@ -1,0 +1,7 @@
+class: StudentAttendanceInfo
+# serverOnly: true # Эта модель используется только на сервере для передачи данных клиенту
+fields:
+  student: Students
+  isPresent: bool
+  comment: String?
+  attendanceId: int? # ID существующей записи Attendance, если есть

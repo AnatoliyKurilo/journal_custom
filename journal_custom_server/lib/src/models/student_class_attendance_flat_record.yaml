@@ -1,0 +1,7 @@
+class: StudentClassAttendanceFlatRecord
+# serverOnly: true # Используется для передачи комплексных данных клиенту
+fields:
+  student: Students # Включает Person
+  classInfo: Classes # Включает дату, тему, тип и т.д.
+  isPresent: bool
+  comment: String?

@@ -48,7 +48,7 @@ class _TeachersTabState extends State<TeachersTab> {
 
     try {
       // Выполняем поиск преподавателей через сервер
-      var result = await client.admin.searchTeachers(query: query);
+      var result = await client.teacherSearch.searchTeachers(query: query);
       setState(() {
         teachers = result;
         filteredTeachers = result;
@@ -175,8 +175,136 @@ class _TeachersTabState extends State<TeachersTab> {
     );
   }
 
+  Future<void> _showEditTeacherDialog(Teachers teacher) async {
+    final formKey = GlobalKey<FormState>();
+    Person personToEdit = teacher.person ?? Person(firstName: '', lastName: '', email: ''); // Removed non-existent fields
+
+    String firstName = personToEdit.firstName;
+    String lastName = personToEdit.lastName;
+    String? patronymic = personToEdit.patronymic;
+    String email = personToEdit.email; // Removed ?? '' as email is not nullable
+    String? phoneNumber = personToEdit.phoneNumber;
+
+    showDialog(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Text('Редактировать преподавателя'),
+          content: SingleChildScrollView( 
+            child: Form(
+              key: formKey,
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  TextFormField(
+                    initialValue: firstName,
+                    decoration: const InputDecoration(labelText: 'Имя'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Введите имя';
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      firstName = value!;
+                    },
+                  ),
+                  TextFormField(
+                    initialValue: lastName,
+                    decoration: const InputDecoration(labelText: 'Фамилия'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Введите фамилию';
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      lastName = value!;
+                    },
+                  ),
+                  TextFormField(
+                    initialValue: patronymic,
+                    decoration: const InputDecoration(labelText: 'Отчество (необязательно)'),
+                    onSaved: (value) {
+                      patronymic = value;
+                    },
+                  ),
+                  TextFormField(
+                    initialValue: email,
+                    decoration: const InputDecoration(labelText: 'Email'),
+                    validator: (value) {
+                      if (value == null || value.isEmpty) {
+                        return 'Введите email';
+                      }
+                      if (!value.contains('@')) {
+                        return 'Введите корректный email';
+                      }
+                      return null;
+                    },
+                    onSaved: (value) {
+                      email = value!;
+                    },
+                  ),
+                  TextFormField(
+                    initialValue: phoneNumber,
+                    decoration: const InputDecoration(labelText: 'Телефон (необязательно)'),
+                    onSaved: (value) {
+                      phoneNumber = value;
+                    },
+                  ),
+                ],
+              ),
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () {
+                Navigator.of(context).pop();
+              },
+              child: const Text('Отмена'),
+            ),
+            ElevatedButton(
+              onPressed: () async {
+                if (formKey.currentState!.validate()) {
+                  formKey.currentState!.save();
+
+                  final updatedPerson = Person(
+                    id: personToEdit.id, 
+                    firstName: firstName,
+                    lastName: lastName,
+                    patronymic: patronymic,
+                    email: email,
+                    phoneNumber: phoneNumber,
+                    userInfoId: personToEdit.userInfoId, // Keep original userInfoId
+                    userInfo: personToEdit.userInfo, // Keep original userInfo
+                  );
+
+                  try {
+                    await client.admin.updatePerson(updatedPerson); // Pass as positional argument
+                    Navigator.of(context).pop();
+                    _loadTeachers(); 
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Данные преподавателя успешно обновлены')),
+                    );
+                  } catch (e) {
+                    ScaffoldMessenger.of(context).showSnackBar(
+                      SnackBar(content: Text('Ошибка обновления: $e')),
+                    );
+                  }
+                }
+              },
+              child: const Text('Сохранить'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
+    bool isMobile = MediaQuery.of(context).size.width < 600;
+
     if (isLoading) {
       return const Center(child: CircularProgressIndicator());
     }
@@ -197,60 +325,93 @@ class _TeachersTabState extends State<TeachersTab> {
       );
     }
 
-    return Column(
-      children: [
-        Padding(
-          padding: const EdgeInsets.all(16.0),
-          child: Row(
+    return Padding(
+      padding: EdgeInsets.all(isMobile ? 8.0 : 16.0),
+      child: Column(
+        children: [
+          Row(
             children: [
               Expanded(
                 child: TextField(
-                  decoration: const InputDecoration(
+                  decoration: InputDecoration(
                     labelText: 'Поиск преподавателей',
-                    prefixIcon: Icon(Icons.search),
+                    prefixIcon: const Icon(Icons.search),
+                    contentPadding: isMobile ? const EdgeInsets.symmetric(horizontal: 10, vertical: 8) : null,
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(8.0),
+                    ),
                   ),
-                  onSubmitted: (value) {
-                    _searchTeachers(value); // Выполняем поиск через сервер
+                  onChanged: (value) {
+                    // Вызываем _searchTeachers при изменении текста
+                    _searchTeachers(value);
                   },
                 ),
               ),
-              const SizedBox(width: 16),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.add),
-                label: const Text('Добавить'),
-                onPressed: _showCreateTeacherDialog, // Открываем диалог добавления преподавателя
-              ),
+              if (isMobile)
+                IconButton(
+                  icon: const Icon(Icons.add),
+                  onPressed: _showCreateTeacherDialog,
+                  tooltip: 'Добавить преподавателя',
+                )
             ],
           ),
-        ),
-        Expanded(
-          child: ListView.builder(
-            itemCount: filteredTeachers.length,
-            itemBuilder: (context, index) {
-              final teacher = filteredTeachers[index];
-              final person = teacher.person;
-
-              if (person == null) {
-                return ListTile(
-                  title: Text('ID: ${teacher.id}'),
-                  subtitle: const Text('Данные о человеке отсутствуют'),
-                );
-              }
-
-              return ListTile(
-                title: Text('${person.firstName} ${person.lastName}'),
-                subtitle: Text('Email: ${person.email ?? 'Не указан'}'),
-                trailing: IconButton(
-                  icon: const Icon(Icons.edit),
-                  onPressed: () {
-                    // Открыть диалог редактирования преподавателя
-                  },
+          const SizedBox(height: 10),
+          if (!isMobile)
+            Align(
+              alignment: Alignment.centerRight,
+              child: ElevatedButton.icon(
+                icon: const Icon(Icons.add),
+                label: const Text('Добавить преподавателя'),
+                onPressed: _showCreateTeacherDialog,
+                style: ElevatedButton.styleFrom(
+                  padding: isMobile ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8) : null,
                 ),
-              );
-            },
+              ),
+            ),
+          const SizedBox(height: 10),
+          Expanded(
+            child: filteredTeachers.isEmpty
+                ? const Center(child: Text('Преподаватели не найдены'))
+                : ListView.builder(
+                    itemCount: filteredTeachers.length,
+                    itemBuilder: (context, index) {
+                      final teacher = filteredTeachers[index];
+                      final person = teacher.person;
+                      // Construct full name including patronymic if available
+                      String fullName = person?.firstName ?? '';
+                      if (person?.lastName != null && person!.lastName.isNotEmpty) {
+                        fullName += ' ${person.lastName}';
+                      }
+                      if (person?.patronymic != null && person!.patronymic!.isNotEmpty) {
+                        fullName += ' ${person.patronymic}';
+                      }
+                      
+                      return Card(
+                        margin: const EdgeInsets.symmetric(vertical: 4.0),
+                        child: ListTile(
+                          contentPadding: isMobile ? const EdgeInsets.symmetric(horizontal: 12, vertical: 8) : null,
+                          title: Text(fullName.isNotEmpty ? fullName : 'Имя не указано'),
+                          subtitle: Text('Email: ${person?.email ?? 'Не указан'}'),
+                          trailing: IconButton( // Added IconButton for editing
+                            icon: const Icon(Icons.edit),
+                            onPressed: () {
+                              if (person != null) {
+                                _showEditTeacherDialog(teacher);
+                              } else {
+                                ScaffoldMessenger.of(context).showSnackBar(
+                                  const SnackBar(content: Text('Невозможно редактировать: данные преподавателя отсутствуют.')),
+                                );
+                              }
+                            },
+                            tooltip: 'Редактировать',
+                          ),
+                        ),
+                      );
+                    },
+                  ),
           ),
-        ),
-      ],
+        ],
+      ),
     );
   }
 }

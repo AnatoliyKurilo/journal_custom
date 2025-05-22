@@ -5,5 +5,7 @@ fields:
   # studentId: int, relation(parent=students)
   classes: Classes?, relation
   students: Students?, relation
-  status: String
+  # status: String
+  isPresent: bool # true - присутствовал, false - отсутствовал
+
   comment: String?

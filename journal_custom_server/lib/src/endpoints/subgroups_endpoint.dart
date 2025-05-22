@@ -386,4 +386,39 @@ class SubgroupsEndpoint extends Endpoint {
     );
     return deleteCount.isNotEmpty; // Возвращает true, если строка была удалена
   }
+
+  // Метод для поиска подгрупп
+  Future<List<Subgroups>> searchSubgroups(Session session, {required String query}) async {
+    // Убираем лишние пробелы и приводим строку к нижнему регистру
+    final trimmedQuery = query.trim().toLowerCase();
+
+    // Если строка запроса пуста, возвращаем все подгруппы
+    if (trimmedQuery.isEmpty) {
+      return await Subgroups.db.find(
+        session,
+        orderBy: (t) => t.name, // Сортировка по названию
+        orderDescending: false,
+      );
+    }
+
+    // Разделяем строку запроса на слова
+    final tokens = trimmedQuery.split(RegExp(r'\s+'));
+
+    // Создаем условия для поиска
+    var conditions = <Expression<dynamic>>[];
+    for (var token in tokens) {
+      conditions.add(Subgroups.t.name.ilike('%$token%')); // Поиск по названию
+    }
+
+    // Объединяем условия через OR
+    var whereClause = conditions.reduce((value, element) => value | element);
+
+    // Выполняем запрос с фильтром
+    return await Subgroups.db.find(
+      session,
+      where: (t) => whereClause,
+      orderBy: (t) => t.name, // Сортировка по названию
+      orderDescending: false,
+    );
+  }
 }

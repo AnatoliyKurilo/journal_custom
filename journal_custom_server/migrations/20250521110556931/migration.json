@@ -1,0 +1,114 @@
+{
+  "actions": [
+    {
+      "type": "deleteTable",
+      "deleteTable": "attendance"
+    },
+    {
+      "type": "createTable",
+      "createTable": {
+        "name": "attendance",
+        "dartName": "Attendance",
+        "module": "journal_custom",
+        "schema": "public",
+        "columns": [
+          {
+            "name": "id",
+            "columnType": 6,
+            "isNullable": false,
+            "columnDefault": "nextval('attendance_id_seq'::regclass)",
+            "dartType": "int?"
+          },
+          {
+            "name": "classesId",
+            "columnType": 6,
+            "isNullable": false,
+            "dartType": "int"
+          },
+          {
+            "name": "studentsId",
+            "columnType": 6,
+            "isNullable": false,
+            "dartType": "int"
+          },
+          {
+            "name": "isPresent",
+            "columnType": 1,
+            "isNullable": false,
+            "dartType": "bool"
+          },
+          {
+            "name": "comment",
+            "columnType": 0,
+            "isNullable": true,
+            "dartType": "String?"
+          }
+        ],
+        "foreignKeys": [
+          {
+            "constraintName": "attendance_fk_0",
+            "columns": [
+              "classesId"
+            ],
+            "referenceTable": "classes",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          },
+          {
+            "constraintName": "attendance_fk_1",
+            "columns": [
+              "studentsId"
+            ],
+            "referenceTable": "students",
+            "referenceTableSchema": "public",
+            "referenceColumns": [
+              "id"
+            ],
+            "onUpdate": 3,
+            "onDelete": 3
+          }
+        ],
+        "indexes": [
+          {
+            "indexName": "attendance_pkey",
+            "elements": [
+              {
+                "type": 0,
+                "definition": "id"
+              }
+            ],
+            "type": "btree",
+            "isUnique": true,
+            "isPrimary": true
+          }
+        ],
+        "managed": true
+      }
+    }
+  ],
+  "warnings": [
+    {
+      "type": "columnDropped",
+      "message": "Column \"status\" of table \"attendance\" will be dropped.",
+      "table": "attendance",
+      "columns": [
+        "status"
+      ],
+      "destrucive": true
+    },
+    {
+      "type": "tableDropped",
+      "message": "One or more columns are added to table \"attendance\" which cannot be added in a table migration. The complete table will be deleted and recreated.",
+      "table": "attendance",
+      "columns": [
+        "isPresent"
+      ],
+      "destrucive": true
+    }
+  ],
+  "migrationApiVersion": 1
+}

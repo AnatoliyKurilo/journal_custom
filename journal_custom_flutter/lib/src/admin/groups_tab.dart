@@ -3,9 +3,35 @@ import 'package:journal_custom_client/journal_custom_client.dart';
 import 'package:journal_custom_flutter/src/admin/filework/export_groups_csv.dart';
 import 'package:journal_custom_flutter/src/admin/filework/import_groups_csv.dart';
 import 'package:journal_custom_flutter/src/serverpod_client.dart';
-import 'package:journal_custom_flutter/src/utils/search_utils.dart';
+import 'package:collection/collection.dart'; // Убедитесь, что этот импорт есть, если используется firstWhereOrNull
+
+// Функция для фильтрации студентов по ФИО
+List<Students> filterStudents(List<Students> allStudents, String query) {
+  if (query.isEmpty) {
+    return allStudents;
+  }
+  final lowerCaseQuery = query.toLowerCase();
+  return allStudents.where((student) {
+    final person = student.person;
+    if (person == null) return false;
+
+    // Собираем ФИО, обрабатывая возможные null значения
+    final surname = person.lastName?.toLowerCase() ?? '';
+    final name = person.firstName?.toLowerCase() ?? '';
+    final patronymic = person.patronymic?.toLowerCase() ?? '';
+
+    // Проверяем вхождение по каждому полю отдельно или по полному ФИО
+    // Это более гибко, если пользователь ищет только по фамилии или имени
+    return surname.contains(lowerCaseQuery) ||
+           name.contains(lowerCaseQuery) ||
+           patronymic.contains(lowerCaseQuery) ||
+           '$surname $name $patronymic'.trim().contains(lowerCaseQuery);
+  }).toList();
+}
 
 class GroupsTab extends StatefulWidget {
+  const GroupsTab({super.key}); // Используем super.key
+
   @override
   _GroupsTabState createState() => _GroupsTabState();
 }
@@ -14,29 +40,28 @@ class _GroupsTabState extends State<GroupsTab> {
   bool isLoading = true;
   List<Groups> groups = [];
   List<Teachers> teachers = [];
-  List<Teachers> filteredTeachers = []; // Эта переменная используется в _showSelectCuratorDialog
   List<Students> students = [];
   String? errorMessage;
-  String? _currentGroupsSearchQuery; // Новая переменная для хранения текущего поискового запроса групп
+  String? _currentGroupsSearchQuery;
+  final TextEditingController _groupSearchController = TextEditingController(); // Контроллер для поиска
 
   @override
   void initState() {
     super.initState();
-    _loadGroups(); // Начальная загрузка без поискового запроса
+    _loadGroups();
   }
 
-  Future<void> _searchTeachers(String query) async {
+  Future<void> _searchTeachersInDialog(String query, Function(List<Teachers>) setStateCallback) async {
     setState(() {
       isLoading = true;
       errorMessage = null;
     });
 
     try {
-      // Выполняем поиск преподавателей через сервер
-      var result = await client.admin.searchTeachers(query: query);
+      var result = await client.teacherSearch.searchTeachers(query: query);
       setState(() {
         teachers = result;
-        filteredTeachers = result;
+        setStateCallback(result);
         isLoading = false;
       });
     } catch (e) {
@@ -47,11 +72,7 @@ class _GroupsTabState extends State<GroupsTab> {
     }
   }
 
-
   Future<void> _loadGroups({String? query}) async {
-    // Если новый поисковый запрос предоставлен (из поля поиска), обновляем _currentGroupsSearchQuery.
-    // Если query равен null (например, при вызове из _updateGroup или initState),
-    // _currentGroupsSearchQuery сохраняет свое предыдущее значение.
     if (query != null) {
       _currentGroupsSearchQuery = query;
     }
@@ -62,25 +83,23 @@ class _GroupsTabState extends State<GroupsTab> {
     });
 
     try {
-      // Используем _currentGroupsSearchQuery для загрузки или поиска групп
       var loadedGroups = (_currentGroupsSearchQuery == null || _currentGroupsSearchQuery!.isEmpty)
           ? await client.admin.getAllGroups()
           : await client.admin.searchGroups(query: _currentGroupsSearchQuery!);
 
-      // Загружаем полный список преподавателей и студентов, так как они нужны для выбора и отображения
       var loadedTeachers = await client.admin.getAllTeachers();
       var loadedStudents = await client.admin.getAllStudents();
 
-      if (mounted) { // Проверка, что виджет все еще в дереве
+      if (mounted) {
         setState(() {
-          groups = loadedGroups;
-          teachers = loadedTeachers;
-          students = loadedStudents;
+          this.groups = loadedGroups; // Используем this. для ясности, если есть локальные переменные с тем же именем
+          this.teachers = loadedTeachers;
+          this.students = loadedStudents;
           isLoading = false;
         });
       }
     } catch (e) {
-      if (mounted) { // Проверка, что виджет все еще в дереве
+      if (mounted) {
         setState(() {
           errorMessage = 'Ошибка загрузки данных: $e';
           isLoading = false;
@@ -91,10 +110,7 @@ class _GroupsTabState extends State<GroupsTab> {
 
   Future<void> _updateGroup(Groups group, {int? curatorId, int? groupHeadId}) async {
     try {
-      // Измените вызов метода updateGroup, чтобы он соответствовал сигнатуре на сервере
       await client.admin.updateGroup(group, newCuratorId: curatorId, newGroupHeadId: groupHeadId);
-      
-      // Перезагружаем данные, используя текущий сохраненный поисковый запрос для групп
       await _loadGroups(query: _currentGroupsSearchQuery);
 
       if (mounted) {
@@ -146,18 +162,21 @@ class _GroupsTabState extends State<GroupsTab> {
               onPressed: () async {
                 if (formKey.currentState!.validate()) {
                   formKey.currentState!.save();
-
                   try {
-                    await client.admin.createGroup(groupName, null); // Replace 'null' with appropriate values if needed
+                    await client.admin.createGroup(groupName, null); // curatorId пока null
                     Navigator.of(context).pop();
                     _loadGroups(); // Обновляем список групп
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Группа успешно добавлена')),
-                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Группа успешно добавлена')),
+                      );
+                    }
                   } catch (e) {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      SnackBar(content: Text('Ошибка: $e')),
-                    );
+                    if (mounted) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        SnackBar(content: Text('Ошибка: $e')),
+                      );
+                    }
                   }
                 }
               },
@@ -202,9 +221,8 @@ class _GroupsTabState extends State<GroupsTab> {
                       onSubmitted: (value) async {
                         searchQuery = value.toLowerCase();
                         try {
-                          // Выполняем поиск преподавателей через сервер
-                          filteredTeachers = await client.admin.searchTeachers(query: searchQuery);
-                          setState(() {}); // Обновляем состояние для отображения результатов
+                          filteredTeachers = await client.teacherSearch.searchTeachers(query: searchQuery);
+                          setState(() {});
                         } catch (e) {
                           ScaffoldMessenger.of(context).showSnackBar(
                             SnackBar(content: Text('Ошибка поиска: $e')),
@@ -245,7 +263,8 @@ class _GroupsTabState extends State<GroupsTab> {
 
   Future<void> _showSelectGroupHeadDialog(Groups group) async {
     String searchQuery = '';
-    List<Students> filteredStudents = students.where((student) => student.groupsId == group.id).toList();
+    List<Students> groupStudents = students.where((student) => student.groupsId == group.id).toList();
+    List<Students> dialogFilteredStudents = List.from(groupStudents);
 
     await showGeneralDialog(
       context: context,
@@ -253,15 +272,13 @@ class _GroupsTabState extends State<GroupsTab> {
       barrierLabel: 'Выбор старосты',
       pageBuilder: (context, animation, secondaryAnimation) {
         return StatefulBuilder(
-          builder: (context, setState) {
+          builder: (context, setDialogState) {
             return Scaffold(
               appBar: AppBar(
                 title: const Text('Выберите старосту'),
                 leading: IconButton(
                   icon: const Icon(Icons.close),
-                  onPressed: () {
-                    Navigator.of(context).pop();
-                  },
+                  onPressed: () => Navigator.of(context).pop(),
                 ),
               ),
               body: Padding(
@@ -274,42 +291,28 @@ class _GroupsTabState extends State<GroupsTab> {
                         prefixIcon: Icon(Icons.search),
                       ),
                       onChanged: (value) {
-                        // Реализуем локальный поиск по студентам группы
-                        setState(() {
-                          searchQuery = value.toLowerCase();
-                          filteredStudents = students.where((student) => 
-                            student.groupsId == group.id && 
-                            (student.person?.firstName?.toLowerCase().contains(searchQuery) == true || 
-                             student.person?.lastName?.toLowerCase().contains(searchQuery) == true ||
-                             student.person?.email?.toLowerCase().contains(searchQuery) == true)
-                          ).toList();
+                        searchQuery = value.toLowerCase();
+                        setDialogState(() {
+                          dialogFilteredStudents = filterStudents(groupStudents, searchQuery);
                         });
                       },
                     ),
                     const SizedBox(height: 8),
                     Expanded(
-                      child: filteredStudents.isEmpty
-                          ? const Center(child: Text('Студенты не найдены'))
-                          : ListView.builder(
-                              itemCount: filteredStudents.length,
-                              itemBuilder: (context, index) {
-                                final student = filteredStudents[index];
-                                final person = student.person;
-                                final bool isCurrentHead = student.isGroupHead == true;
-                                
-                                return ListTile(
-                                  title: Text('${person?.firstName ?? ''} ${person?.lastName ?? ''}'),
-                                  subtitle: Text('Email: ${person?.email ?? 'Не указан'}'),
-                                  // Добавляем индикатор текущего старосты
-                                  trailing: isCurrentHead 
-                                    ? const Icon(Icons.star, color: Colors.amber) 
-                                    : null,
-                                  onTap: () {
-                                    Navigator.of(context).pop(student.id);
-                                  },
-                                );
-                              },
-                            ),
+                      child: ListView.builder(
+                        itemCount: dialogFilteredStudents.length,
+                        itemBuilder: (context, index) {
+                          final student = dialogFilteredStudents[index];
+                          final person = student.person;
+                          return ListTile(
+                            title: Text('${person?.firstName ?? ''} ${person?.lastName ?? ''}'.trim()),
+                            subtitle: Text('Email: ${person?.email ?? 'Не указан'}'),
+                            onTap: () {
+                              Navigator.of(context).pop(student.id);
+                            },
+                          );
+                        },
+                      ),
                     ),
                   ],
                 ),
@@ -325,11 +328,10 @@ class _GroupsTabState extends State<GroupsTab> {
     });
   }
 
-  // Метод для показа диалога подтверждения удаления группы
   Future<void> _showDeleteGroupConfirmation(Groups group) async {
     return showDialog(
       context: context,
-      builder: (dialogContext) { // Используем отдельный dialogContext
+      builder: (dialogContext) {
         return AlertDialog(
           title: const Text('Удаление группы'),
           content: Text(
@@ -339,7 +341,7 @@ class _GroupsTabState extends State<GroupsTab> {
           actions: [
             TextButton(
               onPressed: () {
-                Navigator.of(dialogContext).pop(); // Используем dialogContext
+                Navigator.of(dialogContext).pop();
               },
               child: const Text('Отмена'),
             ),
@@ -348,21 +350,17 @@ class _GroupsTabState extends State<GroupsTab> {
                 foregroundColor: Colors.red,
               ),
               onPressed: () async {
-                // Закрываем диалог до начала асинхронных операций
                 Navigator.of(dialogContext).pop();
                 
                 try {
-                  // Показываем индикатор загрузки, если виджет всё еще в дереве
                   if (mounted) {
                     ScaffoldMessenger.of(context).showSnackBar(
                       const SnackBar(content: Text('Удаление группы...'))
                     );
                   }
                   
-                  // Вызываем метод удаления группы
                   bool success = await client.admin.deleteGroup(group.id!);
                   
-                  // Проверяем, что виджет всё еще в дереве, прежде чем обновить UI
                   if (success && mounted) {
                     await _loadGroups(query: _currentGroupsSearchQuery);
                     
@@ -415,119 +413,125 @@ class _GroupsTabState extends State<GroupsTab> {
     return Column(
       children: [
         Padding(
-          padding: const EdgeInsets.all(16.0),
+          padding: const EdgeInsets.all(8.0),
           child: Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Expanded(
                 child: TextField(
-                  decoration: const InputDecoration(
+                  controller: _groupSearchController,
+                  decoration: InputDecoration(
                     labelText: 'Поиск групп',
-                    prefixIcon: Icon(Icons.search),
+                    prefixIcon: const Icon(Icons.search),
+                    suffixIcon: _groupSearchController.text.isNotEmpty
+                        ? IconButton(
+                            icon: const Icon(Icons.clear),
+                            onPressed: () {
+                              _groupSearchController.clear();
+                              _loadGroups(query: '');
+                            },
+                          )
+                        : null,
                   ),
-                  onSubmitted: (value) {
-                    // При поиске передаем новое значение query,
-                    // _loadGroups обновит _currentGroupsSearchQuery
-                    _loadGroups(query: value); 
+                  onChanged: (value) {
+                    _loadGroups(query: value);
                   },
                 ),
               ),
-              const SizedBox(width: 16),
-              ElevatedButton.icon(
+              const SizedBox(width: 8),
+              IconButton(
                 icon: const Icon(Icons.add),
-                label: const Text('Добавить группу'),
-                onPressed: _showCreateGroupDialog, // Открываем диалог добавления группы
+                tooltip: 'Добавить группу',
+                onPressed: _showCreateGroupDialog,
               ),
-              const SizedBox(width: 16),
-              ElevatedButton.icon(
-                icon: const Icon(Icons.upload_file),
-                label: const Text('Импорт из CSV'),
+              IconButton(
+                icon: const Icon(Icons.file_upload),
                 onPressed: () async {
-                  await importGroupFromCsv(context); // Передаем BuildContext
-                  await _loadGroups(); // Обновляем список групп после импорта
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    const SnackBar(content: Text('Импорт данных завершен')),
-                  );
+                  await importGroupFromCsv(context);
+                  _loadGroups(); 
                 },
+                tooltip: 'Импорт группы из CSV',
+              ),
+              IconButton(
+                icon: const Icon(Icons.download),
+                onPressed: () async {
+                  await exportGroupsToCsv(groups, students);
+                  if (mounted) {
+                     ScaffoldMessenger.of(context).showSnackBar(
+                      const SnackBar(content: Text('Экспорт всех групп запущен')),
+                    );
+                  }
+                },
+                tooltip: 'Экспорт всех групп в CSV',
               ),
             ],
           ),
         ),
         Expanded(
-          child: ListView.builder(
+          child: groups.isEmpty
+              ? const Center(child: Text('Группы не найдены'))
+              : ListView.builder(
             itemCount: groups.length,
             itemBuilder: (context, index) {
               final group = groups[index];
-              // Ищем старосту в общем списке студентов для данной группы
-              Students? groupHeadStudent;
-              try {
-                groupHeadStudent = students.firstWhere(
-                  (student) => student.groupsId == group.id && student.isGroupHead == true,
-                );
-              } catch (e) {
-                // Если староста не найден (firstWhere выбросит исключение), оставляем groupHeadStudent null
-                groupHeadStudent = null;
-              }
+              final curator = teachers.firstWhereOrNull((t) => t.id == group.curatorId);
+              final groupHeadStudent = students.firstWhereOrNull(
+                (s) => s.groupsId == group.id && s.isGroupHead == true,
+              );
 
-              return Card(
-                margin: const EdgeInsets.all(8.0),
-                child: Padding(
-                  padding: const EdgeInsets.all(16.0),
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Text(
-                        'Группа: ${group.name}',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
-                      ),
-                      const SizedBox(height: 8),
-                      ListTile(
-                        title: const Text('Куратор'),
-                        subtitle: Text(
-                          teachers.firstWhere(
-                            (teacher) => teacher.id == group.curatorId,
-                            orElse: () => Teachers(personId: 0, person: Person(firstName: 'Не назначен', lastName: '', email: '')),
-                          ).person != null ? '${teachers.firstWhere((teacher) => teacher.id == group.curatorId, orElse: () => Teachers(personId: 0, person: Person(firstName: 'Не назначен', lastName: '', email: ''))).person!.firstName} ${teachers.firstWhere((teacher) => teacher.id == group.curatorId, orElse: () => Teachers(personId: 0, person: Person(firstName: 'Не назначен', lastName: '', email: ''))).person!.lastName}' : 'Не назначен',
-                        ),
-                        onTap: () {
-                          _showSelectCuratorDialog(group); // Открываем диалог выбора куратора
-                        },
-                      ),
-                      const SizedBox(height: 8),
-                      ListTile(
-                        title: const Text('Староста'),
-                        subtitle: Text(
-                          groupHeadStudent?.person != null
-                              ? '${groupHeadStudent!.person!.firstName} ${groupHeadStudent.person!.lastName}'
-                              : 'Не назначен',
-                        ),
-                        onTap: () {
-                          _showSelectGroupHeadDialog(group); // Открываем диалог выбора старосты
-                        },
-                      ),
-                      ListTile(
-                        title: const Text('Экспорт группы'),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.download),
-                          onPressed: () async {
-                            await exportGroupToCsv(group, students); // Экспортируем данные группы
-                            ScaffoldMessenger.of(context).showSnackBar(
-                              SnackBar(content: Text('Группа "${group.name}" успешно экспортирована')),
-                            );
-                          },
-                        ),
-                      ),
-                      // Новая кнопка для удаления группы
-                      ListTile(
-                        title: const Text('Удалить группу'),
-                        trailing: IconButton(
-                          icon: const Icon(Icons.delete, color: Colors.red),
-                          onPressed: () => _showDeleteGroupConfirmation(group),
-                        ),
-                      ),
-                    ],
-                  ),
+              return ExpansionTile(
+                title: Text(group.name, style: const TextStyle(fontWeight: FontWeight.bold)),
+                subtitle: Text(
+                  'Куратор: ${curator?.person != null ? '${curator!.person!.firstName} ${curator.person!.lastName}' : 'Не назначен'}\n'
+                  'Староста: ${groupHeadStudent?.person != null ? '${groupHeadStudent!.person!.firstName} ${groupHeadStudent.person!.lastName}' : 'Не назначен'}'
                 ),
+                children: [
+                  ListTile(
+                    title: const Text('Куратор'),
+                    subtitle: Text(
+                       curator?.person != null ? '${curator!.person!.firstName} ${curator.person!.lastName}' : 'Не назначен',
+                    ),
+                    trailing: const Icon(Icons.edit_outlined),
+                    onTap: () {
+                      _showSelectCuratorDialog(group);
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('Староста'),
+                    subtitle: Text(
+                      groupHeadStudent?.person != null
+                          ? '${groupHeadStudent!.person!.firstName} ${groupHeadStudent.person!.lastName}'
+                          : 'Не назначен',
+                    ),
+                    trailing: const Icon(Icons.edit_outlined),
+                    onTap: () {
+                      _showSelectGroupHeadDialog(group);
+                    },
+                  ),
+                  ListTile(
+                    title: const Text('Экспорт группы'),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.download_outlined),
+                      onPressed: () async {
+                        await exportGroupToCsv(group, students);
+                        if (mounted) {
+                           ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Группа "${group.name}" экспортирована')),
+                          );
+                        }
+                      },
+                    ),
+                  ),
+                  ListTile(
+                    title: const Text('Удалить группу', style: TextStyle(color: Colors.red)),
+                    trailing: IconButton(
+                      icon: const Icon(Icons.delete_forever_outlined, color: Colors.red),
+                      onPressed: () {
+                        _showDeleteGroupConfirmation(group);
+                      },
+                    ),
+                    tileColor: Colors.red.withOpacity(0.05),
+                  ),
+                ],
               );
             },
           ),
