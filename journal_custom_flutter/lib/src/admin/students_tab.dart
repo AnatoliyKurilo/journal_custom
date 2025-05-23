@@ -193,32 +193,48 @@ class _StudentsTabState extends State<StudentsTab> {
     );
   }
 
-  Future<void> _showEditStudentDialog(Students? student) async { 
+  Future<void> _showEditStudentDialog(Students? student) async {
     final formKey = GlobalKey<FormState>();
     String firstName = student?.person?.firstName ?? '';
     String lastName = student?.person?.lastName ?? '';
     String? patronymic = student?.person?.patronymic;
     String email = student?.person?.email ?? '';
     String? phoneNumber = student?.person?.phoneNumber;
-    Groups? selectedGroup = student?.groups; // Инициализируем выбранную группу
-    final isMobile = MediaQuery.of(context).size.width < 600;
+    Groups? selectedGroup; // Инициализируем здесь
 
     // Загрузка всех групп для выбора
     List<Groups> availableGroups = [];
+    bool groupsLoadingError = false;
     try {
       availableGroups = await client.admin.getAllGroups();
+      if (student?.groupsId != null && availableGroups.isNotEmpty) {
+        // Пытаемся найти текущую группу студента в списке доступных групп
+        selectedGroup = availableGroups.firstWhere(
+          (g) => g.id == student!.groupsId,
+          orElse: () => Groups(id: -1, name: 'Неизвестная группа'), // Возвращаем группу по умолчанию
+        );
+      } else if (student?.groups != null) {
+        // Если группы загрузить не удалось, но у студента есть объект группы (маловероятно, если groupsId есть)
+        // Это запасной вариант, но лучше полагаться на availableGroups
+        selectedGroup = student!.groups;
+      }
     } catch (e) {
-      print('Ошибка при загрузке списка групп: $e');
+      groupsLoadingError = true;
+      if (mounted) { // Проверяем, смонтирован ли виджет
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text('Ошибка при загрузке списка групп: $e')),
+        );
+      }
     }
 
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        return StatefulBuilder(
-          builder: (context, setState) {
+        return StatefulBuilder( // Используем StatefulBuilder для обновления состояния внутри диалога
+          builder: (context, setDialogState) { // Переименовываем setState в setDialogState
             return AlertDialog(
               title: const Text('Редактировать студента'),
-              content: SingleChildScrollView( // Обертка для прокрутки
+              content: SingleChildScrollView(
                 child: Form(
                   key: formKey,
                   child: Column(
@@ -281,26 +297,30 @@ class _StudentsTabState extends State<StudentsTab> {
                         },
                       ),
                       const SizedBox(height: 16),
-                      // Выпадающий список для выбора группы
-                      DropdownButtonFormField<Groups>(
-                        value: selectedGroup, // Используем selectedGroup
-                        decoration: const InputDecoration(labelText: 'Группа'),
-                        items: availableGroups.map((group) {
-                          return DropdownMenuItem<Groups>(
-                            value: group,
-                            child: Text(group.name),
-                          );
-                        }).toList(),
-                        onChanged: (value) {
-                          setState(() { // Используем setState из StatefulBuilder
-                            selectedGroup = value;
-                          });
-                        },
-                        validator: (value) {
-                          if (value == null) return 'Выберите группу';
-                          return null;
-                        },
-                      ),
+                      if (groupsLoadingError)
+                        const Text('Не удалось загрузить список групп.', style: TextStyle(color: Colors.red))
+                      else if (availableGroups.isNotEmpty)
+                        DropdownButtonFormField<Groups>(
+                          value: selectedGroup,
+                          decoration: const InputDecoration(labelText: 'Группа'),
+                          items: availableGroups.map((group) {
+                            return DropdownMenuItem<Groups>(
+                              value: group,
+                              child: Text(group.name),
+                            );
+                          }).toList(),
+                          onChanged: (value) {
+                            setDialogState(() { // Используем setDialogState
+                              selectedGroup = value;
+                            });
+                          },
+                          validator: (value) {
+                            if (value == null) return 'Выберите группу';
+                            return null;
+                          },
+                        )
+                      else
+                        Text(student?.groups?.name ?? 'Группа не назначена (список групп пуст)'),
                     ],
                   ),
                 ),
@@ -317,9 +337,17 @@ class _StudentsTabState extends State<StudentsTab> {
                     if (formKey.currentState!.validate()) {
                       formKey.currentState!.save();
 
+                      if (student == null || student.person == null) {
+                        if (mounted) {
+                           ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Ошибка: Данные студента или персональные данные отсутствуют.')),
+                          );
+                        }
+                        return;
+                      }
+
                       try {
-                        // Обновляем данные person
-                        var updatedPerson = student!.person!.copyWith(
+                        var updatedPerson = student.person!.copyWith(
                           firstName: firstName,
                           lastName: lastName,
                           patronymic: patronymic,
@@ -327,26 +355,36 @@ class _StudentsTabState extends State<StudentsTab> {
                           phoneNumber: phoneNumber,
                         );
                         
-                        // Сначала обновляем запись Person
                         await client.admin.updatePerson(updatedPerson);
                         
-                        // Затем обновляем запись Student с новой группой, если она изменилась
-                        if (selectedGroup != null && selectedGroup!.id != student.groupsId) {
+                        if (selectedGroup != null && selectedGroup?.id != student.groupsId) {
                           var updatedStudent = student.copyWith(
-                            groupsId: selectedGroup!.id!,
+                            groupsId: selectedGroup?.id!,
+                            // groups: selectedGroup, // Serverpod автоматически обновит связь по groupsId
+                          );
+                          await client.admin.updateStudent(updatedStudent);
+                        } else if (selectedGroup == null && student.groupsId != null) {
+                          // Если группа была удалена (стала null), а раньше была
+                           var updatedStudent = student.copyWith(
+                            groupsId: null, // Устанавливаем null
+                            // groups: null, 
                           );
                           await client.admin.updateStudent(updatedStudent);
                         }
                         
-                        Navigator.of(context).pop();
-                        _loadAllStudents(); // Обновляем список студентов
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          const SnackBar(content: Text('Данные студента успешно обновлены')),
-                        );
+                        if (mounted) {
+                          Navigator.of(context).pop();
+                          _loadAllStudents(); 
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            const SnackBar(content: Text('Данные студента успешно обновлены')),
+                          );
+                        }
                       } catch (e) {
-                        ScaffoldMessenger.of(context).showSnackBar(
-                          SnackBar(content: Text('Ошибка: $e')),
-                        );
+                        if (mounted) {
+                          ScaffoldMessenger.of(context).showSnackBar(
+                            SnackBar(content: Text('Ошибка обновления: $e')),
+                          );
+                        }
                       }
                     }
                   },

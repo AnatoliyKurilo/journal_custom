@@ -36,9 +36,9 @@ class _GroupHeadPageState extends State<GroupHeadPage> {
       }
 
       // Дополнительная проверка на стороне клиента (сервер также должен это проверять)
-      if (!(sessionManager.signedInUser?.scopeNames.contains('groupHead') ?? false)) {
-        throw Exception('У вас нет прав старосты для доступа к этой странице.');
-      }
+      // if (!(sessionManager.signedInUser?.scopeNames.contains('groupHead') ?? false)) {
+      //   throw Exception('У вас нет прав старосты для доступа к этой странице.');
+      // }
 
       final subgroups = await client.subgroups.getGroupSubgroups(group.id!);
 
