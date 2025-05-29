@@ -1,3 +1,4 @@
+import 'dart:convert'; // Для utf8
 import 'dart:io';
 import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
@@ -15,51 +16,91 @@ Future<void> importGroupFromCsv(BuildContext context) async {
     );
 
     if (result == null) {
-      // Пользователь отменил выбор файла
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Выбор файла отменен'))
+      );
       return;
     }
 
     // 2. Получаем путь к выбранному файлу и читаем его содержимое
     final filePath = result.files.single.path!;
     final file = File(filePath);
-    final csvData = await file.readAsString();
+    // Читаем как байты и декодируем в UTF-8 для явности
+    final fileBytes = await file.readAsBytes();
+    final csvData = utf8.decode(fileBytes);
 
-    // 3. Преобразуем CSV в список строк - пробуем несколько разделителей
-    // Используем CsvToListConverter без явного eol для авто-определения конца строки.
-    List<List<dynamic>> rows;
+
+    // ОТЛАДКА: Выводим начало CSV данных
+    print('--- Начало CSV данных (первые 500 символов) ---');
+    print(csvData.substring(0, csvData.length > 500 ? 500 : csvData.length));
+    print('--- Конец CSV данных ---');
+
+    // 3. Преобразуем CSV в список строк
+    List<List<dynamic>> rows = [];
+    bool parsedSuccessfully = false;
+
+    // Попытка 1: Разделитель ','
     try {
-      // Попытка 1: разделитель - запятая
-      rows = const CsvToListConverter(fieldDelimiter: ',').convert(csvData);
-      
-      // Если после первого преобразования в первой строке (если она есть) только одно поле,
-      // это может означать, что фактический разделитель - точка с запятой.
-      // Эта проверка является эвристикой.
-      if (rows.isNotEmpty && rows[0].length == 1) {
-        // Попытка 2: разделитель - точка с запятой
-        rows = const CsvToListConverter(fieldDelimiter: ';').convert(csvData);
+      print('Попытка разбора CSV с разделителем ","');
+      // Используем eol: '\n' для большей определенности, хотя автоопределение обычно работает
+      rows = const CsvToListConverter(fieldDelimiter: ',', eol: '\n').convert(csvData);
+      print('Разбор с "," завершен. Всего строк: ${rows.length}.');
+      if (rows.isNotEmpty) {
+        print('Первая строка (если есть): ${rows[0]}, количество полей в первой строке: ${rows[0].length}');
+        // Проверяем, не состоят ли все строки из одного поля (признак неправильного разделителя)
+        bool allRowsSingleColumn = rows.every((row) => row.length <= 1);
+        if (rows.length > 1 && rows[0].length > 1 && !allRowsSingleColumn) {
+            parsedSuccessfully = true;
+            print('Разбор с "," выглядит успешным (много полей в строках).');
+        } else {
+            print('ПРЕДУПРЕЖДЕНИЕ: Разбор с "," дал строки с 1 полем или мало полей. Возможно, разделитель неверный.');
+            if (allRowsSingleColumn && rows.length > 1) print('Все непустые строки состоят из одного поля при разделителе ",".');
+        }
+      } else {
+        print('Разбор с "," дал пустой список строк.');
       }
     } catch (e) {
-      // Если при разборе с запятой произошла ошибка, пробуем с точкой с запятой.
+      print('Ошибка при разборе CSV с разделителем ",": $e.');
+    }
+
+    // Попытка 2: Разделитель ';', если первая попытка не удалась или дала плохой результат
+    if (!parsedSuccessfully && csvData.contains(';')) {
+      print('Попытка разбора CSV с разделителем ";"');
       try {
-        rows = const CsvToListConverter(fieldDelimiter: ';').convert(csvData);
-      } catch (fallbackError) {
-        // Если и вторая попытка не удалась, значит, файл либо не CSV,
-        // либо использует другой разделитель, либо серьезно поврежден.
-        // Выбрасываем ошибку, чтобы она была обработана выше в вызывающем коде.
-        print('Ошибка при разборе CSV с разделителем ",": $e');
-        print('Ошибка при разборе CSV с разделителем ";": $fallbackError');
-        throw Exception('Не удалось разобрать CSV файл. Убедитесь, что используются разделители "," или ";".');
+        rows = const CsvToListConverter(fieldDelimiter: ';', eol: '\n').convert(csvData);
+        print('Разбор с ";" завершен. Всего строк: ${rows.length}.');
+        if (rows.isNotEmpty) {
+          print('Первая строка (если есть): ${rows[0]}, количество полей в первой строке: ${rows[0].length}');
+          bool allRowsSingleColumn = rows.every((row) => row.length <= 1);
+          if (rows.length > 1 && rows[0].length > 1 && !allRowsSingleColumn) {
+            parsedSuccessfully = true;
+            print('Разбор с ";" выглядит успешным.');
+          } else {
+             print('ПРЕДУПРЕЖДЕНИЕ: Разбор с ";" также дал строки с 1 полем или мало полей.');
+          }
+        } else {
+          print('Разбор с ";" дал пустой список строк.');
+        }
+      } catch (e) {
+        print('Ошибка при разборе CSV с разделителем ";": $e.');
       }
     }
 
-    if (rows.isEmpty) {
-      throw Exception('Файл пуст');
+    if (!parsedSuccessfully || rows.isEmpty) {
+      print('Не удалось корректно разобрать CSV файл ни с одним из разделителей или файл пуст.');
+      throw Exception('Не удалось разобрать CSV файл. Убедитесь, что он корректен и использует разделители "," или ";".');
     }
+    
+    print('Итоговое количество строк после разбора: ${rows.length}');
+    if (rows.isNotEmpty) {
+        print('Пример первой строки данных для обработки (индекс 0 из rows): ${rows[0]} с ${rows[0].length} полями.');
+    }
+
 
     // 4. Извлекаем название группы из имени файла
     String groupName = file.uri.pathSegments.last.split('.').first;
 
-    // 5. Запрашиваем у пользователя название группы для подтверждения/изменения
+    // 5. Запрашиваем у пользователя название группы
     groupName = await _showGroupNameDialog(context, groupName) ?? groupName;
     if (groupName.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -71,50 +112,63 @@ Future<void> importGroupFromCsv(BuildContext context) async {
     // 6. Собираем данные о студентах из файла
     List<Map<String, String>> studentsPreview = [];
     
-    // Проверяем наличие заголовков
     bool hasHeaders = rows.isNotEmpty && _isLikelyHeader(rows[0]);
     int startRow = hasHeaders ? 1 : 0;
     
+    print('--- Обработка строк CSV ---');
+    print('Всего строк для обработки (после разбора): ${rows.length}');
+    print('Определено наличие заголовка: $hasHeaders. Начальная строка для данных: $startRow');
+
     for (int i = startRow; i < rows.length; i++) {
       final row = rows[i];
+      print('Обработка строки ${i + 1} (индекс $i из rows): $row. Количество элементов: ${row.length}');
       
-      // Пропускаем пустые строки
-      if (row.isEmpty) continue;
+      if (row.isEmpty) {
+        print('Строка ${i + 1} пуста. Пропуск.');
+        continue;
+      }
       
-      // Проверка, что в строке достаточно данных для имени и фамилии
+      // Ожидаем как минимум Имя и Фамилию
       if (row.length < 2) {
-        // В строке должно быть минимум 2 значения (имя и фамилия)
+        print('Строка ${i + 1} содержит менее 2 элементов (${row.length}). Пропуск. Это основная причина, если студенты не добавляются.');
         continue;
       }
 
-      // Добавляем студента с доступными данными
+      String firstName = (row[0]?.toString() ?? '').trim();
+      String lastName = (row[1]?.toString() ?? '').trim();
+      
+      print('Извлечено из строки ${i + 1}: Имя="$firstName", Фамилия="$lastName"');
+
       Map<String, String> studentData = {
-        'Имя': row[0]?.toString().trim() ?? '',
-        'Фамилия': row[1]?.toString().trim() ?? '',
+        'Имя': firstName,
+        'Фамилия': lastName,
       };
       
-      // Добавляем опциональные поля в зависимости от количества колонок
-      if (row.length > 2) studentData['Отчество'] = row[2]?.toString().trim() ?? '';
-      if (row.length > 3) studentData['Email'] = row[3]?.toString().trim() ?? '';
-      if (row.length > 4) studentData['Телефон'] = row[4]?.toString().trim() ?? '';
+      if (row.length > 2) studentData['Отчество'] = (row[2]?.toString() ?? '').trim();
+      if (row.length > 3) studentData['Email'] = (row[3]?.toString() ?? '').trim();
+      if (row.length > 4) studentData['Телефон'] = (row[4]?.toString() ?? '').trim();
 
-      // Добавляем только если есть как минимум имя и фамилия
       if (studentData['Имя']!.isNotEmpty && studentData['Фамилия']!.isNotEmpty) {
-        // Проверяем, нет ли дубликатов в списке по email (если email указан)
         bool isDuplicate = false;
         if (studentData['Email'] != null && studentData['Email']!.isNotEmpty) {
-          isDuplicate = studentsPreview.any((s) => 
-            s['Email'] == studentData['Email'] && studentData['Email']!.isNotEmpty);
+          isDuplicate = studentsPreview.any((s) => s['Email'] == studentData['Email']);
         }
         
         if (!isDuplicate) {
           studentsPreview.add(studentData);
+          print('Добавлен студент: ${studentData['Фамилия']} ${studentData['Имя']}');
+        } else {
+          print('Дубликат студента (по Email: ${studentData['Email']}), не добавлен: ${studentData['Фамилия']} ${studentData['Имя']}');
         }
+      } else {
+        print('Пропуск студента из строки ${i + 1} из-за пустого Имени или Фамилии: Имя="${studentData['Имя']}", Фамилия="${studentData['Фамилия']}"');
       }
     }
+    print('--- Завершение обработки строк CSV ---');
+    print('Итоговое количество студентов в preview: ${studentsPreview.length}');
 
     if (studentsPreview.isEmpty) {
-      throw Exception('В файле не найдено данных о студентах');
+      throw Exception('В файле не найдено данных о студентах (studentsPreview пуст после обработки)');
     }
 
     // 7. Показываем предварительный просмотр для подтверждения
@@ -223,7 +277,7 @@ Future<void> importGroupFromCsv(BuildContext context) async {
       }
     }
   } catch (e) {
-    print('Ошибка при импорте данных: $e');
+    print('Критическая ошибка при импорте данных: $e');
     if (context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text('Ошибка при импорте данных: $e'))
@@ -242,13 +296,16 @@ bool _isLikelyHeader(List<dynamic> row) {
     'last name', 'lastname', 'email', 'phone', 'group'
   ];
   
+  // Добавим вывод для отладки _isLikelyHeader
+  // print('Проверка на заголовок строки: $row');
   for (var cell in row) {
     String cellText = cell.toString().toLowerCase().trim();
     if (possibleHeaders.contains(cellText)) {
+      // print('Найдено совпадение заголовка: "$cellText" в строке $row');
       return true;
     }
   }
-  
+  // print('Строка $row не определена как заголовок');
   return false;
 }
 

@@ -35,11 +35,6 @@ class _GroupHeadPageState extends State<GroupHeadPage> {
             'Не удалось определить вашу группу. Убедитесь, что вы студент и назначены старостой с соответствующими правами.');
       }
 
-      // Дополнительная проверка на стороне клиента (сервер также должен это проверять)
-      // if (!(sessionManager.signedInUser?.scopeNames.contains('groupHead') ?? false)) {
-      //   throw Exception('У вас нет прав старосты для доступа к этой странице.');
-      // }
-
       final subgroups = await client.subgroups.getGroupSubgroups(group.id!);
 
       if (mounted) {

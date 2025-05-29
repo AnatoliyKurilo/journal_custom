@@ -993,6 +993,30 @@ class Endpoints extends _i1.EndpointDispatch {
             params['personId'],
           ),
         ),
+        'assignRole': _i1.MethodConnector(
+          name: 'assignRole',
+          params: {
+            'personId': _i1.ParameterDescription(
+              name: 'personId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'roleToAssign': _i1.ParameterDescription(
+              name: 'roleToAssign',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['userRoles'] as _i11.UserRolesEndpoint).assignRole(
+            session,
+            params['personId'],
+            params['roleToAssign'],
+          ),
+        ),
         'assignCuratorRole': _i1.MethodConnector(
           name: 'assignCuratorRole',
           params: {
@@ -1039,8 +1063,8 @@ class Endpoints extends _i1.EndpointDispatch {
               type: _i1.getType<int>(),
               nullable: false,
             ),
-            'role': _i1.ParameterDescription(
-              name: 'role',
+            'roleToRemove': _i1.ParameterDescription(
+              name: 'roleToRemove',
               type: _i1.getType<String>(),
               nullable: false,
             ),
@@ -1052,7 +1076,7 @@ class Endpoints extends _i1.EndpointDispatch {
               (endpoints['userRoles'] as _i11.UserRolesEndpoint).removeRole(
             session,
             params['personId'],
-            params['role'],
+            params['roleToRemove'],
           ),
         ),
       },

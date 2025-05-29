@@ -76,10 +76,11 @@ class AdminEndpoint extends Endpoint {
   // Метод для обновления данных группы
   Future<Groups> updateGroup(
     Session session,
-    Groups clientProvidedGroup,
-    {int? newCuratorId, 
-    int? newGroupHeadId} 
-  ) async {
+    Groups clientProvidedGroup, {
+    int? newCuratorId,
+    int? newGroupHeadId,
+    // bool? clearGroupHead, // Если вы добавили этот параметр ранее
+  }) async {
     session.log('AdminEndpoint.updateGroup called. Group ID: ${clientProvidedGroup.id}, New Curator ID: $newCuratorId, New GroupHead ID: $newGroupHeadId');
 
     var existingGroup = await Groups.db.findById(session, clientProvidedGroup.id!);
@@ -87,42 +88,56 @@ class AdminEndpoint extends Endpoint {
       throw Exception('Группа с ID ${clientProvidedGroup.id} не найдена.');
     }
 
-    var groupToUpdate = existingGroup.copyWith(); 
+    var groupToUpdate = existingGroup.copyWith();
+    bool groupRecordChanged = false;
 
-    // Логика обновления куратора (оставим как есть для краткости)
-    // ... (ваш существующий код обновления куратора) ...
-    // Пример:
-    bool curatorChanged = false;
-    if (newCuratorId != null) {
-        if (groupToUpdate.curatorId != newCuratorId) {
-            groupToUpdate.curatorId = newCuratorId;
-            curatorChanged = true;
-            // TODO: Добавить логику обновления ролей для куратора, если это необходимо
-            // Например, await UserRolesEndpoint().assignCuratorRole(session, newCuratorId);
-            // И снятие роли у старого куратора, если он был.
+    // Логика обновления куратора и его прав
+    if (newCuratorId != null) { // Если передан ID нового куратора (назначение или смена)
+      if (groupToUpdate.curatorId != newCuratorId) {
+        // Снимаем роль у старого куратора, если он был
+        if (groupToUpdate.curatorId != null) {
+          var oldCuratorTeacher = await Teachers.db.findById(session, groupToUpdate.curatorId!);
+          if (oldCuratorTeacher != null && oldCuratorTeacher.personId != null) {
+            await UserRolesEndpoint().removeRole(session, oldCuratorTeacher.personId, 'curator');
+            session.log('AdminEndpoint: Removed "curator" role from old curator (Teacher ID: ${oldCuratorTeacher.id}, Person ID: ${oldCuratorTeacher.personId}) for group ${groupToUpdate.id}');
+          }
         }
-    } else { // newCuratorId равен null
-        // Если newCuratorId null и newGroupHeadId тоже null (т.е. не обновляем старосту),
-        // И при этом в clientProvidedGroup.curatorId тоже null (или не передан),
-        // это может означать запрос на снятие куратора.
-        // Эта логика зависит от того, как клиент формирует запрос.
-        // Для простоты, если newCuratorId null, но был curatorId, и мы не обновляем старосту,
-        // то это может быть снятие куратора.
-        if (newGroupHeadId == null && groupToUpdate.curatorId != null && clientProvidedGroup.curatorId == null) {
-             // Снимаем куратора, если newCuratorId null и в clientProvidedGroup.curatorId тоже null
-            groupToUpdate.curatorId = null;
-            curatorChanged = true;
-            // TODO: Снять роль куратора у groupToUpdate.curatorId (старого)
+        
+        // Назначаем нового куратора и его роль
+        groupToUpdate.curatorId = newCuratorId;
+        var newCuratorTeacher = await Teachers.db.findById(session, newCuratorId);
+        if (newCuratorTeacher != null && newCuratorTeacher.personId != null) {
+           await UserRolesEndpoint().assignCuratorRole(session, newCuratorTeacher.personId);
+           session.log('AdminEndpoint: Assigned "curator" role to new curator (Teacher ID: ${newCuratorTeacher.id}, Person ID: ${newCuratorTeacher.personId}) for group ${groupToUpdate.id}');
         }
+        groupRecordChanged = true;
+      }
+    } else if (clientProvidedGroup.curatorId == null && existingGroup.curatorId != null) {
+      // Если в clientProvidedGroup curatorId равен null, а в existingGroup он был - это явное снятие куратора
+      var oldCuratorTeacher = await Teachers.db.findById(session, existingGroup.curatorId!);
+      if (oldCuratorTeacher != null && oldCuratorTeacher.personId != null) {
+        await UserRolesEndpoint().removeRole(session, oldCuratorTeacher.personId, 'curator');
+        session.log('AdminEndpoint: Explicitly removed "curator" role from (Teacher ID: ${oldCuratorTeacher.id}, Person ID: ${oldCuratorTeacher.personId}) for group ${groupToUpdate.id}');
+      }
+      groupToUpdate.curatorId = null;
+      groupRecordChanged = true;
     }
-    if (curatorChanged) {
-        await Groups.db.updateRow(session, groupToUpdate);
-        groupToUpdate = (await Groups.db.findById(session, clientProvidedGroup.id!))!; // Перезагружаем
+
+
+    // Обновляем имя группы, если оно было передано и изменилось
+    if (clientProvidedGroup.name != existingGroup.name) {
+      groupToUpdate.name = clientProvidedGroup.name;
+      groupRecordChanged = true;
     }
-    
-    // Логика обновления старосты
+
+    if (groupRecordChanged) {
+      await Groups.db.updateRow(session, groupToUpdate);
+      // Перезагружаем, чтобы иметь актуальные данные для дальнейших операций
+      groupToUpdate = (await Groups.db.findById(session, clientProvidedGroup.id!))!;
+    }
+
+    // Логика обновления старосты и его прав
     if (newGroupHeadId != null) {
-      // 1. Снять флаг и роль у текущего старосты этой группы (если он есть и это не тот же студент)
       var currentGroupHeadStudent = await Students.db.findFirstRow(
         session,
         where: (s) => s.groupsId.equals(existingGroup.id!) & s.isGroupHead.equals(true),
@@ -130,13 +145,10 @@ class AdminEndpoint extends Endpoint {
       if (currentGroupHeadStudent != null && currentGroupHeadStudent.id != newGroupHeadId) {
         currentGroupHeadStudent.isGroupHead = false;
         await Students.db.updateRow(session, currentGroupHeadStudent);
-        if (currentGroupHeadStudent.personId != null) {
-           await UserRolesEndpoint().removeRole(session, currentGroupHeadStudent.personId!, 'groupHead');
-           session.log('AdminEndpoint: Removed groupHead role from old head student ID: ${currentGroupHeadStudent.id}');
-        }
+        await UserRolesEndpoint().removeRole(session, currentGroupHeadStudent.personId, 'groupHead');
+        session.log('AdminEndpoint: Removed groupHead role from old head student ID: ${currentGroupHeadStudent.id}, Person ID: ${currentGroupHeadStudent.personId}');
       }
 
-      // 2. Назначить нового старосту
       var studentToMakeHead = await Students.db.findById(session, newGroupHeadId);
       if (studentToMakeHead == null || studentToMakeHead.groupsId != existingGroup.id) {
         throw Exception('Студент с ID $newGroupHeadId не найден или не принадлежит к группе ${existingGroup.name}.');
@@ -145,34 +157,32 @@ class AdminEndpoint extends Endpoint {
         studentToMakeHead.isGroupHead = true;
         await Students.db.updateRow(session, studentToMakeHead);
       }
-      if (studentToMakeHead.id != null) {
-          await UserRolesEndpoint().assignGroupHeadRole(session, studentToMakeHead.id!);
-          session.log('AdminEndpoint: Assigned groupHead role to new head student ID: ${studentToMakeHead.id}');
-      }
-    
-    } else if (newCuratorId == null && newGroupHeadId == null && clientProvidedGroup.id != null) { 
-      // Явный запрос на снятие старосты (если newGroupHeadId это null и мы не обновляем куратора)
+      await UserRolesEndpoint().assignGroupHeadRole(session, studentToMakeHead.id!);
+      session.log('AdminEndpoint: Assigned groupHead role to new head student ID: ${studentToMakeHead.id}');
+
+    } else if (newGroupHeadId == null && newCuratorId == null && clientProvidedGroup.id != null /* && (clearGroupHead == true) */ ) {
+      // Условие для снятия старосты, если clearGroupHead был бы параметром
+      // Или если newGroupHeadId и newCuratorId оба null, и это не просто обновление имени
+      // Текущая логика может быть слишком агрессивной, если просто обновляется имя группы.
+      // Для явного снятия старосты лучше использовать отдельный флаг или специальное значение newGroupHeadId.
+      // Пока оставим как было, но с комментарием.
       var currentGroupHeadStudent = await Students.db.findFirstRow(
         session,
         where: (s) => s.groupsId.equals(existingGroup.id!) & s.isGroupHead.equals(true),
       );
       if (currentGroupHeadStudent != null) {
+        // Проверяем, не является ли это просто обновлением имени группы или куратора,
+        // когда староста не должен меняться.
+        // Это условие нужно уточнить, чтобы избежать случайного снятия старосты.
+        // Например, если clientProvidedGroup.groupHeadId (если бы такое поле было) тоже null.
+        // Пока что, если newGroupHeadId null и newCuratorId null, будем снимать старосту.
         currentGroupHeadStudent.isGroupHead = false;
         await Students.db.updateRow(session, currentGroupHeadStudent);
-        if (currentGroupHeadStudent.personId != null) {
-          await UserRolesEndpoint().removeRole(session, currentGroupHeadStudent.personId!, 'groupHead');
-          session.log('AdminEndpoint: Explicitly removed groupHead role from student ID: ${currentGroupHeadStudent.id}');
-        }
+        await UserRolesEndpoint().removeRole(session, currentGroupHeadStudent.personId, 'groupHead');
+        session.log('AdminEndpoint: Explicitly removed groupHead role from student ID: ${currentGroupHeadStudent.id}, Person ID: ${currentGroupHeadStudent.personId}');
       }
     }
 
-    // Обновляем имя группы, если оно было передано и изменилось
-    if (clientProvidedGroup.name != existingGroup.name) {
-        groupToUpdate.name = clientProvidedGroup.name;
-        await Groups.db.updateRow(session, groupToUpdate);
-        groupToUpdate = (await Groups.db.findById(session, clientProvidedGroup.id!))!; // Перезагружаем
-    }
-    
     var reloadedGroup = await Groups.db.findById(
       session,
       existingGroup.id!,
@@ -180,7 +190,7 @@ class AdminEndpoint extends Endpoint {
         curator: Teachers.include(person: Person.include()),
       ),
     );
-    
+
     session.log('AdminEndpoint.updateGroup finished. Reloaded group: ${reloadedGroup?.toJson()}');
     return reloadedGroup ?? groupToUpdate;
   }

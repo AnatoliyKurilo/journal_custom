@@ -26,7 +26,6 @@ class _StudentsTabState extends State<StudentsTab> {
       isLoading = true;
       errorMessage = null;
     });
-
     try {
       // Получаем список всех студентов
       var result = await client.admin.getAllStudents();
@@ -40,6 +39,7 @@ class _StudentsTabState extends State<StudentsTab> {
         isLoading = false;
       });
     }
+    
   }
 
   Future<void> _searchStudents(String query) async {
@@ -407,34 +407,38 @@ class _StudentsTabState extends State<StudentsTab> {
       displayStudents = filterStudents(students, _searchController.text);
     }
 
+    // Определяем TextField один раз для чистоты кода
+    Widget searchTextField = TextField(
+      controller: _searchController,
+      decoration: InputDecoration(
+        labelText: 'Поиск студентов',
+        hintText: 'Введите имя, фамилию или группу...',
+        prefixIcon: const Icon(Icons.search),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(8.0),
+        ),
+        contentPadding: isMobile ? const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0) : null,
+      ),
+      onChanged: (value) {
+        setState(() {
+          // Фильтрация будет происходить при построении списка
+        });
+      },
+    );
+
     return Column(
       children: [
         Padding(
           padding: EdgeInsets.all(isMobile ? 8.0 : 16.0),
-          child: Flex( // Используем Flex для адаптивного расположения
+          child: Flex(
             direction: isMobile ? Axis.vertical : Axis.horizontal,
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            mainAxisAlignment: MainAxisAlignment.spaceBetween, // Можно оставить или настроить, если нужно другое поведение
+            crossAxisAlignment: isMobile ? CrossAxisAlignment.stretch : CrossAxisAlignment.center, // Добавлено/изменено
             children: [
-              Expanded( // Expanded для поля поиска
-                child: TextField(
-                  controller: _searchController,
-                  decoration: InputDecoration(
-                    labelText: 'Поиск студентов',
-                    hintText: 'Введите имя, фамилию или группу...',
-                    prefixIcon: const Icon(Icons.search),
-                    border: OutlineInputBorder(
-                      borderRadius: BorderRadius.circular(8.0),
-                    ),
-                    contentPadding: isMobile ? const EdgeInsets.symmetric(vertical: 10.0, horizontal: 10.0) : null,
-                  ),
-                  onChanged: (value) {
-                    setState(() {
-                      // Фильтрация будет происходить при построении списка
-                    });
-                  },
-                ),
-              ),
-              SizedBox(width: isMobile ? 0 : 16.0, height: isMobile ? 8.0 : 0), // Отступ
+              isMobile 
+                ? searchTextField // Без Expanded для вертикального режима
+                : Expanded(child: searchTextField), // С Expanded для горизонтального режима
+              SizedBox(width: isMobile ? 0 : 16.0, height: isMobile ? 8.0 : 0),
               ElevatedButton.icon(
                 icon: const Icon(Icons.add),
                 label: Text(isMobile ? 'Добавить' : 'Добавить студента'),

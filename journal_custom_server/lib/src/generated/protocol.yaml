@@ -46,6 +46,7 @@ makeUserAdmin:
   - setUserScopes:
 userRoles:
   - getUserRoles:
+  - assignRole:
   - assignCuratorRole:
   - assignGroupHeadRole:
   - removeRole:

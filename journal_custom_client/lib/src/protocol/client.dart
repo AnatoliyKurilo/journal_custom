@@ -491,6 +491,19 @@ class EndpointUserRoles extends _i1.EndpointRef {
         {'personId': personId},
       );
 
+  _i2.Future<bool> assignRole(
+    int personId,
+    String roleToAssign,
+  ) =>
+      caller.callServerEndpoint<bool>(
+        'userRoles',
+        'assignRole',
+        {
+          'personId': personId,
+          'roleToAssign': roleToAssign,
+        },
+      );
+
   _i2.Future<bool> assignCuratorRole(int teacherId) =>
       caller.callServerEndpoint<bool>(
         'userRoles',
@@ -507,14 +520,14 @@ class EndpointUserRoles extends _i1.EndpointRef {
 
   _i2.Future<bool> removeRole(
     int personId,
-    String role,
+    String roleToRemove,
   ) =>
       caller.callServerEndpoint<bool>(
         'userRoles',
         'removeRole',
         {
           'personId': personId,
-          'role': role,
+          'roleToRemove': roleToRemove,
         },
       );
 }

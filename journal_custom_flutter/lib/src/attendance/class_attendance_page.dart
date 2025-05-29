@@ -66,14 +66,11 @@ class _ClassAttendancePageState extends State<ClassAttendancePage> {
         isPresent: isPresent,
         comment: comment,
       );
-      // Можно показать SnackBar об успехе, но для быстрого UI можно и не показывать
-      // Обновляем локальное состояние, чтобы не перезагружать все данные
       final index = _studentAttendanceList.indexWhere((info) => info.student.id == studentId);
       if (index != -1) {
         final updatedInfo = _studentAttendanceList[index].copyWith(
           isPresent: isPresent,
           comment: comment,
-          // attendanceId можно обновить, если сервер его возвращает после создания/обновления
         );
          if (mounted) {
             setState(() {

@@ -97,6 +97,10 @@ void run(List<String> args) async {
         if (student?.isGroupHead == true) {
           // Если это староста, добавляем роль groupHead
           scopes.add('groupHead');
+          session.log(
+            'Пользователь ${userInfo.email} назначен старостой группы',
+            level: LogLevel.info,
+          );
         }
         
         // Проверяем, является ли преподаватель куратором
