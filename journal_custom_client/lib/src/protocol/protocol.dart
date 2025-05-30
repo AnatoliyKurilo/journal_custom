@@ -27,26 +27,26 @@ import 'subgroups_protocol.dart' as _i15;
 import 'subject_attendance_matrix.dart' as _i16;
 import 'subjects_protocol.dart' as _i17;
 import 'teachers_protocol.dart' as _i18;
-import 'package:journal_custom_client/src/protocol/groups_protocol.dart'
-    as _i19;
 import 'package:journal_custom_client/src/protocol/teachers_protocol.dart'
-    as _i20;
+    as _i19;
 import 'package:journal_custom_client/src/protocol/students_protocol.dart'
+    as _i20;
+import 'package:journal_custom_client/src/protocol/groups_protocol.dart'
     as _i21;
-import 'package:journal_custom_client/src/protocol/student_overall_attendance_record.dart'
-    as _i22;
 import 'package:journal_custom_client/src/protocol/class_types_protocol.dart'
-    as _i23;
+    as _i22;
 import 'package:journal_custom_client/src/protocol/subjects_protocol.dart'
-    as _i24;
-import 'package:journal_custom_client/src/protocol/classes.dart' as _i25;
+    as _i23;
+import 'package:journal_custom_client/src/protocol/classes.dart' as _i24;
 import 'package:journal_custom_client/src/protocol/student_attendance_info.dart'
-    as _i26;
+    as _i25;
 import 'package:journal_custom_client/src/protocol/student_class_attendance_flat_record.dart'
-    as _i27;
+    as _i26;
 import 'package:journal_custom_client/src/protocol/subgroups_protocol.dart'
-    as _i28;
+    as _i27;
 import 'package:journal_custom_client/src/protocol/semesters_protocol.dart'
+    as _i28;
+import 'package:journal_custom_client/src/protocol/student_overall_attendance_record.dart'
     as _i29;
 import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i30;
 export 'greeting.dart';
@@ -210,52 +210,52 @@ class Protocol extends _i1.SerializationManager {
           ? (data as List).map((e) => deserialize<_i6.Groups>(e)).toList()
           : null) as T;
     }
-    if (t == List<_i19.Groups>) {
-      return (data as List).map((e) => deserialize<_i19.Groups>(e)).toList()
+    if (t == List<_i19.Teachers>) {
+      return (data as List).map((e) => deserialize<_i19.Teachers>(e)).toList()
           as T;
     }
-    if (t == List<_i20.Teachers>) {
-      return (data as List).map((e) => deserialize<_i20.Teachers>(e)).toList()
+    if (t == List<_i20.Students>) {
+      return (data as List).map((e) => deserialize<_i20.Students>(e)).toList()
           as T;
     }
-    if (t == List<_i21.Students>) {
-      return (data as List).map((e) => deserialize<_i21.Students>(e)).toList()
+    if (t == List<_i21.Groups>) {
+      return (data as List).map((e) => deserialize<_i21.Groups>(e)).toList()
           as T;
     }
-    if (t == List<_i22.StudentOverallAttendanceRecord>) {
+    if (t == List<_i22.ClassTypes>) {
+      return (data as List).map((e) => deserialize<_i22.ClassTypes>(e)).toList()
+          as T;
+    }
+    if (t == List<_i23.Subjects>) {
+      return (data as List).map((e) => deserialize<_i23.Subjects>(e)).toList()
+          as T;
+    }
+    if (t == List<_i24.Classes>) {
+      return (data as List).map((e) => deserialize<_i24.Classes>(e)).toList()
+          as T;
+    }
+    if (t == List<_i25.StudentAttendanceInfo>) {
       return (data as List)
-          .map((e) => deserialize<_i22.StudentOverallAttendanceRecord>(e))
+          .map((e) => deserialize<_i25.StudentAttendanceInfo>(e))
           .toList() as T;
     }
-    if (t == List<_i23.ClassTypes>) {
-      return (data as List).map((e) => deserialize<_i23.ClassTypes>(e)).toList()
-          as T;
-    }
-    if (t == List<_i24.Subjects>) {
-      return (data as List).map((e) => deserialize<_i24.Subjects>(e)).toList()
-          as T;
-    }
-    if (t == List<_i25.Classes>) {
-      return (data as List).map((e) => deserialize<_i25.Classes>(e)).toList()
-          as T;
-    }
-    if (t == List<_i26.StudentAttendanceInfo>) {
+    if (t == List<_i26.StudentClassAttendanceFlatRecord>) {
       return (data as List)
-          .map((e) => deserialize<_i26.StudentAttendanceInfo>(e))
+          .map((e) => deserialize<_i26.StudentClassAttendanceFlatRecord>(e))
           .toList() as T;
     }
-    if (t == List<_i27.StudentClassAttendanceFlatRecord>) {
+    if (t == List<_i27.Subgroups>) {
+      return (data as List).map((e) => deserialize<_i27.Subgroups>(e)).toList()
+          as T;
+    }
+    if (t == List<_i28.Semesters>) {
+      return (data as List).map((e) => deserialize<_i28.Semesters>(e)).toList()
+          as T;
+    }
+    if (t == List<_i29.StudentOverallAttendanceRecord>) {
       return (data as List)
-          .map((e) => deserialize<_i27.StudentClassAttendanceFlatRecord>(e))
+          .map((e) => deserialize<_i29.StudentOverallAttendanceRecord>(e))
           .toList() as T;
-    }
-    if (t == List<_i28.Subgroups>) {
-      return (data as List).map((e) => deserialize<_i28.Subgroups>(e)).toList()
-          as T;
-    }
-    if (t == List<_i29.Semesters>) {
-      return (data as List).map((e) => deserialize<_i29.Semesters>(e)).toList()
-          as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;

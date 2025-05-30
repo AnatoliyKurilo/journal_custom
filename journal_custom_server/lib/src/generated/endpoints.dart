@@ -13,21 +13,23 @@ import 'package:serverpod/serverpod.dart' as _i1;
 import '../endpoints/admin_endpoint.dart' as _i2;
 import '../endpoints/class_types_endpoint.dart' as _i3;
 import '../endpoints/classes_endpoint.dart' as _i4;
-import '../endpoints/search_endpoint.dart' as _i5;
-import '../endpoints/semesters_endpoint.dart' as _i6;
-import '../endpoints/subgroups_endpoint.dart' as _i7;
-import '../endpoints/subject_attendance_matrix.dart' as _i8;
-import '../endpoints/subjects_endpoint.dart' as _i9;
-import '../endpoints/teachers_search_endpoint.dart' as _i10;
-import '../endpoints/user_endpoint.dart' as _i11;
-import '../endpoints/user_roles_endpoint.dart' as _i12;
-import '../greeting_endpoint.dart' as _i13;
+import '../endpoints/groups_endpoint.dart' as _i5;
+import '../endpoints/search_endpoint.dart' as _i6;
+import '../endpoints/semesters_endpoint.dart' as _i7;
+import '../endpoints/students_endpoint.dart' as _i8;
+import '../endpoints/subgroups_endpoint.dart' as _i9;
+import '../endpoints/subject_attendance_matrix.dart' as _i10;
+import '../endpoints/subjects_endpoint.dart' as _i11;
+import '../endpoints/teachers_search_endpoint.dart' as _i12;
+import '../endpoints/user_endpoint.dart' as _i13;
+import '../endpoints/user_roles_endpoint.dart' as _i14;
+import '../greeting_endpoint.dart' as _i15;
+import 'package:journal_custom_server/src/generated/person.dart' as _i16;
 import 'package:journal_custom_server/src/generated/groups_protocol.dart'
-    as _i14;
-import 'package:journal_custom_server/src/generated/person.dart' as _i15;
+    as _i17;
 import 'package:journal_custom_server/src/generated/students_protocol.dart'
-    as _i16;
-import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i17;
+    as _i18;
+import 'package:serverpod_auth_server/serverpod_auth_server.dart' as _i19;
 
 class Endpoints extends _i1.EndpointDispatch {
   @override
@@ -51,55 +53,67 @@ class Endpoints extends _i1.EndpointDispatch {
           'classes',
           null,
         ),
-      'search': _i5.SearchEndpoint()
+      'groups': _i5.GroupsEndpoint()
+        ..initialize(
+          server,
+          'groups',
+          null,
+        ),
+      'search': _i6.SearchEndpoint()
         ..initialize(
           server,
           'search',
           null,
         ),
-      'semesters': _i6.SemestersEndpoint()
+      'semesters': _i7.SemestersEndpoint()
         ..initialize(
           server,
           'semesters',
           null,
         ),
-      'subgroups': _i7.SubgroupsEndpoint()
+      'students': _i8.StudentsEndpoint()
+        ..initialize(
+          server,
+          'students',
+          null,
+        ),
+      'subgroups': _i9.SubgroupsEndpoint()
         ..initialize(
           server,
           'subgroups',
           null,
         ),
-      'subjectAttendanceMatrix': _i8.SubjectAttendanceMatrixEndpoint()
+      'subjectAttendanceMatrix': _i10.SubjectAttendanceMatrixEndpoint()
         ..initialize(
           server,
           'subjectAttendanceMatrix',
           null,
         ),
-      'subjects': _i9.SubjectsEndpoint()
+      'subjects': _i11.SubjectsEndpoint()
         ..initialize(
           server,
           'subjects',
           null,
         ),
-      'teacherSearch': _i10.TeacherSearchEndpoint()
+      'teacherSearch': _i12.TeacherSearchEndpoint()
         ..initialize(
           server,
           'teacherSearch',
           null,
         ),
-      'makeUserAdmin': _i11.MakeUserAdminEndpoint()
+      'makeUserAdmin': _i13.MakeUserAdminEndpoint()
         ..initialize(
           server,
           'makeUserAdmin',
           null,
         ),
-      'userRoles': _i12.UserRolesEndpoint()
+      'userRoles': _i14.UserRolesEndpoint()
         ..initialize(
           server,
           'userRoles',
           null,
         ),
-      'greeting': _i13.GreetingEndpoint()
+      'greeting': _i15.GreetingEndpoint()
         ..initialize(
           server,
           'greeting',
@@ -110,87 +124,6 @@ class Endpoints extends _i1.EndpointDispatch {
       name: 'admin',
       endpoint: endpoints['admin']!,
       methodConnectors: {
-        'createGroup': _i1.MethodConnector(
-          name: 'createGroup',
-          params: {
-            'name': _i1.ParameterDescription(
-              name: 'name',
-              type: _i1.getType<String>(),
-              nullable: false,
-            ),
-            'curatorId': _i1.ParameterDescription(
-              name: 'curatorId',
-              type: _i1.getType<int?>(),
-              nullable: true,
-            ),
-          },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).createGroup(
-            session,
-            params['name'],
-            params['curatorId'],
-          ),
-        ),
-        'getAllGroups': _i1.MethodConnector(
-          name: 'getAllGroups',
-          params: {},
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).getAllGroups(session),
-        ),
-        'getGroupByName': _i1.MethodConnector(
-          name: 'getGroupByName',
-          params: {
-            'groupName': _i1.ParameterDescription(
-              name: 'groupName',
-              type: _i1.getType<String>(),
-              nullable: false,
-            )
-          },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).getGroupByName(
-            session,
-            params['groupName'],
-          ),
-        ),
-        'updateGroup': _i1.MethodConnector(
-          name: 'updateGroup',
-          params: {
-            'clientProvidedGroup': _i1.ParameterDescription(
-              name: 'clientProvidedGroup',
-              type: _i1.getType<_i14.Groups>(),
-              nullable: false,
-            ),
-            'newCuratorId': _i1.ParameterDescription(
-              name: 'newCuratorId',
-              type: _i1.getType<int?>(),
-              nullable: true,
-            ),
-            'newGroupHeadId': _i1.ParameterDescription(
-              name: 'newGroupHeadId',
-              type: _i1.getType<int?>(),
-              nullable: true,
-            ),
-          },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).updateGroup(
-            session,
-            params['clientProvidedGroup'],
-            newCuratorId: params['newCuratorId'],
-            newGroupHeadId: params['newGroupHeadId'],
-          ),
-        ),
         'createTeacher': _i1.MethodConnector(
           name: 'createTeacher',
           params: {
@@ -233,54 +166,6 @@ class Endpoints extends _i1.EndpointDispatch {
             phoneNumber: params['phoneNumber'],
           ),
         ),
-        'createStudent': _i1.MethodConnector(
-          name: 'createStudent',
-          params: {
-            'firstName': _i1.ParameterDescription(
-              name: 'firstName',
-              type: _i1.getType<String>(),
-              nullable: false,
-            ),
-            'lastName': _i1.ParameterDescription(
-              name: 'lastName',
-              type: _i1.getType<String>(),
-              nullable: false,
-            ),
-            'patronymic': _i1.ParameterDescription(
-              name: 'patronymic',
-              type: _i1.getType<String?>(),
-              nullable: true,
-            ),
-            'email': _i1.ParameterDescription(
-              name: 'email',
-              type: _i1.getType<String>(),
-              nullable: false,
-            ),
-            'phoneNumber': _i1.ParameterDescription(
-              name: 'phoneNumber',
-              type: _i1.getType<String?>(),
-              nullable: true,
-            ),
-            'groupName': _i1.ParameterDescription(
-              name: 'groupName',
-              type: _i1.getType<String>(),
-              nullable: false,
-            ),
-          },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).createStudent(
-            session,
-            firstName: params['firstName'],
-            lastName: params['lastName'],
-            patronymic: params['patronymic'],
-            email: params['email'],
-            phoneNumber: params['phoneNumber'],
-            groupName: params['groupName'],
-          ),
-        ),
         'getAllTeachers': _i1.MethodConnector(
           name: 'getAllTeachers',
           params: {},
@@ -290,21 +175,12 @@ class Endpoints extends _i1.EndpointDispatch {
           ) async =>
               (endpoints['admin'] as _i2.AdminEndpoint).getAllTeachers(session),
         ),
-        'getAllStudents': _i1.MethodConnector(
-          name: 'getAllStudents',
-          params: {},
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).getAllStudents(session),
-        ),
         'updatePerson': _i1.MethodConnector(
           name: 'updatePerson',
           params: {
             'person': _i1.ParameterDescription(
               name: 'person',
-              type: _i1.getType<_i15.Person>(),
+              type: _i1.getType<_i16.Person>(),
               nullable: false,
             )
           },
@@ -351,61 +227,6 @@ class Endpoints extends _i1.EndpointDispatch {
               (endpoints['admin'] as _i2.AdminEndpoint).searchGroups(
             session,
             query: params['query'],
-          ),
-        ),
-        'updateStudent': _i1.MethodConnector(
-          name: 'updateStudent',
-          params: {
-            'student': _i1.ParameterDescription(
-              name: 'student',
-              type: _i1.getType<_i16.Students>(),
-              nullable: false,
-            )
-          },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).updateStudent(
-            session,
-            params['student'],
-          ),
-        ),
-        'deleteGroup': _i1.MethodConnector(
-          name: 'deleteGroup',
-          params: {
-            'groupId': _i1.ParameterDescription(
-              name: 'groupId',
-              type: _i1.getType<int>(),
-              nullable: false,
-            )
-          },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint).deleteGroup(
-            session,
-            params['groupId'],
-          ),
-        ),
-        'getStudentOverallAttendanceRecords': _i1.MethodConnector(
-          name: 'getStudentOverallAttendanceRecords',
-          params: {
-            'studentId': _i1.ParameterDescription(
-              name: 'studentId',
-              type: _i1.getType<int>(),
-              nullable: false,
-            )
-          },
-          call: (
-            _i1.Session session,
-            Map<String, dynamic> params,
-          ) async =>
-              (endpoints['admin'] as _i2.AdminEndpoint)
-                  .getStudentOverallAttendanceRecords(
-            session,
-            params['studentId'],
           ),
         ),
       },
@@ -604,6 +425,111 @@ class Endpoints extends _i1.EndpointDispatch {
         ),
       },
     );
+    connectors['groups'] = _i1.EndpointConnector(
+      name: 'groups',
+      endpoint: endpoints['groups']!,
+      methodConnectors: {
+        'createGroup': _i1.MethodConnector(
+          name: 'createGroup',
+          params: {
+            'name': _i1.ParameterDescription(
+              name: 'name',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'curatorId': _i1.ParameterDescription(
+              name: 'curatorId',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['groups'] as _i5.GroupsEndpoint).createGroup(
+            session,
+            params['name'],
+            params['curatorId'],
+          ),
+        ),
+        'getAllGroups': _i1.MethodConnector(
+          name: 'getAllGroups',
+          params: {},
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['groups'] as _i5.GroupsEndpoint).getAllGroups(session),
+        ),
+        'getGroupByName': _i1.MethodConnector(
+          name: 'getGroupByName',
+          params: {
+            'groupName': _i1.ParameterDescription(
+              name: 'groupName',
+              type: _i1.getType<String>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['groups'] as _i5.GroupsEndpoint).getGroupByName(
+            session,
+            params['groupName'],
+          ),
+        ),
+        'updateGroup': _i1.MethodConnector(
+          name: 'updateGroup',
+          params: {
+            'clientProvidedGroup': _i1.ParameterDescription(
+              name: 'clientProvidedGroup',
+              type: _i1.getType<_i17.Groups>(),
+              nullable: false,
+            ),
+            'newCuratorId': _i1.ParameterDescription(
+              name: 'newCuratorId',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'newGroupHeadId': _i1.ParameterDescription(
+              name: 'newGroupHeadId',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['groups'] as _i5.GroupsEndpoint).updateGroup(
+            session,
+            params['clientProvidedGroup'],
+            newCuratorId: params['newCuratorId'],
+            newGroupHeadId: params['newGroupHeadId'],
+          ),
+        ),
+        'deleteGroup': _i1.MethodConnector(
+          name: 'deleteGroup',
+          params: {
+            'groupId': _i1.ParameterDescription(
+              name: 'groupId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['groups'] as _i5.GroupsEndpoint).deleteGroup(
+            session,
+            params['groupId'],
+          ),
+        ),
+      },
+    );
     connectors['search'] = _i1.EndpointConnector(
       name: 'search',
       endpoint: endpoints['search']!,
@@ -621,7 +547,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['search'] as _i5.SearchEndpoint).searchStudents(
+              (endpoints['search'] as _i6.SearchEndpoint).searchStudents(
             session,
             query: params['query'],
           ),
@@ -639,7 +565,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['search'] as _i5.SearchEndpoint).searchTeachers(
+              (endpoints['search'] as _i6.SearchEndpoint).searchTeachers(
             session,
             query: params['query'],
           ),
@@ -657,7 +583,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['search'] as _i5.SearchEndpoint).searchGroups(
+              (endpoints['search'] as _i6.SearchEndpoint).searchGroups(
             session,
             query: params['query'],
           ),
@@ -675,7 +601,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['search'] as _i5.SearchEndpoint).searchSubjects(
+              (endpoints['search'] as _i6.SearchEndpoint).searchSubjects(
             session,
             query: params['query'],
           ),
@@ -693,7 +619,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['search'] as _i5.SearchEndpoint).searchClassTypes(
+              (endpoints['search'] as _i6.SearchEndpoint).searchClassTypes(
             session,
             query: params['query'],
           ),
@@ -711,7 +637,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['search'] as _i5.SearchEndpoint).searchSubgroups(
+              (endpoints['search'] as _i6.SearchEndpoint).searchSubgroups(
             session,
             query: params['query'],
           ),
@@ -735,11 +661,118 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['semesters'] as _i6.SemestersEndpoint).searchSemesters(
+              (endpoints['semesters'] as _i7.SemestersEndpoint).searchSemesters(
             session,
             query: params['query'],
           ),
         )
+      },
+    );
+    connectors['students'] = _i1.EndpointConnector(
+      name: 'students',
+      endpoint: endpoints['students']!,
+      methodConnectors: {
+        'createStudent': _i1.MethodConnector(
+          name: 'createStudent',
+          params: {
+            'firstName': _i1.ParameterDescription(
+              name: 'firstName',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'lastName': _i1.ParameterDescription(
+              name: 'lastName',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'patronymic': _i1.ParameterDescription(
+              name: 'patronymic',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'email': _i1.ParameterDescription(
+              name: 'email',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'phoneNumber': _i1.ParameterDescription(
+              name: 'phoneNumber',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'groupName': _i1.ParameterDescription(
+              name: 'groupName',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+            'recordBookNumber': _i1.ParameterDescription(
+              name: 'recordBookNumber',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['students'] as _i8.StudentsEndpoint).createStudent(
+            session,
+            firstName: params['firstName'],
+            lastName: params['lastName'],
+            patronymic: params['patronymic'],
+            email: params['email'],
+            phoneNumber: params['phoneNumber'],
+            groupName: params['groupName'],
+            recordBookNumber: params['recordBookNumber'],
+          ),
+        ),
+        'getAllStudents': _i1.MethodConnector(
+          name: 'getAllStudents',
+          params: {},
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['students'] as _i8.StudentsEndpoint)
+                  .getAllStudents(session),
+        ),
+        'updateStudent': _i1.MethodConnector(
+          name: 'updateStudent',
+          params: {
+            'student': _i1.ParameterDescription(
+              name: 'student',
+              type: _i1.getType<_i18.Students>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['students'] as _i8.StudentsEndpoint).updateStudent(
+            session,
+            params['student'],
+          ),
+        ),
+        'getStudentOverallAttendanceRecords': _i1.MethodConnector(
+          name: 'getStudentOverallAttendanceRecords',
+          params: {
+            'studentId': _i1.ParameterDescription(
+              name: 'studentId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['students'] as _i8.StudentsEndpoint)
+                  .getStudentOverallAttendanceRecords(
+            session,
+            params['studentId'],
+          ),
+        ),
       },
     );
     connectors['subgroups'] = _i1.EndpointConnector(
@@ -753,7 +786,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['subgroups'] as _i7.SubgroupsEndpoint)
+              (endpoints['subgroups'] as _i9.SubgroupsEndpoint)
                   .getCurrentUserGroup(session),
         ),
         'createSubgroup': _i1.MethodConnector(
@@ -779,7 +812,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['subgroups'] as _i7.SubgroupsEndpoint).createSubgroup(
+              (endpoints['subgroups'] as _i9.SubgroupsEndpoint).createSubgroup(
             session,
             params['groupId'],
             params['name'],
@@ -809,7 +842,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['subgroups'] as _i7.SubgroupsEndpoint)
+              (endpoints['subgroups'] as _i9.SubgroupsEndpoint)
                   .createFullGroupSubgroup(
             session,
             params['groupId'],
@@ -830,7 +863,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['subgroups'] as _i7.SubgroupsEndpoint)
+              (endpoints['subgroups'] as _i9.SubgroupsEndpoint)
                   .getGroupSubgroups(
             session,
             params['groupId'],
@@ -859,7 +892,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['subgroups'] as _i7.SubgroupsEndpoint).updateSubgroup(
+              (endpoints['subgroups'] as _i9.SubgroupsEndpoint).updateSubgroup(
             session,
             params['subgroupId'],
             params['name'],
@@ -879,7 +912,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['subgroups'] as _i7.SubgroupsEndpoint).deleteSubgroup(
+              (endpoints['subgroups'] as _i9.SubgroupsEndpoint).deleteSubgroup(
             session,
             params['subgroupId'],
           ),
@@ -897,7 +930,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['subgroups'] as _i7.SubgroupsEndpoint)
+              (endpoints['subgroups'] as _i9.SubgroupsEndpoint)
                   .getSubgroupStudents(
             session,
             params['subgroupId'],
@@ -916,7 +949,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['subgroups'] as _i7.SubgroupsEndpoint)
+              (endpoints['subgroups'] as _i9.SubgroupsEndpoint)
                   .getStudentsNotInSubgroup(
             session,
             params['subgroupId'],
@@ -940,7 +973,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['subgroups'] as _i7.SubgroupsEndpoint)
+              (endpoints['subgroups'] as _i9.SubgroupsEndpoint)
                   .addStudentToSubgroup(
             session,
             params['subgroupId'],
@@ -965,7 +998,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['subgroups'] as _i7.SubgroupsEndpoint)
+              (endpoints['subgroups'] as _i9.SubgroupsEndpoint)
                   .removeStudentFromSubgroup(
             session,
             params['subgroupId'],
@@ -985,7 +1018,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['subgroups'] as _i7.SubgroupsEndpoint).searchSubgroups(
+              (endpoints['subgroups'] as _i9.SubgroupsEndpoint).searchSubgroups(
             session,
             query: params['query'],
           ),
@@ -1010,7 +1043,7 @@ class Endpoints extends _i1.EndpointDispatch {
             Map<String, dynamic> params,
           ) async =>
               (endpoints['subjectAttendanceMatrix']
-                      as _i8.SubjectAttendanceMatrixEndpoint)
+                      as _i10.SubjectAttendanceMatrixEndpoint)
                   .getSubjectAttendanceMatrix(
             session,
             subjectId: params['subjectId'],
@@ -1035,7 +1068,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['subjects'] as _i9.SubjectsEndpoint).searchSubjects(
+              (endpoints['subjects'] as _i11.SubjectsEndpoint).searchSubjects(
             session,
             query: params['query'],
           ),
@@ -1059,7 +1092,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['teacherSearch'] as _i10.TeacherSearchEndpoint)
+              (endpoints['teacherSearch'] as _i12.TeacherSearchEndpoint)
                   .searchTeachers(
             session,
             query: params['query'],
@@ -1084,7 +1117,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['makeUserAdmin'] as _i11.MakeUserAdminEndpoint)
+              (endpoints['makeUserAdmin'] as _i13.MakeUserAdminEndpoint)
                   .setUserScopes(
             session,
             params['userId'],
@@ -1109,7 +1142,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['userRoles'] as _i12.UserRolesEndpoint).getUserRoles(
+              (endpoints['userRoles'] as _i14.UserRolesEndpoint).getUserRoles(
             session,
             params['personId'],
           ),
@@ -1132,7 +1165,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['userRoles'] as _i12.UserRolesEndpoint).assignRole(
+              (endpoints['userRoles'] as _i14.UserRolesEndpoint).assignRole(
             session,
             params['personId'],
             params['roleToAssign'],
@@ -1156,7 +1189,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['userRoles'] as _i12.UserRolesEndpoint).removeRole(
+              (endpoints['userRoles'] as _i14.UserRolesEndpoint).removeRole(
             session,
             params['personId'],
             params['roleToRemove'],
@@ -1175,7 +1208,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['userRoles'] as _i12.UserRolesEndpoint)
+              (endpoints['userRoles'] as _i14.UserRolesEndpoint)
                   .assignCuratorRole(
             session,
             params['teacherId'],
@@ -1194,7 +1227,7 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['userRoles'] as _i12.UserRolesEndpoint)
+              (endpoints['userRoles'] as _i14.UserRolesEndpoint)
                   .assignGroupHeadRole(
             session,
             params['studentId'],
@@ -1219,13 +1252,13 @@ class Endpoints extends _i1.EndpointDispatch {
             _i1.Session session,
             Map<String, dynamic> params,
           ) async =>
-              (endpoints['greeting'] as _i13.GreetingEndpoint).hello(
+              (endpoints['greeting'] as _i15.GreetingEndpoint).hello(
             session,
             params['name'],
           ),
         )
       },
     );
-    modules['serverpod_auth'] = _i17.Endpoints()..initializeEndpoints(server);
+    modules['serverpod_auth'] = _i19.Endpoints()..initializeEndpoints(server);
   }
 }

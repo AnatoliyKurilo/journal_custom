@@ -1,18 +1,9 @@
 admin:
-  - createGroup:
-  - getAllGroups:
-  - getGroupByName:
-  - updateGroup:
   - createTeacher:
-  - createStudent:
   - getAllTeachers:
-  - getAllStudents:
   - updatePerson:
   - searchStudents:
   - searchGroups:
-  - updateStudent:
-  - deleteGroup:
-  - getStudentOverallAttendanceRecords:
 classTypes:
   - searchClassTypes:
 classes:
@@ -22,6 +13,12 @@ classes:
   - getStudentsForClassWithAttendance:
   - updateStudentAttendance:
   - getSubjectOverallAttendance:
+groups:
+  - createGroup:
+  - getAllGroups:
+  - getGroupByName:
+  - updateGroup:
+  - deleteGroup:
 search:
   - searchStudents:
   - searchTeachers:
@@ -31,6 +28,11 @@ search:
   - searchSubgroups:
 semesters:
   - searchSemesters:
+students:
+  - createStudent:
+  - getAllStudents:
+  - updateStudent:
+  - getStudentOverallAttendanceRecords:
 subgroups:
   - getCurrentUserGroup:
   - createSubgroup:
