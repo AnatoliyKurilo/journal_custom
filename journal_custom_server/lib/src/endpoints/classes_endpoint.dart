@@ -110,177 +110,160 @@ class ClassesEndpoint extends Endpoint {
   }
 
   // Обновленный метод для получения студентов занятия
-  Future<List<StudentAttendanceInfo>> getStudentsForClassWithAttendance(Session session, {required int classId}) async {
-    // Получаем информацию о занятии
-    final classInfo = await Classes.db.findById(
-      session,
-      classId,
-      include: Classes.include(subgroups: Subgroups.include()),
-    );
-
-    if (classInfo == null) {
-      throw Exception('Занятие с ID $classId не найдено.');
-    }
-
-    // Проверяем доступ к подгруппе этого занятия
-    if (!await UserSubgroupService.hasAccessToSubgroup(session, classInfo.subgroupsId!)) {
-      throw Exception('Доступ запрещен: нет прав на просмотр этого занятия.');
-    }
-
-    // Получаем студентов из подгруппы
-    final studentLinks = await StudentSubgroup.db.find(
-      session,
-      where: (ss) => ss.subgroupsId.equals(classInfo.subgroupsId!),
-      include: StudentSubgroup.include(
-        students: Students.include(person: Person.include()),
-      ),
-    );
-
-    final students = studentLinks.map((link) => link.students!).toList();
-    if (students.isEmpty) {
-      return [];
-    }
-
-    final studentIds = students.map((s) => s.id!).toList();
-
-    // Получаем записи о посещаемости
-    final attendanceRecords = await Attendance.db.find(
-      session,
-      where: (a) => a.classesId.equals(classId) & a.studentsId.inSet(studentIds.toSet()),
-    );
-
-    // Собираем информацию
-    List<StudentAttendanceInfo> studentAttendanceList = [];
-    for (var student in students) {
-      final attendance = attendanceRecords.firstWhere(
-        (ar) => ar.studentsId == student.id,
-        orElse: () => Attendance(classesId: classId, studentsId: student.id!, isPresent: false),
-      );
-      studentAttendanceList.add(StudentAttendanceInfo(
-        student: student,
-        isPresent: attendance.isPresent,
-        comment: attendance.comment,
-        attendanceId: attendance.id,
-      ));
-    }
-    return studentAttendanceList;
-  }
+  // Future<List<StudentAttendanceInfo>> getStudentsForClassWithAttendance(Session session, {required int classId}) async {
+  //   // Получаем информацию о занятии
+  //   final classInfo = await Classes.db.findById(
+  //     session,
+  //     classId,
+  //     include: Classes.include(subgroups: Subgroups.include()),
+  //   );
+  //   if (classInfo == null) {
+  //     throw Exception('Занятие с ID $classId не найдено.');
+  //   }
+  //   // Проверяем доступ к подгруппе этого занятия
+  //   if (!await UserSubgroupService.hasAccessToSubgroup(session, classInfo.subgroupsId!)) {
+  //     throw Exception('Доступ запрещен: нет прав на просмотр этого занятия.');
+  //   }
+  //   // Получаем студентов из подгруппы
+  //   final studentLinks = await StudentSubgroup.db.find(
+  //     session,
+  //     where: (ss) => ss.subgroupsId.equals(classInfo.subgroupsId!),
+  //     include: StudentSubgroup.include(
+  //       students: Students.include(person: Person.include()),
+  //     ),
+  //   );
+  //   final students = studentLinks.map((link) => link.students!).toList();
+  //   if (students.isEmpty) {
+  //     return [];
+  //   }
+  //   final studentIds = students.map((s) => s.id!).toList();
+  //   // Получаем записи о посещаемости
+  //   final attendanceRecords = await Attendance.db.find(
+  //     session,
+  //     where: (a) => a.classesId.equals(classId) & a.studentsId.inSet(studentIds.toSet()),
+  //   );
+  //   // Собираем информацию
+  //   List<StudentAttendanceInfo> studentAttendanceList = [];
+  //   for (var student in students) {
+  //     final attendance = attendanceRecords.firstWhere(
+  //       (ar) => ar.studentsId == student.id,
+  //       orElse: () => Attendance(classesId: classId, studentsId: student.id!, isPresent: false),
+  //     );
+  //     studentAttendanceList.add(StudentAttendanceInfo(
+  //       student: student,
+  //       isPresent: attendance.isPresent,
+  //       comment: attendance.comment,
+  //       attendanceId: attendance.id,
+  //     ));
+  //   }
+  //   return studentAttendanceList;
+  // }
 
   // Обновление/создание записи о посещаемости
-  Future<Attendance> updateStudentAttendance(Session session, {
-    required int classId,
-    required int studentId,
-    required bool isPresent,
-    String? comment,
-  }) async {
-    // Проверяем права доступа (например, куратор группы этого занятия или преподаватель)
-    // Для упрощения пока опустим детальную проверку прав, но в продакшене она обязательна
-    // ... (код проверки прав) ...
-
-    var attendanceRecord = await Attendance.db.findFirstRow(
-      session,
-      where: (a) => a.classesId.equals(classId) & a.studentsId.equals(studentId),
-    );
-
-    if (attendanceRecord == null) {
-      // Создаем новую запись
-      attendanceRecord = Attendance(
-        classesId: classId,
-        studentsId: studentId,
-        isPresent: isPresent,
-        comment: comment,
-      );
-      return await Attendance.db.insertRow(session, attendanceRecord);
-    } else {
-      // Обновляем существующую запись
-      attendanceRecord.isPresent = isPresent;
-      attendanceRecord.comment = comment;
-      return await Attendance.db.updateRow(session, attendanceRecord);
-    }
-  }
+  // Future<Attendance> updateStudentAttendance(Session session, {
+  //   required int classId,
+  //   required int studentId,
+  //   required bool isPresent,
+  //   String? comment,
+  // }) async {
+  //   // Проверяем права доступа (например, куратор группы этого занятия или преподаватель)
+  //   // Для упрощения пока опустим детальную проверку прав, но в продакшене она обязательна
+  //   // ... (код проверки прав) ...
+  //   var attendanceRecord = await Attendance.db.findFirstRow(
+  //     session,
+  //     where: (a) => a.classesId.equals(classId) & a.studentsId.equals(studentId),
+  //   );
+  //   if (attendanceRecord == null) {
+  //     // Создаем новую запись
+  //     attendanceRecord = Attendance(
+  //       classesId: classId,
+  //       studentsId: studentId,
+  //       isPresent: isPresent,
+  //       comment: comment,
+  //     );
+  //     return await Attendance.db.insertRow(session, attendanceRecord);
+  //   } else {
+  //     // Обновляем существующую запись
+  //     attendanceRecord.isPresent = isPresent;
+  //     attendanceRecord.comment = comment;
+  //     return await Attendance.db.updateRow(session, attendanceRecord);
+  //   }
+  // }
 
   // Новый метод для получения сводной посещаемости по предмету
-  Future<List<StudentClassAttendanceFlatRecord>> getSubjectOverallAttendance(
-    Session session, {
-    required int subjectId,
-  }) async {
-    final List<StudentClassAttendanceFlatRecord> flatRecords = [];
-
-    // 1. Найти все занятия (Classes) по этому предмету
-    final classesForSubject = await Classes.db.find(
-      session,
-      where: (c) => c.subjectsId.equals(subjectId),
-      include: Classes.include(
-        // Включаем нужные данные для отображения
-        subjects: Subjects.include(),
-        class_types: ClassTypes.include(),
-        subgroups: Subgroups.include(), // Нужно для получения студентов
-      ),
-      orderBy: (c) => c.date, // Сортируем по дате занятия
-    );
-
-    if (classesForSubject.isEmpty) {
-      return [];
-    }
-
-    // Собираем ID всех подгрупп, связанных с этими занятиями
-    final subgroupIds = classesForSubject
-        .where((c) => c.subgroupsId != null)
-        .map((c) => c.subgroupsId!)
-        .toSet();
-
-    if (subgroupIds.isEmpty) {
-      return []; // Нет подгрупп, значит нет студентов для отчета
-    }
-
-    // 2. Найти всех студентов (Students) в этих подгруппах
-    final studentLinks = await StudentSubgroup.db.find(
-      session,
-      where: (ss) => ss.subgroupsId.inSet(subgroupIds),
-      include: StudentSubgroup.include(
-        students: Students.include(
-          person: Person.include(),
-        ),
-      ),
-    );
-    final allStudentsInvolved = studentLinks.map((link) => link.students!).toList();
-    if (allStudentsInvolved.isEmpty) {
-      return [];
-    }
-    final allStudentIdsInvolved = allStudentsInvolved.map((s) => s.id!).toSet();
-
-
-    // 3. Найти все записи о посещаемости (Attendance) для этих студентов и этих занятий
-    final classIdsForSubject = classesForSubject.map((c) => c.id!).toSet();
-    final attendanceRecords = await Attendance.db.find(
-      session,
-      where: (a) => a.classesId.inSet(classIdsForSubject) & a.studentsId.inSet(allStudentIdsInvolved),
-    );
-
-    // 4. Формируем плоский список
-    for (var classItem in classesForSubject) {
-      // Определяем студентов, которые должны были быть на этом конкретном занятии (из его подгруппы)
-      final studentsForThisClass = allStudentsInvolved
-          .where((student) => studentLinks.any((link) => link.studentsId == student.id && link.subgroupsId == classItem.subgroupsId))
-          .toList();
-
-      for (var student in studentsForThisClass) {
-        final attendance = attendanceRecords.firstWhere(
-          (ar) => ar.classesId == classItem.id && ar.studentsId == student.id,
-          orElse: () => Attendance(
-            classesId: classItem.id!,
-            studentsId: student.id!,
-            isPresent: false, // По умолчанию не был, если записи нет
-          ),
-        );
-        flatRecords.add(StudentClassAttendanceFlatRecord(
-          student: student,
-          classInfo: classItem, // Передаем весь объект Classes
-          isPresent: attendance.isPresent,
-          comment: attendance.comment,
-        ));
-      }
-    }
-    return flatRecords;
-  }
+  // Future<List<StudentClassAttendanceFlatRecord>> getSubjectOverallAttendance(
+  //   Session session, {
+  //   required int subjectId,
+  // }) async {
+  //   final List<StudentClassAttendanceFlatRecord> flatRecords = [];
+  //   // 1. Найти все занятия (Classes) по этому предмету
+  //   final classesForSubject = await Classes.db.find(
+  //     session,
+  //     where: (c) => c.subjectsId.equals(subjectId),
+  //     include: Classes.include(
+  //       // Включаем нужные данные для отображения
+  //       subjects: Subjects.include(),
+  //       class_types: ClassTypes.include(),
+  //       subgroups: Subgroups.include(), // Нужно для получения студентов
+  //     ),
+  //     orderBy: (c) => c.date, // Сортируем по дате занятия
+  //   );
+  //   if (classesForSubject.isEmpty) {
+  //     return [];
+  //   }
+  //   // Собираем ID всех подгрупп, связанных с этими занятиями
+  //   final subgroupIds = classesForSubject
+  //       .where((c) => c.subgroupsId != null)
+  //       .map((c) => c.subgroupsId!)
+  //       .toSet();
+  //   if (subgroupIds.isEmpty) {
+  //     return []; // Нет подгрупп, значит нет студентов для отчета
+  //   }
+  //   // 2. Найти всех студентов (Students) в этих подгруппах
+  //   final studentLinks = await StudentSubgroup.db.find(
+  //     session,
+  //     where: (ss) => ss.subgroupsId.inSet(subgroupIds),
+  //     include: StudentSubgroup.include(
+  //       students: Students.include(
+  //         person: Person.include(),
+  //       ),
+  //     ),
+  //   );
+  //   final allStudentsInvolved = studentLinks.map((link) => link.students!).toList();
+  //   if (allStudentsInvolved.isEmpty) {
+  //     return [];
+  //   }
+  //   final allStudentIdsInvolved = allStudentsInvolved.map((s) => s.id!).toSet();
+  //   // 3. Найти все записи о посещаемости (Attendance) для этих студентов и этих занятий
+  //   final classIdsForSubject = classesForSubject.map((c) => c.id!).toSet();
+  //   final attendanceRecords = await Attendance.db.find(
+  //     session,
+  //     where: (a) => a.classesId.inSet(classIdsForSubject) & a.studentsId.inSet(allStudentIdsInvolved),
+  //   );
+  //   // 4. Формируем плоский список
+  //   for (var classItem in classesForSubject) {
+  //     // Определяем студентов, которые должны были быть на этом конкретном занятии (из его подгруппы)
+  //     final studentsForThisClass = allStudentsInvolved
+  //         .where((student) => studentLinks.any((link) => link.studentsId == student.id && link.subgroupsId == classItem.subgroupsId))
+  //         .toList();
+  //     for (var student in studentsForThisClass) {
+  //       final attendance = attendanceRecords.firstWhere(
+  //         (ar) => ar.classesId == classItem.id && ar.studentsId == student.id,
+  //         orElse: () => Attendance(
+  //           classesId: classItem.id!,
+  //           studentsId: student.id!,
+  //           isPresent: false, // По умолчанию не был, если записи нет
+  //         ),
+  //       );
+  //       flatRecords.add(StudentClassAttendanceFlatRecord(
+  //         student: student,
+  //         classInfo: classItem, // Передаем весь объект Classes
+  //         isPresent: attendance.isPresent,
+  //         comment: attendance.comment,
+  //       ));
+  //     }
+  //   }
+  //   return flatRecords;
+  // }
+  
 }
