@@ -218,71 +218,62 @@ class AdminEndpoint extends Endpoint {
   }
 
   // Метод для создания студента
-  Future<Students> createStudent(
-    Session session, {
-    required String firstName,
-    required String lastName,
-    String? patronymic,
-    required String email,
-    String? phoneNumber,
-    required String groupName,
-  }) async {
-    session.log('Начало создания студента: $firstName $lastName');
-
-    try {
-      // Проверяем, существует ли уже человек с таким email
-      var existingPerson = await Person.db.findFirstRow(
-        session,
-        where: (p) => p.email.equals(email),
-      );
-
-      if (existingPerson != null) {
-        session.log('Человек с таким email уже существует: $email');
-        throw Exception('Человек с таким email уже существует');
-      }
-
-      // Ищем группу по названию
-      var group = await Groups.db.findFirstRow(
-        session,
-        where: (g) => g.name.equals(groupName),
-      );
-
-      if (group == null) {
-        session.log('Группа с названием "$groupName" не найдена');
-        throw Exception('Группа с названием "$groupName" не найдена');
-      }
-
-      // Создаем запись Person
-      var person = Person(
-        firstName: firstName,
-        lastName: lastName,
-        patronymic: patronymic,
-        email: email,
-        phoneNumber: phoneNumber,
-      );
-
-      person = await Person.db.insertRow(session, person);
-      session.log('Создана запись в таблице Person: ${person.id}');
-
-      // Создаем запись Student
-      var student = Students(
-        personId: person.id!,
-        groupsId: group.id!,
-      );
-
-      student = await Students.db.insertRow(session, student);
-      session.log('Создана запись в таблице Students: ${student.id}');
-
-      return student;
-    } catch (e, stackTrace) {
-      session.log(
-        'Ошибка при создании студента: $e',
-        level: LogLevel.error,
-        stackTrace: stackTrace,
-      );
-      rethrow;
-    }
-  }
+  // Future<Students> createStudent(
+  //   Session session, {
+  //   required String firstName,
+  //   required String lastName,
+  //   String? patronymic,
+  //   required String email,
+  //   String? phoneNumber,
+  //   required String groupName,
+  // }) async {
+  //   session.log('Начало создания студента: $firstName $lastName');
+  //   try {
+  //     // Проверяем, существует ли уже человек с таким email
+  //     var existingPerson = await Person.db.findFirstRow(
+  //       session,
+  //       where: (p) => p.email.equals(email),
+  //     );
+  //     if (existingPerson != null) {
+  //       session.log('Человек с таким email уже существует: $email');
+  //       throw Exception('Человек с таким email уже существует');
+  //     }
+  //     // Ищем группу по названию
+  //     var group = await Groups.db.findFirstRow(
+  //       session,
+  //       where: (g) => g.name.equals(groupName),
+  //     );
+  //     if (group == null) {
+  //       session.log('Группа с названием "$groupName" не найдена');
+  //       throw Exception('Группа с названием "$groupName" не найдена');
+  //     }
+  //     // Создаем запись Person
+  //     var person = Person(
+  //       firstName: firstName,
+  //       lastName: lastName,
+  //       patronymic: patronymic,
+  //       email: email,
+  //       phoneNumber: phoneNumber,
+  //     );
+  //     person = await Person.db.insertRow(session, person);
+  //     session.log('Создана запись в таблице Person: ${person.id}');
+  //     // Создаем запись Student
+  //     var student = Students(
+  //       personId: person.id!,
+  //       groupsId: group.id!,
+  //     );
+  //     student = await Students.db.insertRow(session, student);
+  //     session.log('Создана запись в таблице Students: ${student.id}');
+  //     return student;
+  //   } catch (e, stackTrace) {
+  //     session.log(
+  //       'Ошибка при создании студента: $e',
+  //       level: LogLevel.error,
+  //       stackTrace: stackTrace,
+  //     );
+  //     rethrow;
+  //   }
+  // }
 
   // Метод для получения всех преподавателей с использованием include
   Future<List<Teachers>> getAllTeachers(Session session) async {
@@ -293,15 +284,15 @@ class AdminEndpoint extends Endpoint {
   }
 
   // Метод для получения всех студентов с использованием include
-  Future<List<Students>> getAllStudents(Session session) async {
-    return await Students.db.find(
-      session,
-      include: Students.include(
-        person: Person.include(), // Включаем данные о человеке
-        groups: Groups.include(), // Включаем данные о группе
-      ),
-    );
-  }
+  // Future<List<Students>> getAllStudents(Session session) async {
+  //   return await Students.db.find(
+  //     session,
+  //     include: Students.include(
+  //       person: Person.include(), // Включаем данные о человеке
+  //       groups: Groups.include(), // Включаем данные о группе
+  //     ),
+  //   );
+  // }
 
   // Метод для обновления данных человека
   Future<Person> updatePerson(Session session, Person person) async {
@@ -414,21 +405,19 @@ class AdminEndpoint extends Endpoint {
   }
 
   // Метод для обновления данных студента
-  Future<Students> updateStudent(
-    Session session,
-    Students student,
-  ) async {
-    // Проверяем, существует ли студент с таким ID
-    var existingStudent = await Students.db.findById(session, student.id!);
-    if (existingStudent == null) {
-      throw Exception('Студент с ID ${student.id} не найден');
-    }
-
-    // Обновляем данные студента
-    await Students.db.updateRow(session, student);
-
-    return student;
-  }
+  // Future<Students> updateStudent(
+  //   Session session,
+  //   Students student,
+  // ) async {
+  //   // Проверяем, существует ли студент с таким ID
+  //   var existingStudent = await Students.db.findById(session, student.id!);
+  //   if (existingStudent == null) {
+  //     throw Exception('Студент с ID ${student.id} не найден');
+  //   }
+  //   // Обновляем данные студента
+  //   await Students.db.updateRow(session, student);
+  //   return student;
+  // }
 
   // Дополненный метод для удаления группы, студентов и связанных записей Person
   // Future<bool> deleteGroup(Session session, int groupId) async {
@@ -486,73 +475,65 @@ class AdminEndpoint extends Endpoint {
   // }
 
   // Метод для получения всех записей о посещаемости для конкретного студента
-  Future<List<StudentOverallAttendanceRecord>> getStudentOverallAttendanceRecords(Session session, int studentId) async {
-    final student = await Students.db.findById(session, studentId);
-    if (student == null) {
-      throw Exception('Студент с ID $studentId не найден.');
-    }
-
-    // Получаем доступные подгруппы для текущего пользователя
-    final accessibleSubgroupIds = await UserSubgroupService.getUserAccessibleSubgroupIds(session);
-    
-    if (accessibleSubgroupIds.isEmpty) {
-      return [];
-    }
-
-    // Находим связи студента с подгруппами, но только с доступными
-    final studentSubgroupLinks = await StudentSubgroup.db.find(
-      session,
-      where: (ss) => ss.studentsId.equals(studentId) & ss.subgroupsId.inSet(accessibleSubgroupIds.toSet()),
-    );
-
-    if (studentSubgroupLinks.isEmpty) {
-      return [];
-    }
-
-    final subgroupIds = studentSubgroupLinks.map((link) => link.subgroupsId).toSet();
-
-    // Находим занятия только для доступных подгрупп студента
-    final classes = await Classes.db.find(
-      session,
-      where: (c) => c.subgroupsId.inSet(subgroupIds),
-      include: Classes.include(
-        subjects: Subjects.include(),
-        class_types: ClassTypes.include(),
-        subgroups: Subgroups.include(),
-      ),
-      orderBy: (c) => c.date,
-      orderDescending: true,
-    );
-
-    if (classes.isEmpty) {
-      return [];
-    }
-
-    final classIds = classes.map((c) => c.id!).toSet();
-
-    final attendanceRecords = await Attendance.db.find(
-      session,
-      where: (a) => a.studentsId.equals(studentId) & a.classesId.inSet(classIds),
-    );
-
-    final List<StudentOverallAttendanceRecord> result = [];
-    for (var classItem in classes) {
-      final attendance = attendanceRecords.firstWhereOrNull(
-        (ar) => ar.classesId == classItem.id,
-      );
-
-      result.add(StudentOverallAttendanceRecord(
-        subjectName: classItem.subjects?.name ?? 'Неизвестный предмет',
-        classTopic: classItem.topic,
-        classTypeName: classItem.class_types?.name,
-        classDate: classItem.date,
-        isPresent: attendance?.isPresent ?? false,
-        comment: attendance?.comment,
-        subgroupName: classItem.subgroups?.name,
-      ));
-    }
-    return result;
-  }
+  // Future<List<StudentOverallAttendanceRecord>> getStudentOverallAttendanceRecords(
+  //   Session session, 
+  //   int studentId) async {
+  //   final student = await Students.db.findById(session, studentId);
+  //   if (student == null) {
+  //     throw Exception('Студент с ID $studentId не найден.');
+  //   }
+  //   // Получаем доступные подгруппы для текущего пользователя
+  //   final accessibleSubgroupIds = await UserSubgroupService
+  //   .getUserAccessibleSubgroupIds(session);
+  //   if (accessibleSubgroupIds.isEmpty) {
+  //     return [];
+  //   }
+  //   // Находим связи студента с подгруппами, но только с доступными
+  //   final studentSubgroupLinks = await StudentSubgroup.db.find(
+  //     session,
+  //     where: (ss) => ss.studentsId.equals(studentId) & ss.subgroupsId.inSet(accessibleSubgroupIds.toSet()),
+  //   );
+  //   if (studentSubgroupLinks.isEmpty) {
+  //     return [];
+  //   }
+  //   final subgroupIds = studentSubgroupLinks.map((link) => link.subgroupsId).toSet();
+  //   // Находим занятия только для доступных подгрупп студента
+  //   final classes = await Classes.db.find(
+  //     session,
+  //     where: (c) => c.subgroupsId.inSet(subgroupIds),
+  //     include: Classes.include(
+  //       subjects: Subjects.include(),
+  //       class_types: ClassTypes.include(),
+  //       subgroups: Subgroups.include(),
+  //     ),
+  //     orderBy: (c) => c.date,
+  //     orderDescending: true,
+  //   );
+  //   if (classes.isEmpty) {
+  //     return [];
+  //   }
+  //   final classIds = classes.map((c) => c.id!).toSet();
+  //   final attendanceRecords = await Attendance.db.find(
+  //     session,
+  //     where: (a) => a.studentsId.equals(studentId) & a.classesId.inSet(classIds),
+  //   );
+  //   final List<StudentOverallAttendanceRecord> result = [];
+  //   for (var classItem in classes) {
+  //     final attendance = attendanceRecords.firstWhereOrNull(
+  //       (ar) => ar.classesId == classItem.id,
+  //     );
+  //     result.add(StudentOverallAttendanceRecord(
+  //       subjectName: classItem.subjects?.name ?? 'Неизвестный предмет',
+  //       classTopic: classItem.topic,
+  //       classTypeName: classItem.class_types?.name,
+  //       classDate: classItem.date,
+  //       isPresent: attendance?.isPresent ?? false,
+  //       comment: attendance?.comment,
+  //       subgroupName: classItem.subgroups?.name,
+  //     ));
+  //   }
+  //   return result;
+  // }
 
   // Вспомогательный метод для обработки ошибок
   Future<T> _executeWithErrorHandling<T>(
