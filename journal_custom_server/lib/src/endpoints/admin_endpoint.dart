@@ -180,42 +180,37 @@ class AdminEndpoint extends Endpoint {
   // }
 
   // Метод для создания преподавателя
-  Future<Teachers> createTeacher(
-    Session session, {
-    required String firstName,
-    required String lastName,
-    String? patronymic,
-    required String email,
-    String? phoneNumber,
-  }) async {
-    // Проверяем, существует ли уже человек с таким email
-    var existingPerson = await Person.db.findFirstRow(
-      session,
-      where: (p) => p.email.equals(email),
-    );
-
-    if (existingPerson != null) {
-      throw Exception('Человек с таким email уже существует');
-    }
-
-    // Создаем запись Person
-    var person = Person(
-      firstName: firstName,
-      lastName: lastName,
-      patronymic: patronymic,
-      email: email,
-      phoneNumber: phoneNumber,
-    );
-
-    person = await Person.db.insertRow(session, person);
-
-    // Создаем запись Teacher
-    var teacher = Teachers(
-      personId: person.id!,
-    );
-
-    return await Teachers.db.insertRow(session, teacher);
-  }
+  // Future<Teachers> createTeacher(
+  //   Session session, {
+  //   required String firstName,
+  //   required String lastName,
+  //   String? patronymic,
+  //   required String email,
+  //   String? phoneNumber,
+  // }) async {
+  //   // Проверяем, существует ли уже человек с таким email
+  //   var existingPerson = await Person.db.findFirstRow(
+  //     session,
+  //     where: (p) => p.email.equals(email),
+  //   );
+  //   if (existingPerson != null) {
+  //     throw Exception('Человек с таким email уже существует');
+  //   }
+  //   // Создаем запись Person
+  //   var person = Person(
+  //     firstName: firstName,
+  //     lastName: lastName,
+  //     patronymic: patronymic,
+  //     email: email,
+  //     phoneNumber: phoneNumber,
+  //   );
+  //   person = await Person.db.insertRow(session, person);
+  //   // Создаем запись Teacher
+  //   var teacher = Teachers(
+  //     personId: person.id!,
+  //   );
+  //   return await Teachers.db.insertRow(session, teacher);
+  // }
 
   // Метод для создания студента
   // Future<Students> createStudent(
@@ -276,12 +271,12 @@ class AdminEndpoint extends Endpoint {
   // }
 
   // Метод для получения всех преподавателей с использованием include
-  Future<List<Teachers>> getAllTeachers(Session session) async {
-    return await Teachers.db.find(
-      session,
-      include: Teachers.include(person: Person.include()),
-    );
-  }
+  // Future<List<Teachers>> getAllTeachers(Session session) async {
+  //   return await Teachers.db.find(
+  //     session,
+  //     include: Teachers.include(person: Person.include()),
+  //   );
+  // }
 
   // Метод для получения всех студентов с использованием include
   // Future<List<Students>> getAllStudents(Session session) async {
