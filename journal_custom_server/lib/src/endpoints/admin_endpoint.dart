@@ -290,15 +290,15 @@ class AdminEndpoint extends Endpoint {
   // }
 
   // Метод для обновления данных человека
-  Future<Person> updatePerson(Session session, Person person) async {
-    return await _executeWithErrorHandling<Person>(
-      session,
-      () async {
-        await Person.db.updateRow(session, person);
-        return person;
-      },
-    );
-  }
+  // Future<Person> updatePerson(Session session, Person person) async {
+  //   return await _executeWithErrorHandling<Person>(
+  //     session,
+  //     () async {
+  //       await Person.db.updateRow(session, person);
+  //       return person;
+  //     },
+  //   );
+  // }
   
   // Метод для поиска студентов
   Future<List<Students>> searchStudents(
