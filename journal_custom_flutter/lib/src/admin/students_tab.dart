@@ -49,8 +49,8 @@ class _StudentsTabState extends State<StudentsTab> {
     });
 
     try {
-      // Выполняем поиск студентов
-      var result = await client.admin.searchStudents(query: query);
+      // Используем новый поиск
+      var result = await client.search.searchStudents(query: query); // Изменено с admin.searchStudents на search.searchStudents
       setState(() {
         students = result;
         isLoading = false;

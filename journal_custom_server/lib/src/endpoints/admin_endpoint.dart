@@ -1,3 +1,4 @@
+import 'package:journal_custom_server/src/services/user_subgroup_service.dart';
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import 'package:collection/collection.dart';
@@ -512,58 +513,56 @@ class AdminEndpoint extends Endpoint {
 
   // Метод для получения всех записей о посещаемости для конкретного студента
   Future<List<StudentOverallAttendanceRecord>> getStudentOverallAttendanceRecords(Session session, int studentId) async {
-    // 1. Проверить, существует ли студент
-    final student = await Students.db.findById(
-      session,
-      studentId,
-      // Можно включить person, если нужно будет отображать ФИО на странице, но оно уже есть в объекте Student, передаваемом на страницу
-      // include: Students.include(person: Person.include()),
-    );
+    final student = await Students.db.findById(session, studentId);
     if (student == null) {
       throw Exception('Студент с ID $studentId не найден.');
     }
 
-    // 2. Найти все связи студент-подгруппа для этого студента
-    // Это необходимо, чтобы определить, на каких занятиях студент должен был быть
+    // Получаем доступные подгруппы для текущего пользователя
+    final accessibleSubgroupIds = await UserSubgroupService.getUserAccessibleSubgroupIds(session);
+    
+    if (accessibleSubgroupIds.isEmpty) {
+      return [];
+    }
+
+    // Находим связи студента с подгруппами, но только с доступными
     final studentSubgroupLinks = await StudentSubgroup.db.find(
       session,
-      where: (ss) => ss.studentsId.equals(studentId),
+      where: (ss) => ss.studentsId.equals(studentId) & ss.subgroupsId.inSet(accessibleSubgroupIds.toSet()),
     );
 
     if (studentSubgroupLinks.isEmpty) {
-      return []; // Студент не состоит ни в одной подгруппе, значит, нет занятий для отслеживания
+      return [];
     }
+
     final subgroupIds = studentSubgroupLinks.map((link) => link.subgroupsId).toSet();
 
-    // 3. Найти все занятия (Classes), связанные с этими подгруппами
-    // Это все занятия, на которых студент потенциально мог быть
+    // Находим занятия только для доступных подгрупп студента
     final classes = await Classes.db.find(
       session,
-      where: (c) => c.subgroupsId.inSet(subgroupIds), // Занятия только для подгрупп студента
+      where: (c) => c.subgroupsId.inSet(subgroupIds),
       include: Classes.include(
         subjects: Subjects.include(),
         class_types: ClassTypes.include(),
-        subgroups: Subgroups.include(), // Для subgroupName
+        subgroups: Subgroups.include(),
       ),
-      orderBy: (c) => c.date, // Сортируем по дате
-      orderDescending: true, // Сначала новые
+      orderBy: (c) => c.date,
+      orderDescending: true,
     );
 
     if (classes.isEmpty) {
-      return []; // Для подгрупп студента нет зарегистрированных занятий
+      return [];
     }
+
     final classIds = classes.map((c) => c.id!).toSet();
 
-    // 4. Найти все записи о посещаемости (Attendance) для этого студента по этим занятиям
     final attendanceRecords = await Attendance.db.find(
       session,
       where: (a) => a.studentsId.equals(studentId) & a.classesId.inSet(classIds),
     );
 
-    // 5. Сформировать результат
     final List<StudentOverallAttendanceRecord> result = [];
     for (var classItem in classes) {
-      // Для каждого занятия, на котором студент должен был быть, ищем его отметку
       final attendance = attendanceRecords.firstWhereOrNull(
         (ar) => ar.classesId == classItem.id,
       );
@@ -573,9 +572,9 @@ class AdminEndpoint extends Endpoint {
         classTopic: classItem.topic,
         classTypeName: classItem.class_types?.name,
         classDate: classItem.date,
-        isPresent: attendance?.isPresent ?? false, // Если отметки нет, считаем, что отсутствовал
+        isPresent: attendance?.isPresent ?? false,
         comment: attendance?.comment,
-        subgroupName: classItem.subgroups?.name, // Имя подгруппы, к которой привязано занятие
+        subgroupName: classItem.subgroups?.name,
       ));
     }
     return result;

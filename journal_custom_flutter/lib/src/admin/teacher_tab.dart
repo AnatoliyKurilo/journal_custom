@@ -47,8 +47,8 @@ class _TeachersTabState extends State<TeachersTab> {
     });
 
     try {
-      // Выполняем поиск преподавателей через сервер
-      var result = await client.teacherSearch.searchTeachers(query: query);
+      // Используем новый унифицированный поиск
+      var result = await client.search.searchTeachers(query: query); // Изменено с teacherSearch на search
       setState(() {
         teachers = result;
         filteredTeachers = result;

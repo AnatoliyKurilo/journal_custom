@@ -73,26 +73,24 @@ class _GroupsTabState extends State<GroupsTab> {
   }
 
   Future<void> _loadGroups({String? query}) async {
-    if (query != null) {
-      _currentGroupsSearchQuery = query;
-    }
-
     setState(() {
       isLoading = true;
       errorMessage = null;
+      _currentGroupsSearchQuery = query;
     });
 
     try {
-      var loadedGroups = (_currentGroupsSearchQuery == null || _currentGroupsSearchQuery!.isEmpty)
+      // Используем новый поиск
+      var loadedGroups = (query == null || query.isEmpty)
           ? await client.admin.getAllGroups()
-          : await client.admin.searchGroups(query: _currentGroupsSearchQuery!);
+          : await client.search.searchGroups(query: query); // Изменено с admin.searchGroups на search.searchGroups
 
       var loadedTeachers = await client.admin.getAllTeachers();
       var loadedStudents = await client.admin.getAllStudents();
 
       if (mounted) {
         setState(() {
-          this.groups = loadedGroups; // Используем this. для ясности, если есть локальные переменные с тем же именем
+          this.groups = loadedGroups;
           this.teachers = loadedTeachers;
           this.students = loadedStudents;
           isLoading = false;

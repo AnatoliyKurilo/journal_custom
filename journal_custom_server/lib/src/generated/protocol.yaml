@@ -16,12 +16,19 @@ admin:
 classTypes:
   - searchClassTypes:
 classes:
-  - createClass:
   - getSubjectsWithClasses:
   - getClassesBySubject:
+  - createClass:
   - getStudentsForClassWithAttendance:
   - updateStudentAttendance:
   - getSubjectOverallAttendance:
+search:
+  - searchStudents:
+  - searchTeachers:
+  - searchGroups:
+  - searchSubjects:
+  - searchClassTypes:
+  - searchSubgroups:
 semesters:
   - searchSemesters:
 subgroups:
@@ -47,8 +54,8 @@ makeUserAdmin:
 userRoles:
   - getUserRoles:
   - assignRole:
+  - removeRole:
   - assignCuratorRole:
   - assignGroupHeadRole:
-  - removeRole:
 greeting:
   - hello:

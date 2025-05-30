@@ -44,9 +44,9 @@ import 'package:journal_custom_client/src/protocol/student_attendance_info.dart'
     as _i26;
 import 'package:journal_custom_client/src/protocol/student_class_attendance_flat_record.dart'
     as _i27;
-import 'package:journal_custom_client/src/protocol/semesters_protocol.dart'
-    as _i28;
 import 'package:journal_custom_client/src/protocol/subgroups_protocol.dart'
+    as _i28;
+import 'package:journal_custom_client/src/protocol/semesters_protocol.dart'
     as _i29;
 import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i30;
 export 'greeting.dart';
@@ -249,12 +249,12 @@ class Protocol extends _i1.SerializationManager {
           .map((e) => deserialize<_i27.StudentClassAttendanceFlatRecord>(e))
           .toList() as T;
     }
-    if (t == List<_i28.Semesters>) {
-      return (data as List).map((e) => deserialize<_i28.Semesters>(e)).toList()
+    if (t == List<_i28.Subgroups>) {
+      return (data as List).map((e) => deserialize<_i28.Subgroups>(e)).toList()
           as T;
     }
-    if (t == List<_i29.Subgroups>) {
-      return (data as List).map((e) => deserialize<_i29.Subgroups>(e)).toList()
+    if (t == List<_i29.Semesters>) {
+      return (data as List).map((e) => deserialize<_i29.Semesters>(e)).toList()
           as T;
     }
     if (t == List<String>) {

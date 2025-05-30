@@ -1,126 +1,46 @@
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
+import '../services/user_subgroup_service.dart';
 
 class ClassesEndpoint extends Endpoint {
   @override
   bool get requireAuth => true;
 
-  @override
-  Set<String> get requiredRoles => {'serverpod.admin', 'curator','groupHead'};
-
-  // Метод для создания занятия
-  Future<Classes> createClass(
-    Session session, {
-    required int subjectsId,
-    required int classTypesId,
-    required int teachersId,
-    required int semestersId,
-    required int subgroupsId,
-    required DateTime date,
-    String? topic, // Новое поле
-    String? notes, // Новое поле
-  }) async {
-    // Проверяем, существует ли дисциплина
-    final existingSubject = await Subjects.db.findById(session, subjectsId);
-    if (existingSubject == null) {
-      throw Exception('Дисциплина с ID "$subjectsId" не найдена.');
-    }
-
-    // Проверяем, существует ли тип занятия
-    final existingClassType = await ClassTypes.db.findById(session, classTypesId);
-    if (existingClassType == null) {
-      throw Exception('Тип занятия с ID "$classTypesId" не найден.');
-    }
-
-    // Проверяем, существует ли преподаватель
-    final existingTeacher = await Teachers.db.findById(session, teachersId);
-    if (existingTeacher == null) {
-      throw Exception('Преподаватель с ID "$teachersId" не найден.');
-    }
-
-    // Проверяем, существует ли семестр
-    final existingSemester = await Semesters.db.findById(session, semestersId);
-    if (existingSemester == null) {
-      throw Exception('Семестр с ID "$semestersId" не найден.');
-    }
-
-    // Проверяем, существует ли подгруппа
-    final existingSubgroup = await Subgroups.db.findById(session, subgroupsId);
-    if (existingSubgroup == null) {
-      throw Exception('Подгруппа с ID "$subgroupsId" не найдена.');
-    }
-
-    // Создаем запись о занятии
-    final newClass = Classes(
-      subjectsId: subjectsId,
-      class_typesId: classTypesId,
-      teachersId: teachersId,
-      semestersId: semestersId,
-      subgroupsId: subgroupsId,
-      date: date,
-      topic: topic, // Добавляем новое поле
-      notes: notes, // Добавляем новое поле
-    );
-
-    return await Classes.db.insertRow(session, newClass);
-  }
-
+  // Обновленный метод для получения предметов с занятиями
   Future<List<Subjects>> getSubjectsWithClasses(Session session) async {
     try {
-      // Получаем все записи из таблицы Classes
-      final classEntries = await Classes.db.find(session);
-
-      // Преобразуем результат в список идентификаторов и убираем повторения
-      final subjectIds = classEntries.map((entry) => entry.subjectsId!).toSet().toList();
-
-      // Если предметов нет, возвращаем пустой список
-      if (subjectIds.isEmpty) {
-        return [];
-      }
-
-      // Построение выражения для фильтрации
-      Expression<dynamic>? whereExpression;
-      for (var id in subjectIds) {
-        var condition = Subjects.t.id.equals(id);
-        whereExpression = (whereExpression == null) ? condition : (whereExpression | condition);
-      }
-
-      // Получаем список предметов по построенному выражению
-      return await Subjects.db.find(
-        session,
-        where: (s) => whereExpression!,
-        orderBy: (t) => t.name, // Сортировка по названию
-        orderDescending: false,
-      );
+      return await UserSubgroupService.getUserAccessibleSubjectsWithClasses(session);
     } catch (e, stackTrace) {
       session.log(
         'Ошибка в getSubjectsWithClasses: $e',
         level: LogLevel.error,
         stackTrace: stackTrace,
       );
-      // В случае ошибки возвращаем пустой список
       return [];
     }
   }
 
+  // Обновленный метод для получения занятий по предмету
   Future<List<Classes>> getClassesBySubject(Session session, {required int subjectId}) async {
     try {
+      final accessibleSubgroupIds = await UserSubgroupService.getUserAccessibleSubgroupIds(session);
+      
+      if (accessibleSubgroupIds.isEmpty) {
+        return [];
+      }
+
       return await Classes.db.find(
         session,
-        where: (c) => c.subjectsId.equals(subjectId),
-        // Вы можете добавить orderBy, например, по дате
-        orderBy: (c) => c.date,
-        orderDescending: true, // Сначала новые занятия
-        // Если вам нужна информация о типе занятия, преподавателе и т.д. сразу,
-        // используйте include:
+        where: (c) => c.subjectsId.equals(subjectId) & c.subgroupsId.inSet(accessibleSubgroupIds.toSet()),
         include: Classes.include(
+          subjects: Subjects.include(),
           class_types: ClassTypes.include(),
-          teachers: Teachers.include(
-            person: Person.include(),
-          ),
+          teachers: Teachers.include(person: Person.include()),
           semesters: Semesters.include(),
           subgroups: Subgroups.include(),
         ),
+        orderBy: (c) => c.date,
+        orderDescending: true,
       );
     } catch (e, stackTrace) {
       session.log(
@@ -131,61 +51,116 @@ class ClassesEndpoint extends Endpoint {
       return [];
     }
   }
-  // Получение студентов для занятия и их статуса посещаемости
+
+  // Обновленный метод создания занятий с проверкой доступа
+  Future<Classes> createClass(
+    Session session, {
+    required int subjectsId,
+    required int classTypesId,
+    required int teachersId,
+    required int semestersId,
+    required int subgroupsId,
+    required DateTime date,
+    String? topic,
+    String? notes,
+  }) async {
+    // Проверяем доступ к подгруппе
+    if (!await UserSubgroupService.hasAccessToSubgroup(session, subgroupsId)) {
+      throw Exception('Доступ запрещен: нет прав на создание занятий для этой подгруппы.');
+    }
+
+    // Проверяем существование связанных объектов
+    final existingSubject = await Subjects.db.findById(session, subjectsId);
+    if (existingSubject == null) {
+      throw Exception('Предмет с ID "$subjectsId" не найден.');
+    }
+
+    final existingClassType = await ClassTypes.db.findById(session, classTypesId);
+    if (existingClassType == null) {
+      throw Exception('Тип занятия с ID "$classTypesId" не найден.');
+    }
+
+    final existingTeacher = await Teachers.db.findById(session, teachersId);
+    if (existingTeacher == null) {
+      throw Exception('Преподаватель с ID "$teachersId" не найден.');
+    }
+
+    final existingSemester = await Semesters.db.findById(session, semestersId);
+    if (existingSemester == null) {
+      throw Exception('Семестр с ID "$semestersId" не найден.');
+    }
+
+    final existingSubgroup = await Subgroups.db.findById(session, subgroupsId);
+    if (existingSubgroup == null) {
+      throw Exception('Подгруппа с ID "$subgroupsId" не найдена.');
+    }
+
+    final newClass = Classes(
+      subjectsId: subjectsId,
+      class_typesId: classTypesId,
+      teachersId: teachersId,
+      semestersId: semestersId,
+      subgroupsId: subgroupsId,
+      date: date,
+      topic: topic,
+      notes: notes,
+    );
+
+    return await Classes.db.insertRow(session, newClass);
+  }
+
+  // Обновленный метод для получения студентов занятия
   Future<List<StudentAttendanceInfo>> getStudentsForClassWithAttendance(Session session, {required int classId}) async {
-    // 1. Получаем информацию о занятии, включая подгруппу
+    // Получаем информацию о занятии
     final classInfo = await Classes.db.findById(
       session,
       classId,
-      include: Classes.include(
-        subgroups: Subgroups.include(), // Нам нужна подгруппа этого занятия
-      ),
+      include: Classes.include(subgroups: Subgroups.include()),
     );
 
     if (classInfo == null) {
       throw Exception('Занятие с ID $classId не найдено.');
     }
-    if (classInfo.subgroupsId == null) {
-      // Этого не должно быть, если логика создания занятия корректна
-      throw Exception('Для занятия с ID $classId не определена подгруппа.');
+
+    // Проверяем доступ к подгруппе этого занятия
+    if (!await UserSubgroupService.hasAccessToSubgroup(session, classInfo.subgroupsId!)) {
+      throw Exception('Доступ запрещен: нет прав на просмотр этого занятия.');
     }
 
-    // 2. Получаем студентов из подгруппы этого занятия
+    // Получаем студентов из подгруппы
     final studentLinks = await StudentSubgroup.db.find(
       session,
       where: (ss) => ss.subgroupsId.equals(classInfo.subgroupsId!),
       include: StudentSubgroup.include(
-        students: Students.include(
-          person: Person.include(), // Включаем данные Person для отображения ФИО
-        ),
+        students: Students.include(person: Person.include()),
       ),
     );
 
     final students = studentLinks.map((link) => link.students!).toList();
     if (students.isEmpty) {
-      return []; // Нет студентов в подгруппе
+      return [];
     }
 
     final studentIds = students.map((s) => s.id!).toList();
 
-    // 3. Получаем записи о посещаемости для этих студентов на этом занятии
+    // Получаем записи о посещаемости
     final attendanceRecords = await Attendance.db.find(
       session,
       where: (a) => a.classesId.equals(classId) & a.studentsId.inSet(studentIds.toSet()),
     );
 
-    // 4. Собираем информацию в один список
+    // Собираем информацию
     List<StudentAttendanceInfo> studentAttendanceList = [];
     for (var student in students) {
       final attendance = attendanceRecords.firstWhere(
         (ar) => ar.studentsId == student.id,
-        orElse: () => Attendance(classesId: classId, studentsId: student.id!, isPresent: false), // По умолчанию не присутствовал
+        orElse: () => Attendance(classesId: classId, studentsId: student.id!, isPresent: false),
       );
       studentAttendanceList.add(StudentAttendanceInfo(
         student: student,
         isPresent: attendance.isPresent,
         comment: attendance.comment,
-        attendanceId: attendance.id, // ID записи о посещаемости, если она есть
+        attendanceId: attendance.id,
       ));
     }
     return studentAttendanceList;

@@ -1,141 +1,17 @@
 import 'package:serverpod/serverpod.dart';
-import 'package:serverpod_auth_server/serverpod_auth_server.dart';
 import '../generated/protocol.dart';
-import '../custom_scope.dart'; // Убедитесь, что CustomScope.groupHead.name существует
+import '../services/permission_service.dart';
 
 class SubgroupsEndpoint extends Endpoint {
-  // Вспомогательный метод для проверки прав доступа к управлению подгруппами группы
-  // Доступ разрешен администраторам, старосте этой группы или куратору этой группы.
-  Future<bool> _canManageGroupSubgroups(Session session, int groupId) async {
-    // 1) Получаем ID текущего пользователя
-    var userId = (await session.authenticated)!.userId;
-
-    // 2) Загружаем полную информацию о пользователе
-    var authUser = await Users.findUserByUserId(session, userId);
-    if (authUser == null) {
-      return false; // Не удалось получить информацию о пользователе
-    }
-
-    // Администраторы имеют полный доступ
-    if (authUser.scopeNames.contains('serverpod.admin')) {
-      return true;
-    }
-
-    // Находим связанную запись Person
-    final person = await Person.db.findFirstRow(
-      session,
-      where: (p) => p.userInfoId.equals(userId),
-    );
-    if (person == null) {
-      return false; // Профиль пользователя не найден
-    }
-
-    // Проверка на старосту группы
-    if (authUser.scopeNames.contains('groupHead')) {
-      final student = await Students.db.findFirstRow(
-        session,
-        where: (s) => s.personId.equals(person.id!) & s.groupsId.equals(groupId) & s.isGroupHead.equals(true),
-      );
-      if (student != null) {
-        return true; // Пользователь является старостой этой группы
-      }
-    }
-
-    // Проверка на куратора группы
-    if (authUser.scopeNames.contains('curator')) {
-      // Находим запись Teacher для этого пользователя
-      final teacher = await Teachers.db.findFirstRow(
-        session,
-        where: (t) => t.personId.equals(person.id!),
-      );
-      
-      if (teacher != null) {
-        // Проверяем, является ли преподаватель куратором данной группы
-        final group = await Groups.db.findById(session, groupId);
-        if (group != null && group.curatorId == teacher.id) {
-          return true; // Пользователь является куратором этой группы
-        }
-      }
-    }
-
-    return false; // Нет прав доступа
-  }
-
   @override
   bool get requireAuth => true;
 
   @override
-  Set<String> get requiredRoles=> {'groupHead', 'curator', 'serverpod.admin'};
+  Set<String> get requiredRoles => {'groupHead', 'curator', 'serverpod.admin'};
 
-  // Получить группу текущего аутентифицированного пользователя (если он староста)
+  // Получить группу текущего пользователя
   Future<Groups?> getCurrentUserGroup(Session session) async {
-    // 1) Получаем ID текущего пользователя
-    var userId = (await session.authenticated)!.userId;
-
-    // 2) Загружаем полную информацию о пользователе
-    var authUser = await Users.findUserByUserId(session, userId);
-    if (authUser == null) {
-      throw Exception('Не удалось получить информацию о пользователе.');
-    }
-
-    // Проверяем, имеет ли пользователь роль администратора
-    if (authUser.scopeNames.contains('serverpod.admin')) {
-      // Для админов можно получить любую группу (или первую в списке)
-      var allGroups = await Groups.db.find(
-        session,
-        limit: 1, // Берем первую группу для демонстрации
-      );
-      return allGroups.isNotEmpty ? allGroups.first : null;
-    }
-
-    // Находим связанную запись Person
-    final person = await Person.db.findFirstRow(
-      session,
-      where: (p) => p.userInfoId.equals(userId),
-    );
-    if (person == null) {
-      throw Exception('Связанный профиль пользователя не найден.');
-    }
-
-    // Проверка на старосту группы
-    // 1. Находим студента по personId
-    if (authUser.scopeNames.contains('groupHead')) {
-      final student = await Students.db.findFirstRow(
-        session,
-        where: (s) => s.personId.equals(person.id!) & s.isGroupHead.equals(true),
-      );
-
-      // 2. Проверяем, что студент существует и является старостой
-      if (student != null) {
-        // Получаем группу студента
-        final group = await Groups.db.findById(session, student.groupsId);
-        return group;
-      }
-    }
-
-    // Проверка на куратора группы (если пользователь не староста)
-    if (authUser.scopeNames.contains('curator')) {
-      final teacher = await Teachers.db.findFirstRow(
-        session,
-        where: (t) => t.personId.equals(person.id!),
-      );
-
-      if (teacher != null) {
-        // Находим группу, где учитель является куратором
-        final groups = await Groups.db.find(
-          session,
-          where: (g) => g.curatorId.equals(teacher.id!),
-          limit: 1,
-        );
-        
-        if (groups.isNotEmpty) {
-          return groups.first;
-        }
-      }
-    }
-
-    // Если не нашли группу или пользователь не имеет нужных прав
-    return null;
+    return await PermissionService.getCurrentUserGroup(session);
   }
 
   // Создать новую подгруппу
@@ -145,7 +21,7 @@ class SubgroupsEndpoint extends Endpoint {
     String name,
     String? description,
   ) async {
-    if (!await _canManageGroupSubgroups(session, groupId)) {
+    if (!await PermissionService.canManageGroupSubgroups(session, groupId)) {
       throw Exception('Доступ запрещен: нет прав на управление подгруппами этой группы.');
     }
 
@@ -170,14 +46,14 @@ class SubgroupsEndpoint extends Endpoint {
     return Subgroups.db.insertRow(session, newSubgroup);
   }
 
-  // Метод для создания подгруппы со всеми студентами группы
+  // Создать подгруппу со всеми студентами группы
   Future<Subgroups> createFullGroupSubgroup(
     Session session,
     int groupId,
     String name,
     String? description,
   ) async {
-    if (!await _canManageGroupSubgroups(session, groupId)) {
+    if (!await PermissionService.canManageGroupSubgroups(session, groupId)) {
       throw Exception('Доступ запрещен: нет прав на управление подгруппами этой группы.');
     }
 
@@ -186,7 +62,6 @@ class SubgroupsEndpoint extends Endpoint {
       throw Exception('Основная группа не найдена.');
     }
 
-    // Проверяем, нет ли уже подгруппы с таким названием
     final existingSubgroup = await Subgroups.db.findFirstRow(
       session,
       where: (s) => s.groupsId.equals(groupId) & s.name.equals(name),
@@ -195,23 +70,20 @@ class SubgroupsEndpoint extends Endpoint {
       throw Exception('Подгруппа с таким названием уже существует в этой группе.');
     }
 
-    // Создаем новую подгруппу
     final newSubgroup = Subgroups(
       name: name,
       description: description,
       groupsId: groupId,
     );
     
-    // Сохраняем подгруппу в базе
     final createdSubgroup = await Subgroups.db.insertRow(session, newSubgroup);
 
-    // Получаем всех студентов группы
+    // Получаем всех студентов группы и добавляем в подгруппу
     final allGroupStudents = await Students.db.find(
       session,
       where: (s) => s.groupsId.equals(groupId),
     );
 
-    // Добавляем всех студентов в подгруппу
     for (var student in allGroupStudents) {
       final newLink = StudentSubgroup(
         subgroupsId: createdSubgroup.id!,
@@ -226,7 +98,7 @@ class SubgroupsEndpoint extends Endpoint {
   // Получить все подгруппы для указанной группы
   Future<List<Subgroups>> getGroupSubgroups(Session session, int groupId) async {
     // Разрешим просмотр подгрупп, если пользователь может ими управлять
-    if (!await _canManageGroupSubgroups(session, groupId)) {
+    if (!await PermissionService.canManageGroupSubgroups(session, groupId)) {
       throw Exception('Доступ запрещен: нет прав на просмотр подгрупп этой группы.');
     }
     return Subgroups.db.find(session, where: (s) => s.groupsId.equals(groupId));
@@ -243,7 +115,7 @@ class SubgroupsEndpoint extends Endpoint {
     if (subgroup == null) {
       throw Exception('Подгруппа не найдена.');
     }
-    if (!await _canManageGroupSubgroups(session, subgroup.groupsId!)) {
+    if (!await PermissionService.canManageGroupSubgroups(session, subgroup.groupsId!)) {
       throw Exception('Доступ запрещен: нет прав на управление этой подгруппой.');
     }
 
@@ -268,7 +140,7 @@ class SubgroupsEndpoint extends Endpoint {
     if (subgroup == null) {
       throw Exception('Подгруппа не найдена.');
     }
-    if (!await _canManageGroupSubgroups(session, subgroup.groupsId!)) {
+    if (!await PermissionService.canManageGroupSubgroups(session, subgroup.groupsId!)) {
       throw Exception('Доступ запрещен: нет прав на управление этой подгруппой.');
     }
 
@@ -288,7 +160,7 @@ class SubgroupsEndpoint extends Endpoint {
     if (subgroup == null) {
       throw Exception('Подгруппа не найдена.');
     }
-    if (!await _canManageGroupSubgroups(session, subgroup.groupsId!)) {
+    if (!await PermissionService.canManageGroupSubgroups(session, subgroup.groupsId!)) {
       throw Exception('Доступ запрещен: нет прав на просмотр студентов этой подгруппы.');
     }
 
@@ -310,7 +182,7 @@ class SubgroupsEndpoint extends Endpoint {
     if (subgroup == null) {
       throw Exception('Подгруппа не найдена.');
     }
-    if (!await _canManageGroupSubgroups(session, subgroup.groupsId!)) {
+    if (!await PermissionService.canManageGroupSubgroups(session, subgroup.groupsId!)) {
       throw Exception('Доступ запрещен.');
     }
 
@@ -340,7 +212,7 @@ class SubgroupsEndpoint extends Endpoint {
     if (subgroup == null) {
       throw Exception('Подгруппа не найдена.');
     }
-    if (!await _canManageGroupSubgroups(session, subgroup.groupsId!)) {
+    if (!await PermissionService.canManageGroupSubgroups(session, subgroup.groupsId!)) {
       throw Exception('Доступ запрещен: нет прав на управление этой подгруппой.');
     }
 
@@ -375,7 +247,7 @@ class SubgroupsEndpoint extends Endpoint {
     if (subgroup == null) {
       throw Exception('Подгруппа не найдена.');
     }
-    if (!await _canManageGroupSubgroups(session, subgroup.groupsId!)) {
+    if (!await PermissionService.canManageGroupSubgroups(session, subgroup.groupsId!)) {
       throw Exception('Доступ запрещен: нет прав на управление этой подгруппой.');
     }
 

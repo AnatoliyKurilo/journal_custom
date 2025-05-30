@@ -162,8 +162,8 @@ class _AttendancePageState extends State<AttendancePage> {
                         onTap: () async {
                           final subject = await _showSearchDialog(
                             context,
-                            'Выберите дисциплину',
-                            (query) => client.subjects.searchSubjects(query: query),
+                            'Выберите предмет',
+                            (query) => client.search.searchSubjects(query: query), // Изменено с subjects.searchSubjects на search.searchSubjects
                           );
                           if (subject != null && subject is Subjects) {
                             setDialogState(() {
@@ -280,7 +280,7 @@ class _AttendancePageState extends State<AttendancePage> {
                           final subgroup = await _showSearchDialog(
                             context,
                             'Выберите подгруппу',
-                            (query) => client.subgroups.searchSubgroups(query: query),
+                            (query) => client.search.searchSubgroups(query: query), // Изменено
                           );
                           if (subgroup != null && subgroup is Subgroups) {
                             setDialogState(() { // Используем setDialogState
