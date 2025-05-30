@@ -26,7 +26,7 @@ class _TeachersTabState extends State<TeachersTab> {
     });
 
     try {
-      var result = await client.admin.getAllTeachers();
+      var result = await client.teachers.getAllTeachers();
       setState(() {
         teachers = result;
         filteredTeachers = result;
@@ -148,7 +148,7 @@ class _TeachersTabState extends State<TeachersTab> {
 
                   try {
                     // Создаем преподавателя через сервер
-                    await client.admin.createTeacher(
+                    await client.teachers.createTeacher(
                       firstName: firstName,
                       lastName: lastName,
                       patronymic: patronymic,
@@ -280,7 +280,7 @@ class _TeachersTabState extends State<TeachersTab> {
                   );
 
                   try {
-                    await client.admin.updatePerson(updatedPerson); // Pass as positional argument
+                    await client.person.updatePerson(updatedPerson); // Pass as positional argument
                     Navigator.of(context).pop();
                     _loadTeachers(); 
                     ScaffoldMessenger.of(context).showSnackBar(

@@ -34,7 +34,7 @@ class _ClassAttendancePageState extends State<ClassAttendancePage> {
       if (widget.classItem.id == null) {
         throw Exception('ID занятия не может быть null');
       }
-      final studentInfoList = await client.classes.getStudentsForClassWithAttendance(classId: widget.classItem.id!);
+      final studentInfoList = await client.attendance.getStudentsForClassWithAttendance(classId: widget.classItem.id!);
       if (mounted) {
         setState(() {
           _studentAttendanceList = studentInfoList;
@@ -60,7 +60,7 @@ class _ClassAttendancePageState extends State<ClassAttendancePage> {
 
   Future<void> _updateAttendance(int studentId, bool isPresent, String? comment) async {
     try {
-      await client.classes.updateStudentAttendance(
+      await client.attendance.updateStudentAttendance(
         classId: widget.classItem.id!,
         studentId: studentId,
         isPresent: isPresent,

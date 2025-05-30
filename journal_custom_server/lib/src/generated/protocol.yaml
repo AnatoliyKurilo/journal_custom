@@ -1,24 +1,25 @@
 admin:
-  - createTeacher:
-  - getAllTeachers:
-  - updatePerson:
   - searchStudents:
   - searchGroups:
+attendance:
+  - getStudentsForClassWithAttendance:
+  - updateStudentAttendance:
+  - getSubjectOverallAttendance:
+  - getSubjectAttendanceMatrix:
 classTypes:
   - searchClassTypes:
 classes:
   - getSubjectsWithClasses:
   - getClassesBySubject:
   - createClass:
-  - getStudentsForClassWithAttendance:
-  - updateStudentAttendance:
-  - getSubjectOverallAttendance:
 groups:
   - createGroup:
   - getAllGroups:
   - getGroupByName:
   - updateGroup:
   - deleteGroup:
+person:
+  - updatePerson:
 search:
   - searchStudents:
   - searchTeachers:
@@ -49,6 +50,9 @@ subjectAttendanceMatrix:
   - getSubjectAttendanceMatrix:
 subjects:
   - searchSubjects:
+teachers:
+  - createTeacher:
+  - getAllTeachers:
 teacherSearch:
   - searchTeachers:
 makeUserAdmin:

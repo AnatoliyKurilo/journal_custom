@@ -28,7 +28,7 @@ class _StudentsTabState extends State<StudentsTab> {
     });
     try {
       // Получаем список всех студентов
-      var result = await client.admin.getAllStudents();
+      var result = await client.students.getAllStudents();
       setState(() {
         students = result;
         isLoading = false;
@@ -165,7 +165,7 @@ class _StudentsTabState extends State<StudentsTab> {
 
                   try {
                     // Создаем студента через сервер
-                    await client.admin.createStudent(
+                    await client.students.createStudent(
                       firstName: firstName,
                       lastName: lastName,
                       patronymic: patronymic,
@@ -206,7 +206,7 @@ class _StudentsTabState extends State<StudentsTab> {
     List<Groups> availableGroups = [];
     bool groupsLoadingError = false;
     try {
-      availableGroups = await client.admin.getAllGroups();
+      availableGroups = await client.groups.getAllGroups();
       if (student?.groupsId != null && availableGroups.isNotEmpty) {
         // Пытаемся найти текущую группу студента в списке доступных групп
         selectedGroup = availableGroups.firstWhere(
@@ -355,21 +355,21 @@ class _StudentsTabState extends State<StudentsTab> {
                           phoneNumber: phoneNumber,
                         );
                         
-                        await client.admin.updatePerson(updatedPerson);
+                        await client.person.updatePerson(updatedPerson);
                         
                         if (selectedGroup != null && selectedGroup?.id != student.groupsId) {
                           var updatedStudent = student.copyWith(
                             groupsId: selectedGroup?.id!,
                             // groups: selectedGroup, // Serverpod автоматически обновит связь по groupsId
                           );
-                          await client.admin.updateStudent(updatedStudent);
+                          await client.students.updateStudent(updatedStudent);
                         } else if (selectedGroup == null && student.groupsId != null) {
                           // Если группа была удалена (стала null), а раньше была
                            var updatedStudent = student.copyWith(
                             groupsId: null, // Устанавливаем null
                             // groups: null, 
                           );
-                          await client.admin.updateStudent(updatedStudent);
+                          await client.students.updateStudent(updatedStudent);
                         }
                         
                         if (mounted) {

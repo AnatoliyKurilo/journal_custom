@@ -178,11 +178,11 @@ Future<void> importGroupFromCsv(BuildContext context) async {
     }
 
     // 8. Проверяем, существует ли группа
-    Groups? existingGroup = await client.admin.getGroupByName(groupName);
+    Groups? existingGroup = await client.groups.getGroupByName(groupName);
 
     // 9. Если группа не существует, создаем ее
     if (existingGroup == null) {
-      existingGroup = await client.admin.createGroup(groupName, null);
+      existingGroup = await client.groups.createGroup(groupName, null);
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text('Создана новая группа: $groupName'))
@@ -226,7 +226,7 @@ Future<void> importGroupFromCsv(BuildContext context) async {
           email = '$baseName.${DateTime.now().millisecondsSinceEpoch}@example.com';
         }
         
-        await client.admin.createStudent(
+        await client.students.createStudent(
           firstName: student['Имя']!,
           lastName: student['Фамилия']!,
           patronymic: student['Отчество'] ?? '',

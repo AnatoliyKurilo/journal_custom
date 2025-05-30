@@ -32,7 +32,7 @@ class _ViewClassAttendancePageState extends State<ViewClassAttendancePage> {
       if (widget.classItem.id == null) {
         throw Exception('ID занятия не может быть null');
       }
-      final studentInfoList = await client.classes.getStudentsForClassWithAttendance(classId: widget.classItem.id!);
+      final studentInfoList = await client.attendance.getStudentsForClassWithAttendance(classId: widget.classItem.id!);
       if (mounted) {
         // Сортируем студентов по фамилии и имени для удобства
         studentInfoList.sort((a, b) {

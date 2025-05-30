@@ -82,11 +82,11 @@ class _GroupsTabState extends State<GroupsTab> {
     try {
       // Используем новый поиск
       var loadedGroups = (query == null || query.isEmpty)
-          ? await client.admin.getAllGroups()
+          ? await client.groups.getAllGroups()
           : await client.search.searchGroups(query: query); // Изменено с admin.searchGroups на search.searchGroups
 
-      var loadedTeachers = await client.admin.getAllTeachers();
-      var loadedStudents = await client.admin.getAllStudents();
+      var loadedTeachers = await client.teachers.getAllTeachers();
+      var loadedStudents = await client.students.getAllStudents();
 
       if (mounted) {
         setState(() {
@@ -108,7 +108,7 @@ class _GroupsTabState extends State<GroupsTab> {
 
   Future<void> _updateGroup(Groups group, {int? curatorId, int? groupHeadId}) async {
     try {
-      await client.admin.updateGroup(group, newCuratorId: curatorId, newGroupHeadId: groupHeadId);
+      await client.groups.updateGroup(group, newCuratorId: curatorId, newGroupHeadId: groupHeadId);
       await _loadGroups(query: _currentGroupsSearchQuery);
 
       if (mounted) {
@@ -161,7 +161,7 @@ class _GroupsTabState extends State<GroupsTab> {
                 if (formKey.currentState!.validate()) {
                   formKey.currentState!.save();
                   try {
-                    await client.admin.createGroup(groupName, null); // curatorId пока null
+                    await client.groups.createGroup(groupName, null); // curatorId пока null
                     Navigator.of(context).pop();
                     _loadGroups(); // Обновляем список групп
                     if (mounted) {
@@ -357,7 +357,7 @@ class _GroupsTabState extends State<GroupsTab> {
                     );
                   }
                   
-                  bool success = await client.admin.deleteGroup(group.id!);
+                  bool success = await client.groups.deleteGroup(group.id!);
                   
                   if (success && mounted) {
                     await _loadGroups(query: _currentGroupsSearchQuery);

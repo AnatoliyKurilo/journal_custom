@@ -11,30 +11,30 @@
 // ignore_for_file: no_leading_underscores_for_library_prefixes
 import 'package:serverpod_client/serverpod_client.dart' as _i1;
 import 'dart:async' as _i2;
-import 'package:journal_custom_client/src/protocol/teachers_protocol.dart'
-    as _i3;
-import 'package:journal_custom_client/src/protocol/person.dart' as _i4;
 import 'package:journal_custom_client/src/protocol/students_protocol.dart'
-    as _i5;
-import 'package:journal_custom_client/src/protocol/groups_protocol.dart' as _i6;
-import 'package:journal_custom_client/src/protocol/class_types_protocol.dart'
-    as _i7;
-import 'package:journal_custom_client/src/protocol/subjects_protocol.dart'
-    as _i8;
-import 'package:journal_custom_client/src/protocol/classes.dart' as _i9;
+    as _i3;
+import 'package:journal_custom_client/src/protocol/groups_protocol.dart' as _i4;
 import 'package:journal_custom_client/src/protocol/student_attendance_info.dart'
-    as _i10;
+    as _i5;
 import 'package:journal_custom_client/src/protocol/attendance_protocol.dart'
-    as _i11;
+    as _i6;
 import 'package:journal_custom_client/src/protocol/student_class_attendance_flat_record.dart'
-    as _i12;
-import 'package:journal_custom_client/src/protocol/subgroups_protocol.dart'
-    as _i13;
-import 'package:journal_custom_client/src/protocol/semesters_protocol.dart'
-    as _i14;
-import 'package:journal_custom_client/src/protocol/student_overall_attendance_record.dart'
-    as _i15;
+    as _i7;
 import 'package:journal_custom_client/src/protocol/subject_attendance_matrix.dart'
+    as _i8;
+import 'package:journal_custom_client/src/protocol/class_types_protocol.dart'
+    as _i9;
+import 'package:journal_custom_client/src/protocol/subjects_protocol.dart'
+    as _i10;
+import 'package:journal_custom_client/src/protocol/classes.dart' as _i11;
+import 'package:journal_custom_client/src/protocol/person.dart' as _i12;
+import 'package:journal_custom_client/src/protocol/teachers_protocol.dart'
+    as _i13;
+import 'package:journal_custom_client/src/protocol/subgroups_protocol.dart'
+    as _i14;
+import 'package:journal_custom_client/src/protocol/semesters_protocol.dart'
+    as _i15;
+import 'package:journal_custom_client/src/protocol/student_overall_attendance_record.dart'
     as _i16;
 import 'package:journal_custom_client/src/protocol/greeting.dart' as _i17;
 import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i18;
@@ -47,51 +47,67 @@ class EndpointAdmin extends _i1.EndpointRef {
   @override
   String get name => 'admin';
 
-  _i2.Future<_i3.Teachers> createTeacher({
-    required String firstName,
-    required String lastName,
-    String? patronymic,
-    required String email,
-    String? phoneNumber,
-  }) =>
-      caller.callServerEndpoint<_i3.Teachers>(
-        'admin',
-        'createTeacher',
-        {
-          'firstName': firstName,
-          'lastName': lastName,
-          'patronymic': patronymic,
-          'email': email,
-          'phoneNumber': phoneNumber,
-        },
-      );
-
-  _i2.Future<List<_i3.Teachers>> getAllTeachers() =>
-      caller.callServerEndpoint<List<_i3.Teachers>>(
-        'admin',
-        'getAllTeachers',
-        {},
-      );
-
-  _i2.Future<_i4.Person> updatePerson(_i4.Person person) =>
-      caller.callServerEndpoint<_i4.Person>(
-        'admin',
-        'updatePerson',
-        {'person': person},
-      );
-
-  _i2.Future<List<_i5.Students>> searchStudents({required String query}) =>
-      caller.callServerEndpoint<List<_i5.Students>>(
+  _i2.Future<List<_i3.Students>> searchStudents({required String query}) =>
+      caller.callServerEndpoint<List<_i3.Students>>(
         'admin',
         'searchStudents',
         {'query': query},
       );
 
-  _i2.Future<List<_i6.Groups>> searchGroups({required String query}) =>
-      caller.callServerEndpoint<List<_i6.Groups>>(
+  _i2.Future<List<_i4.Groups>> searchGroups({required String query}) =>
+      caller.callServerEndpoint<List<_i4.Groups>>(
         'admin',
         'searchGroups',
         {'query': query},
+      );
+}
+
+/// {@category Endpoint}
+class EndpointAttendance extends _i1.EndpointRef {
+  EndpointAttendance(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'attendance';
+
+  _i2.Future<List<_i5.StudentAttendanceInfo>> getStudentsForClassWithAttendance(
+          {required int classId}) =>
+      caller.callServerEndpoint<List<_i5.StudentAttendanceInfo>>(
+        'attendance',
+        'getStudentsForClassWithAttendance',
+        {'classId': classId},
+      );
+
+  _i2.Future<_i6.Attendance> updateStudentAttendance({
+    required int classId,
+    required int studentId,
+    required bool isPresent,
+    String? comment,
+  }) =>
+      caller.callServerEndpoint<_i6.Attendance>(
+        'attendance',
+        'updateStudentAttendance',
+        {
+          'classId': classId,
+          'studentId': studentId,
+          'isPresent': isPresent,
+          'comment': comment,
+        },
+      );
+
+  _i2.Future<List<_i7.StudentClassAttendanceFlatRecord>>
+      getSubjectOverallAttendance({required int subjectId}) =>
+          caller.callServerEndpoint<List<_i7.StudentClassAttendanceFlatRecord>>(
+            'attendance',
+            'getSubjectOverallAttendance',
+            {'subjectId': subjectId},
+          );
+
+  _i2.Future<_i8.SubjectAttendanceMatrix> getSubjectAttendanceMatrix(
+          {required int subjectId}) =>
+      caller.callServerEndpoint<_i8.SubjectAttendanceMatrix>(
+        'attendance',
+        'getSubjectAttendanceMatrix',
+        {'subjectId': subjectId},
       );
 }
 
@@ -102,8 +118,8 @@ class EndpointClassTypes extends _i1.EndpointRef {
   @override
   String get name => 'classTypes';
 
-  _i2.Future<List<_i7.ClassTypes>> searchClassTypes({required String query}) =>
-      caller.callServerEndpoint<List<_i7.ClassTypes>>(
+  _i2.Future<List<_i9.ClassTypes>> searchClassTypes({required String query}) =>
+      caller.callServerEndpoint<List<_i9.ClassTypes>>(
         'classTypes',
         'searchClassTypes',
         {'query': query},
@@ -117,21 +133,22 @@ class EndpointClasses extends _i1.EndpointRef {
   @override
   String get name => 'classes';
 
-  _i2.Future<List<_i8.Subjects>> getSubjectsWithClasses() =>
-      caller.callServerEndpoint<List<_i8.Subjects>>(
+  _i2.Future<List<_i10.Subjects>> getSubjectsWithClasses() =>
+      caller.callServerEndpoint<List<_i10.Subjects>>(
         'classes',
         'getSubjectsWithClasses',
         {},
       );
 
-  _i2.Future<List<_i9.Classes>> getClassesBySubject({required int subjectId}) =>
-      caller.callServerEndpoint<List<_i9.Classes>>(
+  _i2.Future<List<_i11.Classes>> getClassesBySubject(
+          {required int subjectId}) =>
+      caller.callServerEndpoint<List<_i11.Classes>>(
         'classes',
         'getClassesBySubject',
         {'subjectId': subjectId},
       );
 
-  _i2.Future<_i9.Classes> createClass({
+  _i2.Future<_i11.Classes> createClass({
     required int subjectsId,
     required int classTypesId,
     required int teachersId,
@@ -141,7 +158,7 @@ class EndpointClasses extends _i1.EndpointRef {
     String? topic,
     String? notes,
   }) =>
-      caller.callServerEndpoint<_i9.Classes>(
+      caller.callServerEndpoint<_i11.Classes>(
         'classes',
         'createClass',
         {
@@ -155,39 +172,6 @@ class EndpointClasses extends _i1.EndpointRef {
           'notes': notes,
         },
       );
-
-  _i2.Future<List<_i10.StudentAttendanceInfo>>
-      getStudentsForClassWithAttendance({required int classId}) =>
-          caller.callServerEndpoint<List<_i10.StudentAttendanceInfo>>(
-            'classes',
-            'getStudentsForClassWithAttendance',
-            {'classId': classId},
-          );
-
-  _i2.Future<_i11.Attendance> updateStudentAttendance({
-    required int classId,
-    required int studentId,
-    required bool isPresent,
-    String? comment,
-  }) =>
-      caller.callServerEndpoint<_i11.Attendance>(
-        'classes',
-        'updateStudentAttendance',
-        {
-          'classId': classId,
-          'studentId': studentId,
-          'isPresent': isPresent,
-          'comment': comment,
-        },
-      );
-
-  _i2.Future<List<_i12.StudentClassAttendanceFlatRecord>>
-      getSubjectOverallAttendance({required int subjectId}) => caller
-              .callServerEndpoint<List<_i12.StudentClassAttendanceFlatRecord>>(
-            'classes',
-            'getSubjectOverallAttendance',
-            {'subjectId': subjectId},
-          );
 }
 
 /// {@category Endpoint}
@@ -197,11 +181,11 @@ class EndpointGroups extends _i1.EndpointRef {
   @override
   String get name => 'groups';
 
-  _i2.Future<_i6.Groups> createGroup(
+  _i2.Future<_i4.Groups> createGroup(
     String name,
     int? curatorId,
   ) =>
-      caller.callServerEndpoint<_i6.Groups>(
+      caller.callServerEndpoint<_i4.Groups>(
         'groups',
         'createGroup',
         {
@@ -210,26 +194,26 @@ class EndpointGroups extends _i1.EndpointRef {
         },
       );
 
-  _i2.Future<List<_i6.Groups>> getAllGroups() =>
-      caller.callServerEndpoint<List<_i6.Groups>>(
+  _i2.Future<List<_i4.Groups>> getAllGroups() =>
+      caller.callServerEndpoint<List<_i4.Groups>>(
         'groups',
         'getAllGroups',
         {},
       );
 
-  _i2.Future<_i6.Groups?> getGroupByName(String groupName) =>
-      caller.callServerEndpoint<_i6.Groups?>(
+  _i2.Future<_i4.Groups?> getGroupByName(String groupName) =>
+      caller.callServerEndpoint<_i4.Groups?>(
         'groups',
         'getGroupByName',
         {'groupName': groupName},
       );
 
-  _i2.Future<_i6.Groups> updateGroup(
-    _i6.Groups clientProvidedGroup, {
+  _i2.Future<_i4.Groups> updateGroup(
+    _i4.Groups clientProvidedGroup, {
     int? newCuratorId,
     int? newGroupHeadId,
   }) =>
-      caller.callServerEndpoint<_i6.Groups>(
+      caller.callServerEndpoint<_i4.Groups>(
         'groups',
         'updateGroup',
         {
@@ -247,49 +231,64 @@ class EndpointGroups extends _i1.EndpointRef {
 }
 
 /// {@category Endpoint}
+class EndpointPerson extends _i1.EndpointRef {
+  EndpointPerson(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'person';
+
+  _i2.Future<_i12.Person> updatePerson(_i12.Person person) =>
+      caller.callServerEndpoint<_i12.Person>(
+        'person',
+        'updatePerson',
+        {'person': person},
+      );
+}
+
+/// {@category Endpoint}
 class EndpointSearch extends _i1.EndpointRef {
   EndpointSearch(_i1.EndpointCaller caller) : super(caller);
 
   @override
   String get name => 'search';
 
-  _i2.Future<List<_i5.Students>> searchStudents({required String query}) =>
-      caller.callServerEndpoint<List<_i5.Students>>(
+  _i2.Future<List<_i3.Students>> searchStudents({required String query}) =>
+      caller.callServerEndpoint<List<_i3.Students>>(
         'search',
         'searchStudents',
         {'query': query},
       );
 
-  _i2.Future<List<_i3.Teachers>> searchTeachers({required String query}) =>
-      caller.callServerEndpoint<List<_i3.Teachers>>(
+  _i2.Future<List<_i13.Teachers>> searchTeachers({required String query}) =>
+      caller.callServerEndpoint<List<_i13.Teachers>>(
         'search',
         'searchTeachers',
         {'query': query},
       );
 
-  _i2.Future<List<_i6.Groups>> searchGroups({required String query}) =>
-      caller.callServerEndpoint<List<_i6.Groups>>(
+  _i2.Future<List<_i4.Groups>> searchGroups({required String query}) =>
+      caller.callServerEndpoint<List<_i4.Groups>>(
         'search',
         'searchGroups',
         {'query': query},
       );
 
-  _i2.Future<List<_i8.Subjects>> searchSubjects({required String query}) =>
-      caller.callServerEndpoint<List<_i8.Subjects>>(
+  _i2.Future<List<_i10.Subjects>> searchSubjects({required String query}) =>
+      caller.callServerEndpoint<List<_i10.Subjects>>(
         'search',
         'searchSubjects',
         {'query': query},
       );
 
-  _i2.Future<List<_i7.ClassTypes>> searchClassTypes({required String query}) =>
-      caller.callServerEndpoint<List<_i7.ClassTypes>>(
+  _i2.Future<List<_i9.ClassTypes>> searchClassTypes({required String query}) =>
+      caller.callServerEndpoint<List<_i9.ClassTypes>>(
         'search',
         'searchClassTypes',
         {'query': query},
       );
 
-  _i2.Future<List<_i13.Subgroups>> searchSubgroups({required String query}) =>
-      caller.callServerEndpoint<List<_i13.Subgroups>>(
+  _i2.Future<List<_i14.Subgroups>> searchSubgroups({required String query}) =>
+      caller.callServerEndpoint<List<_i14.Subgroups>>(
         'search',
         'searchSubgroups',
         {'query': query},
@@ -303,8 +302,8 @@ class EndpointSemesters extends _i1.EndpointRef {
   @override
   String get name => 'semesters';
 
-  _i2.Future<List<_i14.Semesters>> searchSemesters({required String query}) =>
-      caller.callServerEndpoint<List<_i14.Semesters>>(
+  _i2.Future<List<_i15.Semesters>> searchSemesters({required String query}) =>
+      caller.callServerEndpoint<List<_i15.Semesters>>(
         'semesters',
         'searchSemesters',
         {'query': query},
@@ -318,7 +317,7 @@ class EndpointStudents extends _i1.EndpointRef {
   @override
   String get name => 'students';
 
-  _i2.Future<_i5.Students> createStudent({
+  _i2.Future<_i3.Students> createStudent({
     required String firstName,
     required String lastName,
     String? patronymic,
@@ -327,7 +326,7 @@ class EndpointStudents extends _i1.EndpointRef {
     required String groupName,
     String? recordBookNumber,
   }) =>
-      caller.callServerEndpoint<_i5.Students>(
+      caller.callServerEndpoint<_i3.Students>(
         'students',
         'createStudent',
         {
@@ -341,23 +340,23 @@ class EndpointStudents extends _i1.EndpointRef {
         },
       );
 
-  _i2.Future<List<_i5.Students>> getAllStudents() =>
-      caller.callServerEndpoint<List<_i5.Students>>(
+  _i2.Future<List<_i3.Students>> getAllStudents() =>
+      caller.callServerEndpoint<List<_i3.Students>>(
         'students',
         'getAllStudents',
         {},
       );
 
-  _i2.Future<_i5.Students> updateStudent(_i5.Students student) =>
-      caller.callServerEndpoint<_i5.Students>(
+  _i2.Future<_i3.Students> updateStudent(_i3.Students student) =>
+      caller.callServerEndpoint<_i3.Students>(
         'students',
         'updateStudent',
         {'student': student},
       );
 
-  _i2.Future<List<_i15.StudentOverallAttendanceRecord>>
+  _i2.Future<List<_i16.StudentOverallAttendanceRecord>>
       getStudentOverallAttendanceRecords(int studentId) =>
-          caller.callServerEndpoint<List<_i15.StudentOverallAttendanceRecord>>(
+          caller.callServerEndpoint<List<_i16.StudentOverallAttendanceRecord>>(
             'students',
             'getStudentOverallAttendanceRecords',
             {'studentId': studentId},
@@ -371,19 +370,19 @@ class EndpointSubgroups extends _i1.EndpointRef {
   @override
   String get name => 'subgroups';
 
-  _i2.Future<_i6.Groups?> getCurrentUserGroup() =>
-      caller.callServerEndpoint<_i6.Groups?>(
+  _i2.Future<_i4.Groups?> getCurrentUserGroup() =>
+      caller.callServerEndpoint<_i4.Groups?>(
         'subgroups',
         'getCurrentUserGroup',
         {},
       );
 
-  _i2.Future<_i13.Subgroups> createSubgroup(
+  _i2.Future<_i14.Subgroups> createSubgroup(
     int groupId,
     String name,
     String? description,
   ) =>
-      caller.callServerEndpoint<_i13.Subgroups>(
+      caller.callServerEndpoint<_i14.Subgroups>(
         'subgroups',
         'createSubgroup',
         {
@@ -393,12 +392,12 @@ class EndpointSubgroups extends _i1.EndpointRef {
         },
       );
 
-  _i2.Future<_i13.Subgroups> createFullGroupSubgroup(
+  _i2.Future<_i14.Subgroups> createFullGroupSubgroup(
     int groupId,
     String name,
     String? description,
   ) =>
-      caller.callServerEndpoint<_i13.Subgroups>(
+      caller.callServerEndpoint<_i14.Subgroups>(
         'subgroups',
         'createFullGroupSubgroup',
         {
@@ -408,19 +407,19 @@ class EndpointSubgroups extends _i1.EndpointRef {
         },
       );
 
-  _i2.Future<List<_i13.Subgroups>> getGroupSubgroups(int groupId) =>
-      caller.callServerEndpoint<List<_i13.Subgroups>>(
+  _i2.Future<List<_i14.Subgroups>> getGroupSubgroups(int groupId) =>
+      caller.callServerEndpoint<List<_i14.Subgroups>>(
         'subgroups',
         'getGroupSubgroups',
         {'groupId': groupId},
       );
 
-  _i2.Future<_i13.Subgroups> updateSubgroup(
+  _i2.Future<_i14.Subgroups> updateSubgroup(
     int subgroupId,
     String name,
     String? description,
   ) =>
-      caller.callServerEndpoint<_i13.Subgroups>(
+      caller.callServerEndpoint<_i14.Subgroups>(
         'subgroups',
         'updateSubgroup',
         {
@@ -437,15 +436,15 @@ class EndpointSubgroups extends _i1.EndpointRef {
         {'subgroupId': subgroupId},
       );
 
-  _i2.Future<List<_i5.Students>> getSubgroupStudents(int subgroupId) =>
-      caller.callServerEndpoint<List<_i5.Students>>(
+  _i2.Future<List<_i3.Students>> getSubgroupStudents(int subgroupId) =>
+      caller.callServerEndpoint<List<_i3.Students>>(
         'subgroups',
         'getSubgroupStudents',
         {'subgroupId': subgroupId},
       );
 
-  _i2.Future<List<_i5.Students>> getStudentsNotInSubgroup(int subgroupId) =>
-      caller.callServerEndpoint<List<_i5.Students>>(
+  _i2.Future<List<_i3.Students>> getStudentsNotInSubgroup(int subgroupId) =>
+      caller.callServerEndpoint<List<_i3.Students>>(
         'subgroups',
         'getStudentsNotInSubgroup',
         {'subgroupId': subgroupId},
@@ -477,8 +476,8 @@ class EndpointSubgroups extends _i1.EndpointRef {
         },
       );
 
-  _i2.Future<List<_i13.Subgroups>> searchSubgroups({required String query}) =>
-      caller.callServerEndpoint<List<_i13.Subgroups>>(
+  _i2.Future<List<_i14.Subgroups>> searchSubgroups({required String query}) =>
+      caller.callServerEndpoint<List<_i14.Subgroups>>(
         'subgroups',
         'searchSubgroups',
         {'query': query},
@@ -492,9 +491,9 @@ class EndpointSubjectAttendanceMatrix extends _i1.EndpointRef {
   @override
   String get name => 'subjectAttendanceMatrix';
 
-  _i2.Future<_i16.SubjectAttendanceMatrix> getSubjectAttendanceMatrix(
+  _i2.Future<_i8.SubjectAttendanceMatrix> getSubjectAttendanceMatrix(
           {required int subjectId}) =>
-      caller.callServerEndpoint<_i16.SubjectAttendanceMatrix>(
+      caller.callServerEndpoint<_i8.SubjectAttendanceMatrix>(
         'subjectAttendanceMatrix',
         'getSubjectAttendanceMatrix',
         {'subjectId': subjectId},
@@ -508,11 +507,45 @@ class EndpointSubjects extends _i1.EndpointRef {
   @override
   String get name => 'subjects';
 
-  _i2.Future<List<_i8.Subjects>> searchSubjects({required String query}) =>
-      caller.callServerEndpoint<List<_i8.Subjects>>(
+  _i2.Future<List<_i10.Subjects>> searchSubjects({required String query}) =>
+      caller.callServerEndpoint<List<_i10.Subjects>>(
         'subjects',
         'searchSubjects',
         {'query': query},
+      );
+}
+
+/// {@category Endpoint}
+class EndpointTeachers extends _i1.EndpointRef {
+  EndpointTeachers(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'teachers';
+
+  _i2.Future<_i13.Teachers> createTeacher({
+    required String firstName,
+    required String lastName,
+    String? patronymic,
+    required String email,
+    String? phoneNumber,
+  }) =>
+      caller.callServerEndpoint<_i13.Teachers>(
+        'teachers',
+        'createTeacher',
+        {
+          'firstName': firstName,
+          'lastName': lastName,
+          'patronymic': patronymic,
+          'email': email,
+          'phoneNumber': phoneNumber,
+        },
+      );
+
+  _i2.Future<List<_i13.Teachers>> getAllTeachers() =>
+      caller.callServerEndpoint<List<_i13.Teachers>>(
+        'teachers',
+        'getAllTeachers',
+        {},
       );
 }
 
@@ -523,8 +556,8 @@ class EndpointTeacherSearch extends _i1.EndpointRef {
   @override
   String get name => 'teacherSearch';
 
-  _i2.Future<List<_i3.Teachers>> searchTeachers({required String query}) =>
-      caller.callServerEndpoint<List<_i3.Teachers>>(
+  _i2.Future<List<_i13.Teachers>> searchTeachers({required String query}) =>
+      caller.callServerEndpoint<List<_i13.Teachers>>(
         'teacherSearch',
         'searchTeachers',
         {'query': query},
@@ -652,15 +685,18 @@ class Client extends _i1.ServerpodClientShared {
               disconnectStreamsOnLostInternetConnection,
         ) {
     admin = EndpointAdmin(this);
+    attendance = EndpointAttendance(this);
     classTypes = EndpointClassTypes(this);
     classes = EndpointClasses(this);
     groups = EndpointGroups(this);
+    person = EndpointPerson(this);
     search = EndpointSearch(this);
     semesters = EndpointSemesters(this);
     students = EndpointStudents(this);
     subgroups = EndpointSubgroups(this);
     subjectAttendanceMatrix = EndpointSubjectAttendanceMatrix(this);
     subjects = EndpointSubjects(this);
+    teachers = EndpointTeachers(this);
     teacherSearch = EndpointTeacherSearch(this);
     makeUserAdmin = EndpointMakeUserAdmin(this);
     userRoles = EndpointUserRoles(this);
@@ -670,11 +706,15 @@ class Client extends _i1.ServerpodClientShared {
 
   late final EndpointAdmin admin;
 
+  late final EndpointAttendance attendance;
+
   late final EndpointClassTypes classTypes;
 
   late final EndpointClasses classes;
 
   late final EndpointGroups groups;
+
+  late final EndpointPerson person;
 
   late final EndpointSearch search;
 
@@ -687,6 +727,8 @@ class Client extends _i1.ServerpodClientShared {
   late final EndpointSubjectAttendanceMatrix subjectAttendanceMatrix;
 
   late final EndpointSubjects subjects;
+
+  late final EndpointTeachers teachers;
 
   late final EndpointTeacherSearch teacherSearch;
 
@@ -701,15 +743,18 @@ class Client extends _i1.ServerpodClientShared {
   @override
   Map<String, _i1.EndpointRef> get endpointRefLookup => {
         'admin': admin,
+        'attendance': attendance,
         'classTypes': classTypes,
         'classes': classes,
         'groups': groups,
+        'person': person,
         'search': search,
         'semesters': semesters,
         'students': students,
         'subgroups': subgroups,
         'subjectAttendanceMatrix': subjectAttendanceMatrix,
         'subjects': subjects,
+        'teachers': teachers,
         'teacherSearch': teacherSearch,
         'makeUserAdmin': makeUserAdmin,
         'userRoles': userRoles,
