@@ -31,11 +31,12 @@ class AccountPage extends StatelessWidget {
           ListTile(
             contentPadding:
                 const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            leading: CircularUserImage(
-              userInfo: sessionManager.signedInUser,
-              size: 42,
-            ),
-            title: Text(sessionManager.signedInUser!.userName!),
+            // leading: CircularUserImage(
+            //   userInfo: sessionManager.signedInUser,
+            //   size: 42,
+            // ),
+            // title: Text(sessionManager.signedInUser!.userName!),
+            title: Text("Курило Анатолий"),
             subtitle: Text(sessionManager.signedInUser!.email ?? ''),
           ),
           Padding(
@@ -48,20 +49,77 @@ class AccountPage extends StatelessWidget {
             ),
           ),
           // Кнопка назначения админом (можно оставить для тестирования)
-          Padding(
-            padding: const EdgeInsets.all(16),
-            child: ElevatedButton(
-              onPressed: () {
-                client.makeUserAdmin.setUserScopes(
-                  sessionManager.signedInUser!.id!,
-                );
-                ScaffoldMessenger.of(context).showSnackBar(
-                  const SnackBar(content: Text('Права администратора назначены'))
-                );
-              },
-              child: const Text('Сделать администратором (Тест)'),
+          // Padding(
+          //   padding: const EdgeInsets.all(16),
+          //   child: ElevatedButton(
+          //     onPressed: () async {
+          //       try {
+          //         await client.makeUserAdmin.setUserScopes(
+          //           sessionManager.signedInUser!.id!,
+          //           // Если ваш setUserScopes на сервере принимает Set<String> scopes
+          //           // и устанавливает их, то для назначения админом вы передавали бы {'serverpod.admin', ...другие скоупы}
+          //           // В вашем случае, похоже, setUserScopes без второго аргумента назначает админа.
+          //         );
+          //         ScaffoldMessenger.of(context).showSnackBar(
+          //           const SnackBar(content: Text('Права администратора назначены'))
+          //         );
+          //         // Обновляем сессию, чтобы isAdmin переключился
+          //         await sessionManager.refreshSession();
+          //         // Перестраиваем виджет, чтобы кнопка "Убрать права" появилась/исчезла корректно
+          //         (context as Element).reassemble();
+          //       } catch (e) {
+          //         ScaffoldMessenger.of(context).showSnackBar(
+          //           SnackBar(content: Text('Ошибка: $e'))
+          //         );
+          //       }
+          //     },
+          //     child: const Text('Сделать администратором (Тест)'),
+          //   ),
+          // ),
+          // Новая кнопка для снятия прав администратора
+          if (isAdmin) // Показываем кнопку, только если пользователь админ
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.amber[700], // Другой цвет для отличия
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () async {
+                  try {
+                    
+                    // // Используем существующий метод removeRole из UserRolesEndpoint
+                    // // Предполагаем, что sessionManager.signedInUser!.id! - это userInfoId,
+                    // // и серверный UserRolesEndpoint.removeRole (через UserService)
+                    // // сможет найти Person по этому userInfoId.
+                    // final success = await client.userRoles.removeRole(
+                    //    sessionManager.signedInUser!.id!, // Это UserInfo.id
+                    //    'serverpod.admin', // Стандартное имя роли администратора
+                    // );
+
+                    // if (success) {
+                    //   ScaffoldMessenger.of(context).showSnackBar(
+                    //     const SnackBar(content: Text('Права администратора убраны'))
+                    //   );
+                    //   // Обновляем сессию, чтобы isAdmin переключился
+                    //   await sessionManager.refreshSession();
+                    //    // Перестраиваем виджет, чтобы кнопка "Убрать права" исчезла
+                    //   (context as Element).reassemble();
+                    // } else {
+                    //   ScaffoldMessenger.of(context).showSnackBar(
+                    //     const SnackBar(content: Text('Не удалось убрать права администратора'))
+                    //   );
+                    // }
+                  } catch (e) {
+                     ScaffoldMessenger.of(context).showSnackBar(
+                       SnackBar(content: Text('Ошибка при снятии прав: $e'))
+                     );
+                  }
+                },
+                child: const Text('Убрать права администратора (Тест)'),
+              ),
             ),
-          ),
+
           if (isAdmin)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -114,7 +172,7 @@ class AccountPage extends StatelessWidget {
               ),
             ),
 
-          // Новая кнопка для просмотра посещаемости
+          // кнопка для просмотра посещаемости
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: ElevatedButton(
@@ -125,7 +183,8 @@ class AccountPage extends StatelessWidget {
               onPressed: () {
                 Navigator.push(
                   context,
-                  MaterialPageRoute(builder: (context) => const ViewAttendancePage()),
+                  MaterialPageRoute(
+                    builder: (context) => const ViewAttendancePage()),
                 );
               },
               child: const Text('Просмотр посещаемости'),
