@@ -306,16 +306,51 @@ class _SubgroupDetailPageState extends State<SubgroupDetailPage> {
                       ),
                     Padding(
                       padding: const EdgeInsets.fromLTRB(16.0, 8.0, 16.0, 8.0),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Text('Студенты в подгруппе', style: Theme.of(context).textTheme.titleLarge),
-                          ElevatedButton.icon(
-                            icon: const Icon(Icons.person_add),
-                            label: const Text('Добавить'),
-                            onPressed: _showAddStudentDialog,
-                          ),
-                        ],
+                      child: LayoutBuilder(
+                        builder: (context, constraints) {
+                          // Пороговое значение ширины, при котором макет меняется.
+                          // Подберите это значение в зависимости от ваших предпочтений и контента.
+                          const double breakpoint = 380.0; 
+
+                          if (constraints.maxWidth < breakpoint) {
+                            // Вертикальный макет для узких экранов
+                            return Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text('Студенты в подгруппе', style: Theme.of(context).textTheme.titleLarge),
+                                // const SizedBox(height: 8), // Убираем этот отступ, чтобы кнопка не "съезжала"
+                                Align( 
+                                  alignment: Alignment.centerRight,
+                                  child: Tooltip( // Добавляем Tooltip для отображения текста при наведении/долгом нажатии
+                                    message: 'Добавить студента',
+                                    child: ElevatedButton.icon(
+                                      icon: const Icon(Icons.person_add),
+                                      label: const SizedBox.shrink(), // Скрываем текстовую метку
+                                      onPressed: _showAddStudentDialog,
+                                      style: ElevatedButton.styleFrom(
+                                        // Можно немного уменьшить отступы, если кнопка кажется слишком широкой только с иконкой
+                                        // padding: const EdgeInsets.symmetric(horizontal: 12.0), 
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ],
+                            );
+                          } else {
+                            // Горизонтальный макет для широких экранов
+                            return Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                Text('Студенты в подгруппе', style: Theme.of(context).textTheme.titleLarge),
+                                ElevatedButton.icon(
+                                  icon: const Icon(Icons.person_add),
+                                  label: const Text('Добавить'),
+                                  onPressed: _showAddStudentDialog,
+                                ),
+                              ],
+                            );
+                          }
+                        },
                       ),
                     ),
                     Expanded(
