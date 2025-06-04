@@ -17,6 +17,18 @@ class _AttendancePageState extends State<AttendancePage> {
   final dateTimeController = TextEditingController();
   List<Subjects> _subjectsWithClasses = []; // Состояние для хранения предметов
 
+  // Добавлены переменные состояния
+  int? selectedSubjectId;
+  int? selectedClassTypeId;
+  int? selectedTeacherId;
+  int? selectedSubgroupId;
+  DateTime? selectedDateTimeForClass;
+  int? selectedSemesterId; // <--- ОБЪЯВЛЕНА ПЕРЕМЕННАЯ
+
+  final TextEditingController topicController = TextEditingController();
+  final TextEditingController notesController = TextEditingController();
+  final GlobalKey<FormState> formKey = GlobalKey<FormState>();
+
   @override
   void initState() {
     super.initState();
@@ -98,13 +110,12 @@ class _AttendancePageState extends State<AttendancePage> {
   }
 
   Future<void> _showAddClassDialog() async {
-    int? selectedSubjectId;
-    // String? selectedSubjectName; // selectedSubjectName не используется напрямую в createClass
-    int? selectedClassTypeId;
-    int? selectedTeacherId;
-    int? selectedSemesterId;
-    int? selectedSubgroupId;
-    DateTime? selectedDateTimeForClass; // Переименовано для ясности и используется для createClass
+    int? localSelectedSubjectId; // Используем локальные переменные для диалога
+    int? localSelectedClassTypeId;
+    int? localSelectedTeacherId;
+    int? localSelectedSemesterId; // Раскомментировали и будем использовать
+    int? localSelectedSubgroupId;
+    DateTime? localSelectedDateTimeForClass;
 
     final topicController = TextEditingController();
     final notesController = TextEditingController();
@@ -112,9 +123,11 @@ class _AttendancePageState extends State<AttendancePage> {
     final formKey = GlobalKey<FormState>();
     final subjectController = TextEditingController();
     final teacherController = TextEditingController();
-    final semesterController = TextEditingController();
+    final semesterController = TextEditingController(); // Контроллер для отображения выбранного семестра
     final subgroupController = TextEditingController();
-    final dateTimeControllerForDisplay = TextEditingController(); // Для отображения даты/времени
+    final dateTimeControllerForDisplay = TextEditingController();
+
+    final isSmallScreenDialog = MediaQuery.of(context).size.width < 600;
 
     List<ClassTypes> classTypes = [];
     try {
@@ -159,30 +172,25 @@ class _AttendancePageState extends State<AttendancePage> {
                           border: OutlineInputBorder(),
                           suffixIcon: Icon(Icons.search),
                         ),
+                        validator: (value) => value == null || value.isEmpty ? 'Выберите дисциплину' : null,
                         onTap: () async {
-                          final subject = await _showSearchDialog(
+                          final selected = await _showSearchDialog(
                             context,
-                            'Выберите предмет',
-                            (query) => client.search.searchSubjects(query: query), // Изменено с subjects.searchSubjects на search.searchSubjects
+                            'Выберите дисциплину', // Title for subjects
+                            (query) => client.search.searchSubjects(query: query),
                           );
-                          if (subject != null && subject is Subjects) {
+                          if (selected != null && selected is Subjects) {
                             setDialogState(() {
-                              selectedSubjectId = subject.id;
-                              subjectController.text = subject.name ?? 'Не выбрано';
+                              localSelectedSubjectId = selected.id;
+                              subjectController.text = selected.name;
                             });
                           }
-                        },
-                        validator: (value) {
-                          if (selectedSubjectId == null) { // Проверяем ID
-                            return 'Выберите дисциплину';
-                          }
-                          return null;
                         },
                       ),
                       const SizedBox(height: 16),
                       // Выпадающий список для выбора типа занятия
                       DropdownButtonFormField<int>(
-                        value: selectedClassTypeId,
+                        value: localSelectedClassTypeId,
                         decoration: const InputDecoration(
                           labelText: 'Тип занятия *',
                           border: OutlineInputBorder(),
@@ -195,7 +203,7 @@ class _AttendancePageState extends State<AttendancePage> {
                         }).toList(),
                         onChanged: (value) {
                           setDialogState(() {
-                            selectedClassTypeId = value;
+                            localSelectedClassTypeId = value;
                           });
                         },
                         validator: (value) {
@@ -223,14 +231,14 @@ class _AttendancePageState extends State<AttendancePage> {
                           );
                           if (teacher != null && teacher is Teachers) {
                             setDialogState(() {
-                              selectedTeacherId = teacher.id;
+                              localSelectedTeacherId = teacher.id;
                               teacherController.text =
                                   '${teacher.person?.lastName ?? ''} ${teacher.person?.firstName ?? ''} ${teacher.person?.patronymic ?? ''}'.trim();
                             });
                           }
                         },
                         validator: (value) {
-                          if (selectedTeacherId == null) { // Проверяем ID
+                          if (localSelectedTeacherId == null) { // Проверяем ID
                             return 'Выберите преподавателя';
                           }
                           return null;
@@ -240,30 +248,27 @@ class _AttendancePageState extends State<AttendancePage> {
                       // Поле для выбора семестра
                       TextFormField(
                         controller: semesterController,
-                        readOnly: true,
+                        readOnly: true, // Делаем поле только для чтения
                         decoration: const InputDecoration(
                           labelText: 'Семестр *',
                           border: OutlineInputBorder(),
                           suffixIcon: Icon(Icons.search),
                         ),
+                        validator: (value) => value == null || value.isEmpty ? 'Выберите семестр' : null,
                         onTap: () async {
-                          final semester = await _showSearchDialog(
+                          // TODO: Замените client.search.searchSemesters на ваш реальный эндпоинт поиска семестров
+                          // Предполагается, что он возвращает List<Semesters>
+                          final selected = await _showSearchDialog(
                             context,
                             'Выберите семестр',
-                            (query) => client.semesters.searchSemesters(query: query),
+                            (query) => client.semesters.searchSemesters(query: query)
                           );
-                          if (semester != null && semester is Semesters) {
-                            setDialogState(() { // Используем setDialogState
-                              selectedSemesterId = semester.id;
-                              semesterController.text = semester.name ?? 'Не выбрано';
+                          if (selected != null && selected is Semesters) { // Убедитесь, что Semesters - это ваша модель
+                            setDialogState(() {
+                              localSelectedSemesterId = selected.id;
+                              semesterController.text = selected.name; // Предполагаем, что у Semesters есть поле name
                             });
                           }
-                        },
-                        validator: (value) {
-                          if (selectedSemesterId == null) { // Проверяем ID
-                            return 'Выберите семестр';
-                          }
-                          return null;
                         },
                       ),
                       const SizedBox(height: 16),
@@ -284,13 +289,13 @@ class _AttendancePageState extends State<AttendancePage> {
                           );
                           if (subgroup != null && subgroup is Subgroups) {
                             setDialogState(() { // Используем setDialogState
-                              selectedSubgroupId = subgroup.id;
+                              localSelectedSubgroupId = subgroup.id;
                               subgroupController.text = subgroup.name ?? 'Не выбрано';
                             });
                           }
                         },
                         validator: (value) {
-                          if (selectedSubgroupId == null) { // Проверяем ID
+                          if (localSelectedSubgroupId == null) { // Проверяем ID
                             return 'Выберите подгруппу';
                           }
                           return null;
@@ -320,18 +325,18 @@ class _AttendancePageState extends State<AttendancePage> {
                             );
                             if (time != null) {
                               setDialogState(() { // Используем setDialogState
-                                selectedDateTimeForClass = DateTime(
+                                localSelectedDateTimeForClass = DateTime(
                                   date.year, date.month, date.day,
                                   time.hour, time.minute,
                                 );
                                 dateTimeControllerForDisplay.text =
-                                    '${selectedDateTimeForClass!.day.toString().padLeft(2, '0')}.${selectedDateTimeForClass!.month.toString().padLeft(2, '0')}.${selectedDateTimeForClass!.year} ${time.format(context)}';
+                                    '${localSelectedDateTimeForClass!.day.toString().padLeft(2, '0')}.${localSelectedDateTimeForClass!.month.toString().padLeft(2, '0')}.${localSelectedDateTimeForClass!.year} ${time.format(context)}';
                               });
                             }
                           }
                         },
                         validator: (value) {
-                          if (selectedDateTimeForClass == null) { // Проверяем выбранную дату
+                          if (localSelectedDateTimeForClass == null) { // Проверяем выбранную дату
                             return 'Выберите дату и время';
                           }
                           return null;
@@ -362,18 +367,29 @@ class _AttendancePageState extends State<AttendancePage> {
               floatingActionButton: FloatingActionButton.extended(
                 onPressed: () async {
                   if (formKey.currentState!.validate()) {
+                    if (localSelectedSubjectId == null ||
+                        localSelectedClassTypeId == null ||
+                        localSelectedTeacherId == null ||
+                        localSelectedSemesterId == null || // Проверяем localSelectedSemesterId
+                        localSelectedSubgroupId == null ||
+                        localSelectedDateTimeForClass == null) {
+                      ScaffoldMessenger.of(context).showSnackBar(
+                        const SnackBar(content: Text('Пожалуйста, заполните все обязательные поля.')),
+                      );
+                      return;
+                    }
                     try {
                       await client.classes.createClass(
-                        subjectsId: selectedSubjectId!,
-                        classTypesId: selectedClassTypeId!,
-                        teachersId: selectedTeacherId!,
-                        semestersId: selectedSemesterId!,
-                        subgroupsId: selectedSubgroupId!,
-                        date: selectedDateTimeForClass!, // Используем корректную переменную
+                        subjectsId: localSelectedSubjectId!,
+                        classTypesId: localSelectedClassTypeId!,
+                        teachersId: localSelectedTeacherId!,
+                        semestersId: localSelectedSemesterId!, // Используем localSelectedSemesterId
+                        subgroupsId: localSelectedSubgroupId!,
+                        date: localSelectedDateTimeForClass!,
                         topic: topicController.text.isNotEmpty ? topicController.text : null,
                         notes: notesController.text.isNotEmpty ? notesController.text : null,
                       );
-                      Navigator.of(context).pop();
+                      Navigator.of(context).pop(); // Закрываем диалог
                       ScaffoldMessenger.of(context).showSnackBar(
                         const SnackBar(content: Text('Занятие успешно добавлено!')),
                       );
@@ -403,13 +419,21 @@ class _AttendancePageState extends State<AttendancePage> {
     String searchQuery = '';
     List<dynamic> results = [];
     bool isLoading = false;
-    String itemType = 'unknown'; // Определяем тип для buildListTile
+    String itemType = 'unknown';
+    bool isInitialFetchDone = false; // Флаг для отслеживания начальной загрузки
 
-    if (title.contains('дисциплину')) itemType = 'subject';
-    if (title.contains('преподавателя')) itemType = 'teacher';
-    if (title.contains('семестр')) itemType = 'semester';
-    if (title.contains('подгруппу')) itemType = 'subgroup';
+    // Определение itemType (ваш существующий код)
+    final lowerCaseTitle = title.toLowerCase();
+    if (lowerCaseTitle.contains('дисциплин')) itemType = 'subject';
+    else if (lowerCaseTitle.contains('преподавател')) itemType = 'teacher';
+    else if (lowerCaseTitle.contains('семестр')) itemType = 'semester';
+    else if (lowerCaseTitle.contains('подгрупп')) itemType = 'subgroup';
 
+    print('--- Search Dialog Opened ---');
+    print('Dialog title (original): "$title"');
+    print('Dialog title (lowercase): "$lowerCaseTitle"');
+    print('Determined itemType: "$itemType"');
+    print('--------------------------');
 
     return showGeneralDialog(
       context: context,
@@ -418,79 +442,101 @@ class _AttendancePageState extends State<AttendancePage> {
       pageBuilder: (context, animation, secondaryAnimation) {
         return StatefulBuilder(
           builder: (context, setDialogState) {
-            Future<void> performSearch(String query) async {
-              setDialogState(() {
-                isLoading = true;
-              });
-              try {
-                final searchResults = await searchFunction(query);
+            // Начальная загрузка данных, если запрос пуст и загрузка еще не выполнялась
+            if (!isInitialFetchDone && searchQuery.isEmpty) {
+              isInitialFetchDone = true;
+              // Выполняем асинхронно после построения первого кадра
+              WidgetsBinding.instance.addPostFrameCallback((_) async {
+                if (!context.mounted) return; // Проверка, что виджет все еще в дереве
                 setDialogState(() {
-                  results = searchResults;
-                  isLoading = false;
+                  isLoading = true;
                 });
-              } catch (e) {
-                setDialogState(() {
-                  isLoading = false;
-                });
-                if(mounted){
-                  ScaffoldMessenger.of(context).showSnackBar(
-                    SnackBar(content: Text('Ошибка поиска: $e')),
-                  );
+                try {
+                  results = await searchFunction(''); // Загружаем все элементы
+                } catch (e) {
+                  print('Initial search error in dialog: $e');
+                  results = [];
+                } finally {
+                  if (context.mounted) {
+                    setDialogState(() {
+                      isLoading = false;
+                    });
+                  }
                 }
-              }
+              });
             }
-            // Первоначальный поиск при открытии диалога, если нужно
-            // if (results.isEmpty && searchQuery.isEmpty && !isLoading) {
-            //   performSearch('');
-            // }
 
-            return Scaffold(
-              appBar: AppBar(
-                title: Text(title),
-                leading: IconButton(
-                  icon: const Icon(Icons.close),
-                  onPressed: () => Navigator.of(context).pop(),
-                ),
-              ),
-              body: Padding(
-                padding: const EdgeInsets.all(16.0),
+            return AlertDialog(
+              title: Text(title),
+              content: SizedBox(
+                width: double.maxFinite,
+                height: MediaQuery.of(context).size.height * 0.6, // Можно настроить высоту
                 child: Column(
+                  mainAxisSize: MainAxisSize.min,
                   children: [
                     TextField(
+                      autofocus: true,
                       decoration: const InputDecoration(
-                        labelText: 'Поиск',
-                        prefixIcon: Icon(Icons.search),
-                        border: OutlineInputBorder(),
+                        hintText: 'Поиск...',
+                        suffixIcon: Icon(Icons.search),
                       ),
-                      onChanged: (value) {
+                      onChanged: (value) async {
                         searchQuery = value;
-                        // Можно добавить debounce для оптимизации
-                        performSearch(searchQuery);
-                      },
-                      onSubmitted: (value) { // Поиск по нажатию Enter
-                        performSearch(value);
+                        isInitialFetchDone = true; // Любой ввод отменяет "начальную" загрузку
+
+                        // Запускаем поиск, если запрос пуст (для отображения всех) или длиннее 1 символа
+                        if (searchQuery.isEmpty || searchQuery.length > 1) {
+                          setDialogState(() {
+                            isLoading = true;
+                          });
+                          try {
+                            results = await searchFunction(searchQuery);
+                          } catch (e) {
+                            print('Search error in dialog: $e');
+                            results = [];
+                          } finally {
+                            if (context.mounted) {
+                              setDialogState(() {
+                                isLoading = false;
+                              });
+                            }
+                          }
+                        } else if (searchQuery.length == 1) {
+                          // Если введен только один символ, можно очистить результаты или ничего не делать
+                          if (context.mounted) {
+                            setDialogState(() {
+                              results = [];
+                              isLoading = false;
+                            });
+                          }
+                        }
                       },
                     ),
-                    const SizedBox(height: 16),
-                    if (isLoading)
-                      const Center(child: CircularProgressIndicator())
-                    else if (results.isEmpty)
-                      const Expanded(
-                        child: Center(child: Text('Ничего не найдено. Попробуйте изменить запрос.')),
-                      )
-                    else
-                      Expanded(
-                        child: ListView.builder(
-                          itemCount: results.length,
-                          itemBuilder: (context, index) {
-                            final item = results[index];
-                            return buildListTile(context, item, itemType); // Передаем itemType
-                          },
-                        ),
-                      ),
+                    const SizedBox(height: 10),
+                    Expanded(
+                      child: isLoading
+                          ? const Center(child: CircularProgressIndicator())
+                          : results.isEmpty
+                              ? Center(child: Text(searchQuery.isEmpty && !isLoading ? 'Начните ввод для поиска' : 'Нет результатов'))
+                              : ListView.builder(
+                                  shrinkWrap: true,
+                                  itemCount: results.length,
+                                  itemBuilder: (context, index) {
+                                    // Отладочный вывод перед вызовом buildListTile
+                                    // print('ListView.builder - itemType: $itemType, item: ${results[index]}');
+                                    return buildListTile(context, results[index], itemType);
+                                  },
+                                ),
+                    ),
                   ],
                 ),
               ),
+              actions: [
+                TextButton(
+                  onPressed: () => Navigator.of(context).pop(null),
+                  child: const Text('Отмена'),
+                ),
+              ],
             );
           },
         );
@@ -499,6 +545,23 @@ class _AttendancePageState extends State<AttendancePage> {
   }
 
   Widget buildListTile(BuildContext context, dynamic item, String type) {
+    // Отладочный вывод в начале buildListTile
+    print('--- buildListTile ---');
+    print('Type: "$type"');
+    print('Item: $item');
+    if (item != null) {
+      print('Item runtimeType: ${item.runtimeType}');
+      try {
+        // Попытка вывести имя, если оно есть, для отладки
+        if (item.name != null) {
+          print('Item name: ${item.name}');
+        }
+      } catch (_) {
+        // Игнорируем ошибку, если поля name нет
+      }
+    }
+    print('---------------------');
+
     switch (type) {
       case 'teacher':
         return ListTile(
@@ -507,9 +570,17 @@ class _AttendancePageState extends State<AttendancePage> {
           onTap: () => Navigator.of(context).pop(item),
         );
       case 'subject':
+        if (item is Subjects) {
+          return ListTile(
+            title: Text(item.name), // Убрал ?? 'Без названия', т.к. name не nullable в Subjects
+            onTap: () => Navigator.of(context).pop(item),
+          );
+        }
+        // Если item не Subjects, но type 'subject', это ошибка данных
+        print('Error: itemType is "subject", but item is not Subjects: $item');
         return ListTile(
-          title: Text(item.name ?? 'Без названия'),
-          onTap: () => Navigator.of(context).pop(item),
+          title: Text('Ошибка данных: неверный тип для предмета ($item)'),
+          onTap: () => Navigator.of(context).pop(null),
         );
       case 'subgroup':
         return ListTile(
@@ -517,15 +588,25 @@ class _AttendancePageState extends State<AttendancePage> {
           subtitle: Text('ID: ${item.id}'),
           onTap: () => Navigator.of(context).pop(item),
         );
-      case 'semester':
+      case 'semester': // Добавлен case для семестра
+        if (item is Semesters) { // Убедитесь, что Semesters - это ваша модель
+          return ListTile(
+            title: Text(item.name), // Предполагаем, что у Semesters есть поле name
+            // subtitle: Text('ID: ${item.id}'), // Можно добавить доп. информацию
+            onTap: () => Navigator.of(context).pop(item),
+          );
+        }
+        print('Error: itemType is "semester", but item is not Semesters: $item');
         return ListTile(
-          title: Text(item.name ?? 'Без названия'),
-          subtitle: Text('Год: ${item.year}'),
-          onTap: () => Navigator.of(context).pop(item),
+          title: Text('Ошибка данных: неверный тип для семестра ($item)'),
+          onTap: () => Navigator.of(context).pop(null),
         );
       default:
+        print('Warning: Unknown itemType "$type" in buildListTile for item: $item');
         return ListTile(
-          title: const Text('Неизвестный тип'),
+          title: Text('Неизвестный тип ($type)'),
+          subtitle: Text('Элемент: $item'),
+          onTap: () => Navigator.of(context).pop(null),
         );
     }
   }
