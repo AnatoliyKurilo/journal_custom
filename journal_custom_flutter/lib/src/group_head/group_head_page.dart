@@ -211,6 +211,8 @@ class _GroupHeadPageState extends State<GroupHeadPage> {
 
   @override
   Widget build(BuildContext context) {
+    final isSmallScreen = MediaQuery.of(context).size.width < 600; // Определяем размер экрана
+
     // Всегда оборачиваем содержимое в Scaffold для корректного отображения Material Design
     return Scaffold(
       appBar: AppBar(
@@ -274,27 +276,49 @@ class _GroupHeadPageState extends State<GroupHeadPage> {
                     ),
                   ],
                 ),
-      floatingActionButton: !_isLoading && _errorMessage == null 
-      ? Row(
-          mainAxisAlignment: MainAxisAlignment.end,
-          children: [
-            FloatingActionButton.extended(
-              heroTag: 'createFullGroupSubgroup',
-              onPressed: _showCreateFullGroupSubgroupDialog,
-              icon: const Icon(Icons.group),
-              label: const Text('Подгруппа со всеми'),
-              backgroundColor: Colors.green,
-            ),
-            const SizedBox(width: 16),
-            FloatingActionButton.extended(
-              heroTag: 'createSubgroup',
-              onPressed: () => _showCreateOrEditSubgroupDialog(),
-              icon: const Icon(Icons.add),
-              label: const Text('Создать подгруппу'),
-            ),
-          ],
-        ) 
-      : null,
+      floatingActionButton: !_isLoading && _errorMessage == null
+          ? isSmallScreen
+              ? Column( // Используем Column для маленьких экранов
+                  mainAxisSize: MainAxisSize.min,
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    FloatingActionButton(
+                      heroTag: 'createFullGroupSubgroup', // heroTag должен быть уникальным
+                      onPressed: _showCreateFullGroupSubgroupDialog,
+                      backgroundColor: Colors.green,
+                      tooltip: 'Подгруппа со всеми',
+                      child: const Icon(Icons.group),
+                    ),
+                    const SizedBox(height: 16),
+                    FloatingActionButton(
+                      heroTag: 'createSubgroup', // heroTag должен быть уникальным
+                      onPressed: () => _showCreateOrEditSubgroupDialog(),
+                      tooltip: 'Создать подгруппу',
+                      child: const Icon(Icons.add),
+                    ),
+                  ],
+                )
+              : Row( // Используем Row для больших экранов (как было)
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: [
+                    FloatingActionButton.extended(
+                      heroTag: 'createFullGroupSubgroup',
+                      onPressed: _showCreateFullGroupSubgroupDialog,
+                      icon: const Icon(Icons.group),
+                      label: const Text('Подгруппа со всеми'),
+                      backgroundColor: Colors.green,
+                    ),
+                    const SizedBox(width: 16),
+                    FloatingActionButton.extended(
+                      heroTag: 'createSubgroup',
+                      onPressed: () => _showCreateOrEditSubgroupDialog(),
+                      icon: const Icon(Icons.add),
+                      label: const Text('Создать подгруппу'),
+                    ),
+                  ],
+                )
+          : null,
     );
   }
 }

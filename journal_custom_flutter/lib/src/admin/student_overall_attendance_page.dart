@@ -36,7 +36,7 @@ class _StudentOverallAttendancePageState extends State<StudentOverallAttendanceP
       if (widget.student.id == null) {
         throw Exception('ID студента не может быть null');
       }
-      final records = await client.admin.getStudentOverallAttendanceRecords(widget.student.id!);
+      final records = await client.students.getStudentOverallAttendanceRecords(widget.student.id!);
 
       // Группировка по предмету
       final Map<String, List<StudentOverallAttendanceRecord>> grouped =
