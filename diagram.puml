@@ -1,0 +1,99 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+!define SERVERPOD_COLOR #ADD8E6
+
+package "Endpoints" <<Cloud>> {
+  class StudentsEndpoint {
+    +createStudent(...): Students
+    +getAllStudents(): List<Students>
+    +updateStudent(student: Students): Students
+    +getStudentOverallAttendanceRecords(studentId: int): List<StudentOverallAttendanceRecord>
+  }
+
+  class GroupsEndpoint {
+    +createGroup(name: String, curatorId: int?): Groups
+    +getAllGroups(): List<Groups>
+    +getGroupByName(groupName: String): Groups?
+    +updateGroup(...): Groups
+    +deleteGroup(groupId: int): bool
+  }
+
+  class TeachersEndpoint {
+    +createTeacher(...): Teachers
+    +getAllTeachers(): List<Teachers>
+  }
+
+  class PersonEndpoint {
+    +updatePerson(person: Person): Person
+  }
+
+  class AttendanceEndpoint {
+    +getStudentsForClassWithAttendance(classId: int): List<StudentAttendanceInfo>
+    +updateStudentAttendance(classId: int, studentId: int, isPresent: bool, comment: String?): Attendance
+    +getSubjectOverallAttendance(subjectId: int): List<StudentClassAttendanceFlatRecord>
+    +getSubjectAttendanceMatrix(subjectId: int): SubjectAttendanceMatrix
+  }
+
+  class ClassesEndpoint {
+    +getSubjectsWithClasses(): List<Subjects>
+    +getClassesBySubject(subjectId: int): List<Classes>
+    +createClass(...): Classes
+  }
+
+  class SubgroupsEndpoint {
+    +createSubgroup(groupId: int, name: String): Subgroups
+    +getSubgroupsByGroup(groupId: int): List<Subgroups>
+    +updateSubgroup(subgroup: Subgroups): Subgroups
+    +deleteSubgroup(subgroupId: int): bool
+    +assignStudentToSubgroup(studentId: int, subgroupId: int): StudentSubgroup
+    +removeStudentFromSubgroup(studentId: int, subgroupId: int): bool
+    +getStudentsBySubgroup(subgroupId: int): List<Students>
+  }
+
+  class SubjectsEndpoint {
+    +createSubject(name: String): Subjects
+    +getAllSubjects(): List<Subjects>
+    +updateSubject(subject: Subjects): Subjects
+    +deleteSubject(subjectId: int): bool
+  }
+
+  class ClassTypesEndpoint {
+    +createClassType(name: String): ClassTypes
+    +getAllClassTypes(): List<ClassTypes>
+    +updateClassType(classType: ClassTypes): ClassTypes
+    +deleteClassType(classTypeId: int): bool
+  }
+
+  class UserRolesEndpoint {
+    +assignRole(personId: int, role: String): bool
+    +removeRole(personId: int, role: String): bool
+    +getUserRoles(personId: int): List<String>
+    +assignCuratorRole(personId: int): bool
+    +assignGroupHeadRole(studentId: int): bool
+  }
+  
+  class MakeUserAdminEndpoint {
+     +setUserScopes(personId: int, scopes: Set<String>): void
+     +getMyStudentProfile(): Students?
+  }
+
+  class SearchEndpoint {
+    +searchStudents(query: String): List<Students>
+    +searchTeachers(query: String): List<Teachers>
+    +searchGroups(query: String): List<Groups>
+    +searchSubjects(query: String): List<Subjects>
+    +searchClassTypes(query: String): List<ClassTypes>
+    +searchSubgroups(query: String, groupId: int?): List<Subgroups>
+  }
+}
+
+' Inter-Endpoint Dependencies
+GroupsEndpoint ..> UserRolesEndpoint : calls
+
+' Note: Model and Service usage is implied by method signatures (return types and parameters)
+' and internal implementation, but not shown explicitly in this diagram.
+' The base Endpoint class is also not shown, though all listed classes inherit from it.
+
+@enduml

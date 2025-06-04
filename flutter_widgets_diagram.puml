@@ -1,0 +1,139 @@
+@startuml
+skinparam classAttributeIconSize 0
+hide empty members
+
+!define FLUTTER_COLOR #40C4FF
+!define SERVERPOD_CLIENT_COLOR #90EE90
+
+package "Flutter UI" <<Mobile>> {
+  class ViewClassAttendancePage <<(W,FLUTTER_COLOR) StatefulWidget>> {
+    +classItem: Classes
+    --
+    -_isLoading: bool
+    -_studentAttendanceList: List<StudentAttendanceInfo>
+    -_errorMessage: String?
+    --
+    +_fetchStudentAttendance()
+    +_updateStudentAttendance(studentId: int, isPresent: bool, comment: String?)
+  }
+
+  class AttendancePage <<(W,FLUTTER_COLOR) StatefulWidget>> {
+    +subject: Subjects
+    --
+    -_classesForSubject: List<Classes>
+    -_isLoading: bool
+    --
+    +_fetchClassesForSubject()
+    +navigateToViewClass(classItem: Classes)
+  }
+
+  class MyOverallAttendancePage <<(W,FLUTTER_COLOR) StatefulWidget>> {
+    --
+    -_isLoading: bool
+    -_attendanceRecords: List<StudentOverallAttendanceRecord>
+    -_currentStudent: Students?
+    --
+    +_fetchCurrentStudentAndAttendance()
+  }
+
+  package "Admin Panel" <<Admin>> {
+    class StudentsTab <<(W,FLUTTER_COLOR) StatefulWidget>> {
+      --
+      -_allStudents: List<Students>
+      -_filteredStudents: List<Students>
+      -_searchQuery: String
+      --
+      +_fetchStudents()
+      +_showCreateStudentDialog()
+      +_showEditStudentDialog(student: Students)
+      +filterStudents(query: String): List<Students>
+    }
+
+    class GroupsTab <<(W,FLUTTER_COLOR) StatefulWidget>> {
+      --
+      -_allGroups: List<Groups>
+      --
+      +_fetchGroups()
+      +_showCreateGroupDialog()
+      +_showEditGroupDialog(group: Groups)
+    }
+
+    class TeacherTab <<(W,FLUTTER_COLOR) StatefulWidget>> {
+      --
+      -_allTeachers: List<Teachers>
+      --
+      +_fetchTeachers()
+      +_showCreateTeacherDialog()
+    }
+  }
+}
+
+package "Serverpod Client" <<Client>> {
+  class ServerpodClient <<(C,SERVERPOD_CLIENT_COLOR)>> {
+    +students: StudentsEndpointCaller
+    +groups: GroupsEndpointCaller
+    +teachers: TeachersEndpointCaller
+    +person: PersonEndpointCaller
+    +attendance: AttendanceEndpointCaller
+    +classes: ClassesEndpointCaller
+    +user: MakeUserAdminEndpointCaller ' Assuming getMyStudentProfile is here
+    ' ... other endpoint callers
+  }
+
+  class StudentsEndpointCaller {
+    +getAllStudents(): Future<List<Students>>
+    +createStudent(...): Future<Students>
+    +updateStudent(student: Students): Future<Students>
+    +getStudentOverallAttendanceRecords(studentId: int): Future<List<StudentOverallAttendanceRecord>>
+  }
+
+  class GroupsEndpointCaller {
+    +getAllGroups(): Future<List<Groups>>
+    +createGroup(...): Future<Groups>
+    +updateGroup(...): Future<Groups>
+  }
+
+  class TeachersEndpointCaller {
+    +getAllTeachers(): Future<List<Teachers>>
+    +createTeacher(...): Future<Teachers>
+  }
+  
+  class PersonEndpointCaller {
+    +updatePerson(person: Person): Future<Person>
+  }
+
+  class AttendanceEndpointCaller {
+    +getStudentsForClassWithAttendance(classId: int): Future<List<StudentAttendanceInfo>>
+    +updateStudentAttendance(...): Future<Attendance>
+  }
+
+  class ClassesEndpointCaller {
+    +getClassesBySubject(subjectId: int): Future<List<Classes>>
+  }
+  
+  class MakeUserAdminEndpointCaller {
+    +getMyStudentProfile(): Future<Students?>
+  }
+}
+
+' Dependencies
+ViewClassAttendancePage ..> ServerpodClient : uses client.attendance
+AttendancePage ..> ServerpodClient : uses client.classes
+MyOverallAttendancePage ..> ServerpodClient : uses client.user, client.students
+
+StudentsTab ..> ServerpodClient : uses client.students, client.person
+GroupsTab ..> ServerpodClient : uses client.groups
+TeacherTab ..> ServerpodClient : uses client.teachers
+
+ServerpodClient --> StudentsEndpointCaller : .students
+ServerpodClient --> GroupsEndpointCaller : .groups
+ServerpodClient --> TeachersEndpointCaller : .teachers
+ServerpodClient --> PersonEndpointCaller : .person
+ServerpodClient --> AttendanceEndpointCaller : .attendance
+ServerpodClient --> ClassesEndpointCaller : .classes
+ServerpodClient --> MakeUserAdminEndpointCaller : .user
+
+' Note: Model classes (Students, Groups, Classes, etc.) are used as data types
+' but are not explicitly shown in this diagram to focus on widget-client interaction.
+' Their definitions would be in a separate model diagram.
+@enduml
