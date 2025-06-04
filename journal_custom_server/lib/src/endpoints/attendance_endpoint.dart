@@ -71,7 +71,6 @@ class AttendanceEndpoint extends Endpoint {
       session,
       where: (a) => a.classesId.equals(classId) & a.studentsId.equals(studentId),
     );
-
     if (attendanceRecord == null) {
       attendanceRecord = Attendance(
         classesId: classId,
