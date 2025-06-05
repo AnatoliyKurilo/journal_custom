@@ -6,10 +6,10 @@ import '../services/user_service.dart';
 
 class UserRolesEndpoint extends Endpoint {
   @override
-  bool get requireAuth => true;
+  bool get requireLogin => true;
 
-  @override
-  Set<String> get requiredRoles => {CustomScope.documentSpecialist.name!};
+  // @override
+  // Set<Scope> get requiredScopes  => {CustomScope.documentSpecialist, Scope.admin, CustomScope.curator, CustomScope.groupHead, CustomScope.teacher, CustomScope.student};
 
   // Получить все роли пользователя по personId
   Future<List<String>> getUserRoles(Session session, int personId) async {

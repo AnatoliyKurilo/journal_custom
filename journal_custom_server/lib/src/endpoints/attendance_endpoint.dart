@@ -4,7 +4,7 @@ import '../services/user_subgroup_service.dart';
 
 class AttendanceEndpoint extends Endpoint {
   @override
-  bool get requireAuth => true;
+  bool get requireLogin => true;
 
   // Получение студентов занятия с посещаемостью
   Future<List<StudentAttendanceInfo>> getStudentsForClassWithAttendance(
@@ -67,6 +67,19 @@ class AttendanceEndpoint extends Endpoint {
     required bool isPresent,
     String? comment,
   }) async {
+
+  // Проверяем существование занятия
+  final classInfo = await Classes.db.findById(session, classId);
+  if (classInfo == null) {
+    throw Exception('Занятие с ID $classId не найдено.');
+  }
+
+  // Проверяем существование студента
+  final studentInfo = await Students.db.findById(session, studentId);
+  if (studentInfo == null) {
+    throw Exception('Студент с ID $studentId не найден.');
+  }
+
     var attendanceRecord = await Attendance.db.findFirstRow(
       session,
       where: (a) => a.classesId.equals(classId) & a.studentsId.equals(studentId),
@@ -91,6 +104,10 @@ class AttendanceEndpoint extends Endpoint {
     Session session, {
     required int subjectId,
   }) async {
+
+    if (subjectId <= 0) {
+      throw Exception('Предмет с ID $subjectId не найден.');
+    }
     // Перенести логику из ClassesEndpoint
     final List<StudentClassAttendanceFlatRecord> flatRecords = [];
 
@@ -172,6 +189,11 @@ class AttendanceEndpoint extends Endpoint {
     // Перенести логику из SubjectAttendanceMatrixEndpoint
     final accessibleSubgroupIds = await UserSubgroupService.getUserAccessibleSubgroupIds(session);
     
+    final subject = await Subjects.db.findById(session, subjectId);
+    if (subject == null) {
+      throw Exception('Предмет с ID $subjectId не найден.');
+    }
+
     if (accessibleSubgroupIds.isEmpty) {
       return SubjectAttendanceMatrix(students: [], classes: [], attendanceData: {});
     }

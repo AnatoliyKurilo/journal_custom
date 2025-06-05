@@ -4,11 +4,11 @@ import 'user_roles_endpoint.dart';
 
 class GroupsEndpoint extends Endpoint {
   @override
-  bool get requireAuth => true;
+  bool get requireLogin  => true;
 
   @override
-  Set<String> get requiredRoles => {'serverpod.admin'};
-
+  Set<Scope> get requiredScopes => {Scope.admin};
+  
   // Создание группы
   Future<Groups> createGroup(Session session, String name, int? curatorId) async {
     var group = Groups(

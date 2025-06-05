@@ -1,19 +1,22 @@
+import 'package:journal_custom_server/src/custom_scope.dart';
+import 'package:journal_custom_server/src/services/Scope_service.dart';
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import '../services/permission_service.dart';
 
 class SubgroupsEndpoint extends Endpoint {
   @override
-  bool get requireAuth => true;
+  bool get requireLogin => true;
 
-  @override
-  Set<String> get requiredRoles => {'groupHead', 'curator', 'serverpod.admin'};
+  // @override
+  // Set<Scope> get requiredScopes => {Scope.admin, CustomScope.curator, CustomScope.groupHead, CustomScope.teacher, CustomScope.student, CustomScope.documentSpecialist};
 
   // Получить группу текущего пользователя
   Future<Groups?> getCurrentUserGroup(Session session) async {
     return await PermissionService.getCurrentUserGroup(session);
   }
 
+  
   // Создать новую подгруппу
   Future<Subgroups> createSubgroup(
     Session session,
@@ -21,9 +24,18 @@ class SubgroupsEndpoint extends Endpoint {
     String name,
     String? description,
   ) async {
-    if (!await PermissionService.canManageGroupSubgroups(session, groupId)) {
+
+    
+
+    final canManage = await PermissionService.canManageGroupSubgroups(session, groupId);
+    if (canManage != true) { // Убедитесь, что проверяется именно `true`
       throw Exception('Доступ запрещен: нет прав на управление подгруппами этой группы.');
     }
+
+    ScopeService.checkScopes(
+      session,
+      requiredScopes: {CustomScope.documentSpecialist, Scope.admin},
+    );
 
     final groupExists = await Groups.db.findById(session, groupId);
     if (groupExists == null) {
@@ -47,12 +59,8 @@ class SubgroupsEndpoint extends Endpoint {
   }
 
   // Создать подгруппу со всеми студентами группы
-  Future<Subgroups> createFullGroupSubgroup(
-    Session session,
-    int groupId,
-    String name,
-    String? description,
-  ) async {
+  Future<Subgroups> createFullGroupSubgroup(Session session,int groupId,String name,String? description,) async 
+  {
     if (!await PermissionService.canManageGroupSubgroups(session, groupId)) {
       throw Exception('Доступ запрещен: нет прав на управление подгруппами этой группы.');
     }
@@ -110,7 +118,7 @@ class SubgroupsEndpoint extends Endpoint {
     int subgroupId,
     String name,
     String? description,
-  ) async {
+    ) async {
     final subgroup = await Subgroups.db.findById(session, subgroupId);
     if (subgroup == null) {
       throw Exception('Подгруппа не найдена.');

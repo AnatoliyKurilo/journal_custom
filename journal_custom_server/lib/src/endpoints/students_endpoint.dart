@@ -1,3 +1,4 @@
+import 'package:journal_custom_server/src/custom_scope.dart';
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import '../services/user_subgroup_service.dart';
@@ -6,10 +7,10 @@ import 'package:collection/collection.dart';
 
 class StudentsEndpoint extends Endpoint {
   @override
-  bool get requireAuth => true;
+  bool get requireLogin => true;
 
-  @override
-  Set<String> get requiredRoles => {'serverpod.admin'};
+  // @override
+  // Set<Scope> get requiredScopes => {Scope.admin, CustomScope.curator, CustomScope.groupHead, CustomScope.teacher, CustomScope.student, CustomScope.documentSpecialist};
 
   // Создание студента
   Future<Students> createStudent(
@@ -25,14 +26,6 @@ class StudentsEndpoint extends Endpoint {
     session.log('StudentsEndpoint: Начало создания студента: $firstName $lastName');
 
     try {
-      var existingPerson = await Person.db.findFirstRow(
-        session,
-        where: (p) => p.email.equals(email),
-      );
-
-      if (existingPerson != null) {
-        throw Exception('Человек с таким email уже существует');
-      }
 
       var group = await Groups.db.findFirstRow(
         session,
@@ -42,6 +35,31 @@ class StudentsEndpoint extends Endpoint {
       if (group == null) {
         throw Exception('Группа с названием "$groupName" не найдена');
       }
+      
+      if (firstName.isEmpty || lastName.isEmpty || email.isEmpty || groupName.isEmpty) {
+        throw Exception('Все поля должны быть заполнены');
+      }
+      if (!RegExp(r'^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$').hasMatch(email)) {
+        throw Exception('Некорректный формат email: $email');
+      }
+      // var group = Groups.db.findFirstRow(
+      //   session,
+      //   where: (g) => g.name.equals(groupName),
+      // ); 
+      // if(group == null) {
+      //   throw Exception('Группа с названием "$groupName" не найдена');
+      // }
+
+      var existingPerson = await Person.db.findFirstRow(
+        session,
+        where: (p) => p.email.equals(email),
+      );
+
+      if (existingPerson != null) {
+        throw Exception('Человек с таким email уже существует');
+      }
+
+      
 
       var person = Person(
         firstName: firstName,

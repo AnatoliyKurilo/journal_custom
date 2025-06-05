@@ -4,7 +4,7 @@ import '../services/user_subgroup_service.dart';
 
 class ClassesEndpoint extends Endpoint {
   @override
-  bool get requireAuth => true;
+  bool get requireLogin => true;
 
   // Обновленный метод для получения предметов с занятиями
   Future<List<Subjects>> getSubjectsWithClasses(Session session) async {
@@ -64,10 +64,6 @@ class ClassesEndpoint extends Endpoint {
     String? topic,
     String? notes,
   }) async {
-    // Проверяем доступ к подгруппе
-    if (!await UserSubgroupService.hasAccessToSubgroup(session, subgroupsId)) {
-      throw Exception('Доступ запрещен: нет прав на создание занятий для этой подгруппы.');
-    }
 
     // Проверяем существование связанных объектов
     final existingSubject = await Subjects.db.findById(session, subjectsId);
@@ -93,6 +89,11 @@ class ClassesEndpoint extends Endpoint {
     final existingSubgroup = await Subgroups.db.findById(session, subgroupsId);
     if (existingSubgroup == null) {
       throw Exception('Подгруппа с ID "$subgroupsId" не найдена.');
+    }
+
+    // Проверяем доступ к подгруппе
+    if (!await UserSubgroupService.hasAccessToSubgroup(session, subgroupsId)) {
+      throw Exception('Доступ запрещен: нет прав на создание занятий для этой подгруппы.');
     }
 
     final newClass = Classes(

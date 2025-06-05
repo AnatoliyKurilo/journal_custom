@@ -3,10 +3,10 @@ import '../generated/protocol.dart';
 
 class TeachersEndpoint extends Endpoint {
   @override
-  bool get requireAuth => true;
+  bool get requireLogin  => true;
 
-  @override
-  Set<String> get requiredRoles => {'serverpod.admin'};
+  // @override
+  // Set<Scope> get requiredScopes  => {Scope.admin};
 
   // Создание преподавателя
   Future<Teachers> createTeacher(
@@ -21,6 +21,9 @@ class TeachersEndpoint extends Endpoint {
       session,
       where: (p) => p.email.equals(email),
     );
+    if (firstName.isEmpty || lastName.isEmpty || email.isEmpty) {
+      throw Exception('Все поля должны быть заполнены');
+    }
 
     if (existingPerson != null) {
       throw Exception('Человек с таким email уже существует');

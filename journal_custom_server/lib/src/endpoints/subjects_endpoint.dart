@@ -3,7 +3,7 @@ import '../generated/protocol.dart';
 
 class SubjectsEndpoint extends Endpoint {
   @override
-  bool get requireAuth => true;
+  bool get requireLogin => true;
 
   // Метод для поиска дисциплин
   Future<List<Subjects>> searchSubjects(Session session, {required String query}) async {

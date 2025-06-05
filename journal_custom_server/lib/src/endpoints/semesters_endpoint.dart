@@ -3,7 +3,7 @@ import '../generated/protocol.dart';
 
 class SemestersEndpoint extends Endpoint {
   @override
-  bool get requireAuth => true;
+  bool get requireLogin => true;
 
   // Метод для поиска семестров
   Future<List<Semesters>> searchSemesters(Session session, {required String query}) async {
@@ -35,10 +35,10 @@ class SemestersEndpoint extends Endpoint {
       }
     }
 
-    // Объединяем условия через OR
+    // Объединяем условия через AND
     Expression<dynamic>? whereClause;
     if (conditions.isNotEmpty) {
-      whereClause = conditions.reduce((value, element) => value | element); // Убираем приведение к Expression<bool>
+      whereClause = conditions.reduce((value, element) => value & element);
     }
 
     // Выполняем запрос с фильтром

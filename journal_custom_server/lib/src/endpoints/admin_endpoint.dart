@@ -1,3 +1,4 @@
+import 'package:journal_custom_server/src/custom_scope.dart';
 import 'package:journal_custom_server/src/services/user_subgroup_service.dart';
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
@@ -6,10 +7,10 @@ import 'user_roles_endpoint.dart'; // Убедитесь, что этот энд
 
 class AdminEndpoint extends Endpoint {
   @override
-  bool get requireAuth => true;
+  bool get requireLogin  => true;
 
   @override
-  Set<String> get requiredRoles => {'serverpod.admin'};
+  Set<Scope> get requiredScopes  => {Scope.admin, CustomScope.curator, CustomScope.groupHead, CustomScope.teacher, CustomScope.student, CustomScope.documentSpecialist};
 
   // Метод для создания группы
   // Future<Groups> createGroup(Session session, String name, int? curatorId) async {

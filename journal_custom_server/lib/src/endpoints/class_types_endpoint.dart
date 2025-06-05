@@ -3,7 +3,7 @@ import '../generated/protocol.dart';
 
 class ClassTypesEndpoint extends Endpoint {
   @override
-  bool get requireAuth => true;
+  bool get requireLogin => true;
 
   // Метод для поиска типов занятий
   Future<List<ClassTypes>> searchClassTypes(Session session, {required String query}) async {

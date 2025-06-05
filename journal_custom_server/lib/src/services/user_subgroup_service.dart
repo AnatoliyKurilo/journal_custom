@@ -1,3 +1,4 @@
+import 'package:journal_custom_server/src/custom_scope.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_server/serverpod_auth_server.dart';
 import '../generated/protocol.dart';
@@ -10,7 +11,7 @@ class UserSubgroupService {
     if (authUser == null) return [];
 
     // Администраторы видят все подгруппы
-    if (authUser.scopeNames.contains('serverpod.admin')) {
+    if (authUser.scopeNames.contains('serverpod.admin')||authUser.scopes.contains(CustomScope.documentSpecialist)) {
       final allSubgroups = await Subgroups.db.find(session);
       return allSubgroups.map((s) => s.id!).toList();
     }

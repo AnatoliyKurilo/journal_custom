@@ -1,3 +1,4 @@
+import 'package:journal_custom_server/src/custom_scope.dart';
 import 'package:serverpod/serverpod.dart';
 import 'package:serverpod_auth_server/serverpod_auth_server.dart';
 import '../generated/protocol.dart';
@@ -10,7 +11,7 @@ class PermissionService {
     if (authUser == null) return false;
 
     // Администраторы имеют полный доступ
-    if (authUser.scopeNames.contains('serverpod.admin')) {
+    if (authUser.scopes.contains(CustomScope.documentSpecialist)||authUser.scopes.contains(Scope.admin)) {
       return true;
     }
 

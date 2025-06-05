@@ -1,14 +1,14 @@
+import 'package:journal_custom_server/src/custom_scope.dart';
 import 'package:journal_custom_server/src/generated/protocol.dart';
 import 'package:serverpod/serverpod.dart';
 import '../services/user_subgroup_service.dart';
 
 class SubjectAttendanceMatrixEndpoint extends Endpoint {
   @override
-  bool get requireAuth => true;
+  bool get requireLogin => true;
 
   @override
-  Set<String> get requiredRoles => {'serverpod.admin', 'curator', 'groupHead', 'teacher', 'student'};
-
+  Set<Scope> get requiredScopes => {Scope.admin, CustomScope.curator, CustomScope.groupHead, CustomScope.teacher, CustomScope.student, CustomScope.documentSpecialist};
 
   Future<SubjectAttendanceMatrix> getSubjectAttendanceMatrix(
     Session session, {
