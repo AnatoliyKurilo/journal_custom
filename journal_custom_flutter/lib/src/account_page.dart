@@ -9,7 +9,7 @@ import 'package:journal_custom_flutter/src/attendance/view_attendance_page.dart'
 import 'dart:developer' as developer;
 
 class AccountPage extends StatelessWidget {
-  const AccountPage({Key? key}) : super(key: key);
+  const AccountPage({super.key});
 
   @override
   Widget build(BuildContext context) {
