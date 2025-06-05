@@ -1,4 +1,4 @@
-@startuml
+@startuml DiagramTitle
 skinparam classAttributeIconSize 0
 hide empty members
 

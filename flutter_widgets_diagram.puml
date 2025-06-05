@@ -1,4 +1,4 @@
-@startuml
+@startuml flutter_widgets_diagram
 skinparam classAttributeIconSize 0
 hide empty members
 
