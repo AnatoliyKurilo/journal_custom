@@ -5,89 +5,264 @@
 // gestures. You can also use WidgetTester to find child widgets in the widget
 // tree, read text, and verify that the values of widget properties are correct.
 
-// import 'package:flutter/material.dart';
-// import 'package:flutter_test/flutter_test.dart';
-//
-// import 'package:PROJECTNAME_flutter/main.dart';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:journal_custom_client/journal_custom_client.dart';
-import 'package:journal_custom_flutter/src/serverpod_client.dart' as serverpod;
+import 'package:journal_custom_flutter/main.dart';
+import 'package:journal_custom_flutter/src/account_page.dart';
+import 'package:journal_custom_flutter/src/serverpod_client.dart' as serverpod_client;
 import 'package:journal_custom_flutter/src/sign_in_page.dart';
-import 'package:mockito/annotations.dart'; // Для аннотации @GenerateMocks
-import 'package:mockito/mockito.dart'; // Для when, any и т.д.
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as auth_client;
+import 'package:mockito/mockito.dart';
+import 'package:serverpod_auth_email_flutter/serverpod_auth_email_flutter.dart';
 import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:serverpod_auth_client/serverpod_auth_client.dart';
+import 'package:journal_custom_client/journal_custom_client.dart';
 
-// Генерируем мок для FlutterSecureStorage
-@GenerateMocks([FlutterSecureStorage])
-import 'widget_test.mocks.dart'; // Этот файл будет сгенерирован
+// Создаем мок для sessionManager
+class MockSessionManager extends Mock implements SessionManager {
+  UserInfo? _mockSignedInUser;
+  final List<VoidCallback> _listeners = [];
+  
+  @override
+  UserInfo? get signedInUser => _mockSignedInUser;
+  
+  @override
+  bool get isSignedIn => _mockSignedInUser != null;
+  
+  // Добавляем все необходимые методы SessionManager
+  @override
+  Stream<UserInfo?> get onUserChanged => Stream.value(_mockSignedInUser);
+  
+  @override
+  Future<UserInfo?> signInWithEmail(String email, String password) async {
+    return _mockSignedInUser;
+  }
+  
+  @override
+  Future<bool> signOut() async {
+    _mockSignedInUser = null;
+    _notifyListeners();
+    return true;
+  }
+  
+  // Добавляем поддержку слушателей
+  @override
+  void addListener(VoidCallback listener) {
+    _listeners.add(listener);
+  }
+  
+  @override
+  void removeListener(VoidCallback listener) {
+    _listeners.remove(listener);
+  }
+  
+  void _notifyListeners() {
+    for (final listener in _listeners) {
+      listener();
+    }
+  }
+  
+  void setMockSignedInUser(UserInfo? user) {
+    _mockSignedInUser = user;
+    _notifyListeners(); // Уведомляем слушателей об изменении
+  }
+}
+
+// Создаем мок для Client
+class MockClient extends Mock implements Client {
+  Modules? _modules;
+  
+  @override
+  Modules get modules => _modules ??= MockModules();
+  
+  set modules(Modules value) {
+    _modules = value;
+  }
+}
+
+// Создаем мок для Modules
+class MockModules extends Mock implements Modules {
+  Caller? _auth;
+  
+  @override
+  Caller get auth => _auth ??= MockAuthModule();
+  
+  set auth(Caller value) {
+    _auth = value;
+  }
+}
+
+// Создаем мок для AuthModule
+class MockAuthModule extends Mock implements Caller {
+  @override
+  Future<UserInfo?> signInWithEmail(String email, String password) async {
+    return null;
+  }
+  
+  @override
+  Future<void> signOut() async {
+    // Mock implementation
+  }
+}
 
 void main() {
-  // Переменные для моков
-  late MockFlutterSecureStorage mockSecureStorage;
-  late auth_client.FlutterAuthenticationKeyManager testAuthKeyManager;
+  late MockSessionManager mockSessionManager;
+  late MockClient mockClient;
 
-  // Группа тестов для SignInPage
-  group('SignInPage Widget Tests', () {
-    setUp(() async {
-      // Создаем мок для FlutterSecureStorage
-      mockSecureStorage = MockFlutterSecureStorage();
+  setUp(() {
+    // Инициализируем моки перед каждым тестом
+    mockSessionManager = MockSessionManager();
+    mockClient = MockClient();
+    
+    // Настраиваем структуру моков
+    final mockModules = MockModules();
+    final mockAuthModule = MockAuthModule();
+    
+    mockModules.auth = mockAuthModule;
+    mockClient.modules = mockModules;
+    
+    // Заменяем глобальные переменные на моки
+    serverpod_client.sessionManager = mockSessionManager;
+    serverpod_client.client = mockClient;
+  });
 
-      // Настраиваем поведение мока (например, возвращать null при чтении, если ключ не найден)
-      // Это важно, чтобы FlutterAuthenticationKeyManager не падал при попытке чтения.
-      when(mockSecureStorage.read(key: anyNamed('key'))).thenAnswer((_) async => null);
-      when(mockSecureStorage.write(key: anyNamed('key'), value: anyNamed('value'))).thenAnswer((_) async {});
-      when(mockSecureStorage.delete(key: anyNamed('key'))).thenAnswer((_) async {});
+  testWidgets('MyHomePage displays AccountPage when signed in', (WidgetTester tester) async {
+    // Создаем мок пользователя
+    final mockUser = UserInfo(
+      id: 1,
+      userIdentifier: 'test@example.com',
+      email: 'test@example.com',
+      userName: 'Test User',
+      fullName: 'Test User',
+      created: DateTime.now(),
+      imageUrl: null,
+      scopeNames: ['user'],
+      blocked: false,
+    );
+    
+    // Устанавливаем пользователя в мок
+    mockSessionManager.setMockSignedInUser(mockUser);
 
+    // Загружаем виджет MyApp
+    await tester.pumpWidget(const MyApp());
+    
+    // Ждем завершения анимаций
+    await tester.pumpAndSettle();
 
-      // Создаем FlutterAuthenticationKeyManager с мокированным хранилищем
-      testAuthKeyManager = auth_client.FlutterAuthenticationKeyManager(
-        mockSecureStorage, // Передаем мок
-        'test_auth_key',   // Любой ключ для теста
-      );
+    // Проверяем, что отображается AccountPage
+    expect(find.byType(AccountPage), findsOneWidget);
+  });
 
-      // Инициализируем глобальный объект client
-      serverpod.client = Client(
-        'http://localhost:8080/',
-        authenticationKeyManager: testAuthKeyManager, // Используем наш настроенный менеджер
-      );
+  testWidgets('MyHomePage displays SignInPage when not signed in', (WidgetTester tester) async {
+    // Устанавливаем null пользователя (не авторизован)
+    mockSessionManager.setMockSignedInUser(null);
 
-      // Инициализируем глобальный объект sessionManager
-      serverpod.sessionManager = SessionManager(
-        caller: serverpod.client.modules.auth,
-      );
+    // Загружаем виджет MyApp
+    await tester.pumpWidget(const MyApp());
+    
+    // Ждем завершения анимаций
+    await tester.pumpAndSettle();
 
-      // Важно: Инициализируем sessionManager, так как он будет пытаться прочитать ключ
-      // из authenticationKeyManager (который теперь использует мокированное хранилище).
-      // Это должно предотвратить ошибки, связанные с неинициализированным состоянием.
-      await serverpod.sessionManager.initialize();
-    });
+    // Проверяем, что отображается SignInPage
+    expect(find.byType(SignInPage), findsOneWidget);
+  });
+  
+  testWidgets('MyHomePage switches between pages based on auth state', (WidgetTester tester) async {
+    // Начинаем с неавторизованного состояния
+    mockSessionManager.setMockSignedInUser(null);
 
-    testWidgets('App starts with SignInPage and renders key elements', (WidgetTester tester) async {
-      await tester.pumpWidget(
-        const MaterialApp(
-          // Важно добавить делегаты локализации, если SignInPage или его дочерние виджеты
-          // (например, SignInWithEmailButton) их используют.
-          localizationsDelegates: [
-            GlobalMaterialLocalizations.delegate,
-            GlobalWidgetsLocalizations.delegate,
-            GlobalCupertinoLocalizations.delegate,
-            ServerpodAuthSharedFlutterLocalizations.delegate,
-          ],
-          supportedLocales: [
-            Locale('en', ''),
-            Locale('ru', ''),
-          ],
-          home: SignInPage(),
-        ),
-      );
+    // Загружаем виджет MyApp
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
 
-      expect(find.text('Журнал посещаемости'), findsOneWidget);
-      expect(find.byType(Image), findsOneWidget);
-      expect(find.widgetWithText(SignInWithEmailButton, 'Войти с Email'), findsOneWidget);
-    });
+    // Проверяем, что отображается SignInPage
+    expect(find.byType(SignInPage), findsOneWidget);
+    expect(find.byType(AccountPage), findsNothing);
+
+    // Эмулируем авторизацию
+    final mockUser = UserInfo(
+      id: 1,
+      userIdentifier: 'test@example.com',
+      email: 'test@example.com',
+      userName: 'Test User',
+      fullName: 'Test User',
+      created: DateTime.now(),
+      imageUrl: null,
+      scopeNames: ['user'],
+      blocked: false,
+    );
+    
+    // Устанавливаем пользователя - это автоматически вызовет _notifyListeners()
+    mockSessionManager.setMockSignedInUser(mockUser);
+
+    // Даем время для перерисовки после уведомления слушателей
+    await tester.pump();
+    await tester.pumpAndSettle();
+
+    // Проверяем, что теперь отображается AccountPage
+    expect(find.byType(AccountPage), findsOneWidget);
+    expect(find.byType(SignInPage), findsNothing);
+  });
+
+  testWidgets('SignInPage displays correctly with auth button', (WidgetTester tester) async {
+    // Устанавливаем неавторизованное состояние
+    mockSessionManager.setMockSignedInUser(null);
+
+    // Загружаем виджет MyApp
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+
+    // Проверяем, что отображается SignInPage
+    expect(find.byType(SignInPage), findsOneWidget);
+
+    // Проверяем наличие виджета SignInWithEmailButton
+    expect(find.byType(SignInWithEmailButton), findsOneWidget);
+
+    // Проверяем наличие заголовка
+    expect(find.text('Журнал посещаемости'), findsOneWidget);
+
+    // Проверяем наличие текста кнопки входа
+    expect(find.text('Войти с Email'), findsOneWidget);
+
+    // Проверяем наличие логотипа (Image)
+    expect(find.byType(Image), findsOneWidget);
+
+    // Проверяем, что можно нажать на кнопку входа по тексту
+    await tester.tap(find.text('Войти с Email'));
+    await tester.pumpAndSettle();
+
+    // После нажатия может появиться диалог входа
+    // (здесь можно добавить проверки для диалога, если нужно)
+  });
+
+  testWidgets('AccountPage displays user information when signed in', (WidgetTester tester) async {
+    // Создаем мок пользователя с тестовыми данными
+    final mockUser = UserInfo(
+      id: 1,
+      userIdentifier: 'test@example.com',
+      email: 'test@example.com',
+      userName: 'Test User',
+      fullName: 'Test User',
+      created: DateTime.now(),
+      imageUrl: null,
+      scopeNames: ['user'],
+      blocked: false,
+    );
+    
+    // Устанавливаем пользователя в мок
+    mockSessionManager.setMockSignedInUser(mockUser);
+
+    // Загружаем виджет MyApp
+    await tester.pumpWidget(const MyApp());
+    await tester.pumpAndSettle();
+
+    // Проверяем, что отображается AccountPage
+    expect(find.byType(AccountPage), findsOneWidget);
+
+    // Проверяем наличие email пользователя
+    expect(find.text('test@example.com'), findsOneWidget);
+    
+    // Проверяем наличие кнопки выхода
+    expect(find.text('Выйти'), findsOneWidget);
   });
 }
+
