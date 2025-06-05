@@ -1,12 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:journal_custom_flutter/src/admin/teacher_tab.dart';
-import 'package:journal_custom_flutter/src/serverpod_client.dart';
+import 'package:journal_custom_flutter/src/features/admin_panel/presentation/tabs/teacher_tab.dart';
+import 'package:journal_custom_flutter/core/serverpod_client.dart';
 import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
-import 'package:journal_custom_flutter/src/group_head/group_head_page.dart'; // Добавляем импорт страницы старосты
-import 'package:journal_custom_flutter/src/account_page.dart'; // Добавляем импорт страницы аккаунта
+import 'package:journal_custom_flutter/src/features/group_management/presentation/pages/group_head_page.dart'; // Добавляем импорт страницы старосты
+import 'package:journal_custom_flutter/src/features/auth/presentation/pages/account_page.dart'; // Добавляем импорт страницы аккаунта
 
-import 'groups_tab.dart';
-import 'students_tab.dart'; // Импортируем новую вкладку
+import '../tabs/groups_tab.dart';
+import '../tabs/students_tab.dart'; // Импортируем новую вкладку
 
 class AdminPanel extends StatefulWidget {
   const AdminPanel({Key? key}) : super(key: key);

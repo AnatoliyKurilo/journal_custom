@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_test/flutter_test.dart';
-import 'package:journal_custom_flutter/src/account_page.dart';
-import 'package:journal_custom_flutter/src/serverpod_client.dart' as serverpod_client;
+import 'package:journal_custom_flutter/src/features/auth/presentation/pages/account_page.dart';
+import 'package:journal_custom_flutter/core/serverpod_client.dart' as serverpod_client;
 import 'package:mockito/mockito.dart';
 import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
 import 'package:serverpod_auth_client/serverpod_auth_client.dart';

@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:journal_custom_client/journal_custom_client.dart';
-import 'package:journal_custom_flutter/src/admin/filework/export_groups_csv.dart';
-import 'package:journal_custom_flutter/src/admin/filework/import_groups_csv.dart';
-import 'package:journal_custom_flutter/src/serverpod_client.dart';
+import 'package:journal_custom_flutter/src/features/admin_panel/data/utils/export_groups_csv.dart';
+import 'package:journal_custom_flutter/src/features/admin_panel/data/utils/import_groups_csv.dart';
+import 'package:journal_custom_flutter/core/serverpod_client.dart';
 import 'package:collection/collection.dart'; // Убедитесь, что этот импорт есть, если используется firstWhereOrNull
 
 // Функция для фильтрации студентов по ФИО

@@ -1,8 +1,8 @@
 import 'package:journal_custom_client/journal_custom_client.dart';
 import 'package:flutter/material.dart';
-import 'package:journal_custom_flutter/src/account_page.dart';
-import 'package:journal_custom_flutter/src/serverpod_client.dart';
-import 'package:journal_custom_flutter/src/sign_in_page.dart';
+import 'package:journal_custom_flutter/src/features/auth/presentation/pages/account_page.dart';
+import 'package:journal_custom_flutter/core/serverpod_client.dart';
+import 'package:journal_custom_flutter/src/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
 
 // import 'package:logging/logging.dart';
@@ -62,30 +62,30 @@ class MyHomePage extends StatefulWidget {
 
 class MyHomePageState extends State<MyHomePage> {
   /// Holds the last result or null if no result exists yet.
-  String? _resultMessage;
+  // String? _resultMessage;
 
   /// Holds the last error message that we've received from the server or null if no
   /// error exists yet.
-  String? _errorMessage;
+  // String? _errorMessage;
 
-  final _textEditingController = TextEditingController();
+  // final _textEditingController = TextEditingController();
 
   /// Calls the `hello` method of the `greeting` endpoint. Will set either the
   /// `_resultMessage` or `_errorMessage` field, depending on if the call
   /// is successful.
-  void _callHello() async {
-    try {
-      final result = await client.greeting.hello(_textEditingController.text);
-      setState(() {
-        _errorMessage = null;
-        _resultMessage = result.message;
-      });
-    } catch (e) {
-      setState(() {
-        _errorMessage = '$e';
-      });
-    }
-  }
+  // void _callHello() async {
+  //   try {
+  //     final result = await client.greeting.hello(_textEditingController.text);
+  //     setState(() {
+  //       _errorMessage = null;
+  //       _resultMessage = result.message;
+  //     });
+  //   } catch (e) {
+  //     setState(() {
+  //       _errorMessage = '$e';
+  //     });
+  //   }
+  // }
 
   @override
   void initState() {

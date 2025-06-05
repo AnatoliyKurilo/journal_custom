@@ -1,10 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
-import 'package:journal_custom_flutter/src/serverpod_client.dart';
-import 'package:journal_custom_flutter/src/admin/admin_panel.dart';
-import 'package:journal_custom_flutter/src/group_head/group_head_page.dart'; // Импортируем страницу старосты
-import 'package:journal_custom_flutter/src/attendance/attendance_page.dart'; // Импортируем новую страницу
-import 'package:journal_custom_flutter/src/attendance/view_attendance_page.dart'; // <-- Новый импорт
+import 'package:journal_custom_flutter/core/serverpod_client.dart';
+import 'package:journal_custom_flutter/src/features/admin_panel/presentation/pages/admin_panel.dart';
+import 'package:journal_custom_flutter/src/features/group_management/presentation/pages/group_head_page.dart'; // Импортируем страницу старосты
+import 'package:journal_custom_flutter/src/features/attendance/presentation/pages/attendance_page.dart'; // Импортируем новую страницу
+import 'package:journal_custom_flutter/src/features/attendance/presentation/pages/view_attendance_page.dart'; // <-- Новый импорт
 
 import 'dart:developer' as developer;
 

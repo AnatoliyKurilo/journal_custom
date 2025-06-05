@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:journal_custom_client/journal_custom_client.dart';
-import 'package:journal_custom_flutter/src/serverpod_client.dart';
-import 'package:journal_custom_flutter/src/group_head/subgroup_detail_page.dart';
+import 'package:journal_custom_flutter/core/serverpod_client.dart';
+import 'package:journal_custom_flutter/src/features/group_management/presentation/pages/subgroup_detail_page.dart';
 
 class GroupHeadPage extends StatefulWidget {
   const GroupHeadPage({super.key});

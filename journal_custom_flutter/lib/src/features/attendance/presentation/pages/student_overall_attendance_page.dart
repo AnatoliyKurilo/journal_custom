@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:journal_custom_client/journal_custom_client.dart';
-import 'package:journal_custom_flutter/src/serverpod_client.dart';
+import 'package:journal_custom_flutter/core/serverpod_client.dart';
 import 'package:intl/intl.dart';
 import 'package:collection/collection.dart'; // Для groupBy
 

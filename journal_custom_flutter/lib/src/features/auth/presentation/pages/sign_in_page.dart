@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:serverpod_auth_email_flutter/serverpod_auth_email_flutter.dart';
-import 'package:journal_custom_flutter/src/serverpod_client.dart';
+import 'package:journal_custom_flutter/core/serverpod_client.dart';
 
 class SignInPage extends StatelessWidget {
   const SignInPage({Key? key}) : super(key: key);

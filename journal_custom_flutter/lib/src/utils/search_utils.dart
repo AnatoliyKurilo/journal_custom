@@ -1,5 +1,5 @@
 import 'package:journal_custom_client/journal_custom_client.dart';
-import 'package:journal_custom_flutter/src/serverpod_client.dart';
+import 'package:journal_custom_flutter/core/serverpod_client.dart';
 
 class SearchUtils {
   static Future<List<Teachers>> searchTeachers(String query) async {

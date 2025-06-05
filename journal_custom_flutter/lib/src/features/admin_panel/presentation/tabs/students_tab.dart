@@ -1,8 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:journal_custom_client/journal_custom_client.dart';
-import 'package:journal_custom_flutter/src/serverpod_client.dart';
+import 'package:journal_custom_flutter/core/serverpod_client.dart';
 import 'package:journal_custom_flutter/src/utils/search_utils.dart';
-import 'package:journal_custom_flutter/src/admin/student_overall_attendance_page.dart'; // <-- Новый импорт
+import 'package:journal_custom_flutter/src/features/attendance/presentation/pages/student_overall_attendance_page.dart'; // <-- Новый импорт
 
 class StudentsTab extends StatefulWidget {
   @override

@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:journal_custom_client/journal_custom_client.dart';
-import 'package:journal_custom_flutter/src/serverpod_client.dart';
-import 'package:intl/intl.dart'; // Для форматирования даты
-import 'package:journal_custom_flutter/src/attendance/class_attendance_page.dart'; // Добавьте этот импорт
+import 'package:journal_custom_flutter/core/serverpod_client.dart';
+import 'package:intl/intl.dart';
+import 'package:journal_custom_flutter/src/features/attendance/presentation/pages/view_class_attendance_page.dart'; // Для навигации
+import 'package:journal_custom_flutter/src/features/attendance/presentation/pages/subject_overall_attendance_page.dart'; // Новый импорт
 
-class SubjectClassesPage extends StatefulWidget {
+class ViewSubjectClassesPage extends StatefulWidget {
   final Subjects subject;
 
-  const SubjectClassesPage({Key? key, required this.subject}) : super(key: key);
+  const ViewSubjectClassesPage({Key? key, required this.subject}) : super(key: key);
 
   @override
-  _SubjectClassesPageState createState() => _SubjectClassesPageState();
+  _ViewSubjectClassesPageState createState() => _ViewSubjectClassesPageState();
 }
 
-class _SubjectClassesPageState extends State<SubjectClassesPage> {
+class _ViewSubjectClassesPageState extends State<ViewSubjectClassesPage> {
   bool _isLoading = true;
   String? _errorMessage;
   List<Classes> _classes = [];
@@ -54,7 +55,21 @@ class _SubjectClassesPageState extends State<SubjectClassesPage> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: Text(widget.subject.name ?? 'Занятия по предмету'),
+        title: Text('Занятия: ${widget.subject.name ?? 'Предмет'}'),
+        actions: [
+          IconButton(
+            icon: const Icon(Icons.table_chart_outlined),
+            tooltip: 'Сводный отчет по предмету',
+            onPressed: () {
+              Navigator.push(
+                context,
+                MaterialPageRoute(
+                  builder: (context) => SubjectOverallAttendancePage(subject: widget.subject),
+                ),
+              );
+            },
+          ),
+        ],
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
@@ -91,18 +106,16 @@ class _SubjectClassesPageState extends State<SubjectClassesPage> {
 
                         return ListTile(
                           title: Text(
-                              // Отображаем тип занятия, если он загружен
                               '${classItem.class_types?.name ?? 'Занятие'} ID: ${classItem.id}'),
                           subtitle: Text(subtitleText),
                           isThreeLine: (classItem.topic != null && classItem.topic!.isNotEmpty) ||
                               (classItem.notes != null && classItem.notes!.isNotEmpty),
                           onTap: () {
-                            // Убедимся, что classItem.id не null перед навигацией
                             if (classItem.id != null) {
                               Navigator.push(
                                 context,
                                 MaterialPageRoute(
-                                  builder: (context) => ClassAttendancePage(classItem: classItem),
+                                  builder: (context) => ViewClassAttendancePage(classItem: classItem),
                                 ),
                               );
                             } else {

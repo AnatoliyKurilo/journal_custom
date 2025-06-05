@@ -1,7 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:journal_custom_client/journal_custom_client.dart';
-import 'package:journal_custom_flutter/src/serverpod_client.dart';
-import 'package:journal_custom_flutter/src/attendance/subject_classes_page.dart'; // Добавьте этот импорт
+import 'package:journal_custom_flutter/core/serverpod_client.dart';
+import 'package:journal_custom_flutter/src/features/attendance/presentation/pages/subject_classes_page.dart'; // Добавьте этот импорт
 
 class AttendancePage extends StatefulWidget {
   const AttendancePage({Key? key}) : super(key: key);
@@ -89,7 +89,7 @@ class _AttendancePageState extends State<AttendancePage> {
                       itemBuilder: (context, index) {
                         final subject = _subjectsWithClasses[index];
                         return ListTile(
-                          title: Text(subject.name ?? 'Предмет без названия'),
+                          title: Text(subject.name),
                           onTap: () {
                             Navigator.push(
                               context,
@@ -127,7 +127,7 @@ class _AttendancePageState extends State<AttendancePage> {
     final subgroupController = TextEditingController();
     final dateTimeControllerForDisplay = TextEditingController();
 
-    final isSmallScreenDialog = MediaQuery.of(context).size.width < 600;
+    // final isSmallScreenDialog = MediaQuery.of(context).size.width < 600;
 
     List<ClassTypes> classTypes = [];
     try {
@@ -198,7 +198,7 @@ class _AttendancePageState extends State<AttendancePage> {
                         items: classTypes.map((type) {
                           return DropdownMenuItem<int>(
                             value: type.id,
-                            child: Text(type.name ?? 'Тип без названия'),
+                            child: Text(type.name),
                           );
                         }).toList(),
                         onChanged: (value) {
@@ -290,7 +290,7 @@ class _AttendancePageState extends State<AttendancePage> {
                           if (subgroup != null && subgroup is Subgroups) {
                             setDialogState(() { // Используем setDialogState
                               localSelectedSubgroupId = subgroup.id;
-                              subgroupController.text = subgroup.name ?? 'Не выбрано';
+                              subgroupController.text = subgroup.name;
                             });
                           }
                         },
