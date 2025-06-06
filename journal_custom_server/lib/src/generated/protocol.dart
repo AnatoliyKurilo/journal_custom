@@ -42,14 +42,15 @@ import 'package:journal_custom_server/src/generated/class_types_protocol.dart'
 import 'package:journal_custom_server/src/generated/subjects_protocol.dart'
     as _i26;
 import 'package:journal_custom_server/src/generated/classes.dart' as _i27;
+import 'package:journal_custom_server/src/generated/person.dart' as _i28;
 import 'package:journal_custom_server/src/generated/teachers_protocol.dart'
-    as _i28;
-import 'package:journal_custom_server/src/generated/subgroups_protocol.dart'
     as _i29;
-import 'package:journal_custom_server/src/generated/semesters_protocol.dart'
+import 'package:journal_custom_server/src/generated/subgroups_protocol.dart'
     as _i30;
-import 'package:journal_custom_server/src/generated/student_overall_attendance_record.dart'
+import 'package:journal_custom_server/src/generated/semesters_protocol.dart'
     as _i31;
+import 'package:journal_custom_server/src/generated/student_overall_attendance_record.dart'
+    as _i32;
 export 'greeting.dart';
 export 'attendance_protocol.dart';
 export 'class_types_protocol.dart';
@@ -1095,21 +1096,25 @@ class Protocol extends _i1.SerializationManagerServer {
       return (data as List).map((e) => deserialize<_i27.Classes>(e)).toList()
           as T;
     }
-    if (t == List<_i28.Teachers>) {
-      return (data as List).map((e) => deserialize<_i28.Teachers>(e)).toList()
+    if (t == List<_i28.Person>) {
+      return (data as List).map((e) => deserialize<_i28.Person>(e)).toList()
           as T;
     }
-    if (t == List<_i29.Subgroups>) {
-      return (data as List).map((e) => deserialize<_i29.Subgroups>(e)).toList()
+    if (t == List<_i29.Teachers>) {
+      return (data as List).map((e) => deserialize<_i29.Teachers>(e)).toList()
           as T;
     }
-    if (t == List<_i30.Semesters>) {
-      return (data as List).map((e) => deserialize<_i30.Semesters>(e)).toList()
+    if (t == List<_i30.Subgroups>) {
+      return (data as List).map((e) => deserialize<_i30.Subgroups>(e)).toList()
           as T;
     }
-    if (t == List<_i31.StudentOverallAttendanceRecord>) {
+    if (t == List<_i31.Semesters>) {
+      return (data as List).map((e) => deserialize<_i31.Semesters>(e)).toList()
+          as T;
+    }
+    if (t == List<_i32.StudentOverallAttendanceRecord>) {
       return (data as List)
-          .map((e) => deserialize<_i31.StudentOverallAttendanceRecord>(e))
+          .map((e) => deserialize<_i32.StudentOverallAttendanceRecord>(e))
           .toList() as T;
     }
     if (t == List<String>) {

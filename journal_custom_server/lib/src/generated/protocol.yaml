@@ -20,7 +20,11 @@ groups:
   - updateGroup:
   - deleteGroup:
 person:
+  - createPerson:
+  - getPerson:
   - updatePerson:
+  - deletePerson:
+  - getAllPersons:
 search:
   - searchStudents:
   - searchTeachers:

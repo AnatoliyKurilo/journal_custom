@@ -40,15 +40,16 @@ import 'package:journal_custom_client/src/protocol/class_types_protocol.dart'
 import 'package:journal_custom_client/src/protocol/subjects_protocol.dart'
     as _i24;
 import 'package:journal_custom_client/src/protocol/classes.dart' as _i25;
+import 'package:journal_custom_client/src/protocol/person.dart' as _i26;
 import 'package:journal_custom_client/src/protocol/teachers_protocol.dart'
-    as _i26;
-import 'package:journal_custom_client/src/protocol/subgroups_protocol.dart'
     as _i27;
-import 'package:journal_custom_client/src/protocol/semesters_protocol.dart'
+import 'package:journal_custom_client/src/protocol/subgroups_protocol.dart'
     as _i28;
-import 'package:journal_custom_client/src/protocol/student_overall_attendance_record.dart'
+import 'package:journal_custom_client/src/protocol/semesters_protocol.dart'
     as _i29;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i30;
+import 'package:journal_custom_client/src/protocol/student_overall_attendance_record.dart'
+    as _i30;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i31;
 export 'greeting.dart';
 export 'attendance_protocol.dart';
 export 'class_types_protocol.dart';
@@ -240,28 +241,32 @@ class Protocol extends _i1.SerializationManager {
       return (data as List).map((e) => deserialize<_i25.Classes>(e)).toList()
           as T;
     }
-    if (t == List<_i26.Teachers>) {
-      return (data as List).map((e) => deserialize<_i26.Teachers>(e)).toList()
+    if (t == List<_i26.Person>) {
+      return (data as List).map((e) => deserialize<_i26.Person>(e)).toList()
           as T;
     }
-    if (t == List<_i27.Subgroups>) {
-      return (data as List).map((e) => deserialize<_i27.Subgroups>(e)).toList()
+    if (t == List<_i27.Teachers>) {
+      return (data as List).map((e) => deserialize<_i27.Teachers>(e)).toList()
           as T;
     }
-    if (t == List<_i28.Semesters>) {
-      return (data as List).map((e) => deserialize<_i28.Semesters>(e)).toList()
+    if (t == List<_i28.Subgroups>) {
+      return (data as List).map((e) => deserialize<_i28.Subgroups>(e)).toList()
           as T;
     }
-    if (t == List<_i29.StudentOverallAttendanceRecord>) {
+    if (t == List<_i29.Semesters>) {
+      return (data as List).map((e) => deserialize<_i29.Semesters>(e)).toList()
+          as T;
+    }
+    if (t == List<_i30.StudentOverallAttendanceRecord>) {
       return (data as List)
-          .map((e) => deserialize<_i29.StudentOverallAttendanceRecord>(e))
+          .map((e) => deserialize<_i30.StudentOverallAttendanceRecord>(e))
           .toList() as T;
     }
     if (t == List<String>) {
       return (data as List).map((e) => deserialize<String>(e)).toList() as T;
     }
     try {
-      return _i30.Protocol().deserialize<T>(data, t);
+      return _i31.Protocol().deserialize<T>(data, t);
     } on _i1.DeserializationTypeNotFoundException catch (_) {}
     return super.deserialize<T>(data, t);
   }
@@ -321,7 +326,7 @@ class Protocol extends _i1.SerializationManager {
     if (data is _i18.Teachers) {
       return 'Teachers';
     }
-    className = _i30.Protocol().getClassNameForObject(data);
+    className = _i31.Protocol().getClassNameForObject(data);
     if (className != null) {
       return 'serverpod_auth.$className';
     }
@@ -387,7 +392,7 @@ class Protocol extends _i1.SerializationManager {
     }
     if (dataClassName.startsWith('serverpod_auth.')) {
       data['className'] = dataClassName.substring(15);
-      return _i30.Protocol().deserializeByClassName(data);
+      return _i31.Protocol().deserializeByClassName(data);
     }
     return super.deserializeByClassName(data);
   }

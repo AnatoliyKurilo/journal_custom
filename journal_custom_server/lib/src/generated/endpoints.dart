@@ -529,6 +529,42 @@ class Endpoints extends _i1.EndpointDispatch {
       name: 'person',
       endpoint: endpoints['person']!,
       methodConnectors: {
+        'createPerson': _i1.MethodConnector(
+          name: 'createPerson',
+          params: {
+            'person': _i1.ParameterDescription(
+              name: 'person',
+              type: _i1.getType<_i20.Person>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['person'] as _i7.PersonEndpoint).createPerson(
+            session,
+            params['person'],
+          ),
+        ),
+        'getPerson': _i1.MethodConnector(
+          name: 'getPerson',
+          params: {
+            'personId': _i1.ParameterDescription(
+              name: 'personId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['person'] as _i7.PersonEndpoint).getPerson(
+            session,
+            params['personId'],
+          ),
+        ),
         'updatePerson': _i1.MethodConnector(
           name: 'updatePerson',
           params: {
@@ -546,7 +582,35 @@ class Endpoints extends _i1.EndpointDispatch {
             session,
             params['person'],
           ),
-        )
+        ),
+        'deletePerson': _i1.MethodConnector(
+          name: 'deletePerson',
+          params: {
+            'personId': _i1.ParameterDescription(
+              name: 'personId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['person'] as _i7.PersonEndpoint).deletePerson(
+            session,
+            params['personId'],
+          ),
+        ),
+        'getAllPersons': _i1.MethodConnector(
+          name: 'getAllPersons',
+          params: {},
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['person'] as _i7.PersonEndpoint)
+                  .getAllPersons(session),
+        ),
       },
     );
     connectors['search'] = _i1.EndpointConnector(

@@ -244,11 +244,39 @@ class EndpointPerson extends _i1.EndpointRef {
   @override
   String get name => 'person';
 
+  _i2.Future<_i12.Person> createPerson(_i12.Person person) =>
+      caller.callServerEndpoint<_i12.Person>(
+        'person',
+        'createPerson',
+        {'person': person},
+      );
+
+  _i2.Future<_i12.Person?> getPerson(int personId) =>
+      caller.callServerEndpoint<_i12.Person?>(
+        'person',
+        'getPerson',
+        {'personId': personId},
+      );
+
   _i2.Future<_i12.Person> updatePerson(_i12.Person person) =>
       caller.callServerEndpoint<_i12.Person>(
         'person',
         'updatePerson',
         {'person': person},
+      );
+
+  _i2.Future<bool> deletePerson(int personId) =>
+      caller.callServerEndpoint<bool>(
+        'person',
+        'deletePerson',
+        {'personId': personId},
+      );
+
+  _i2.Future<List<_i12.Person>> getAllPersons() =>
+      caller.callServerEndpoint<List<_i12.Person>>(
+        'person',
+        'getAllPersons',
+        {},
       );
 }
 
