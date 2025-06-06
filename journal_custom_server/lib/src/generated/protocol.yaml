@@ -12,6 +12,7 @@ classes:
   - getSubjectsWithClasses:
   - getClassesBySubject:
   - createClass:
+  - getSubjectsForGroup:
 groups:
   - createGroup:
   - getAllGroups:
@@ -27,6 +28,8 @@ search:
   - searchSubjects:
   - searchClassTypes:
   - searchSubgroups:
+  - getAllStudentsForAdmin:
+  - getStudentsForCurator:
 semesters:
   - searchSemesters:
 students:

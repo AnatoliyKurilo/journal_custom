@@ -275,8 +275,8 @@ class _TeachersTabState extends State<TeachersTab> {
                     patronymic: patronymic,
                     email: email,
                     phoneNumber: phoneNumber,
-                    userInfoId: personToEdit.userInfoId, // Keep original userInfoId
-                    userInfo: personToEdit.userInfo, // Keep original userInfo
+                    userInfoId: personToEdit.userInfoId, // <--- ОСТАВИТЬ РАСКОММЕНТИРОВАННЫМ
+                    // userInfo: personToEdit.userInfo, 
                   );
 
                   try {

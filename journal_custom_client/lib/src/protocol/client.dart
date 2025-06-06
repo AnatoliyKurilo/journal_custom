@@ -172,6 +172,13 @@ class EndpointClasses extends _i1.EndpointRef {
           'notes': notes,
         },
       );
+
+  _i2.Future<List<_i10.Subjects>> getSubjectsForGroup(int groupId) =>
+      caller.callServerEndpoint<List<_i10.Subjects>>(
+        'classes',
+        'getSubjectsForGroup',
+        {'groupId': groupId},
+      );
 }
 
 /// {@category Endpoint}
@@ -292,6 +299,20 @@ class EndpointSearch extends _i1.EndpointRef {
         'search',
         'searchSubgroups',
         {'query': query},
+      );
+
+  _i2.Future<List<_i3.Students>> getAllStudentsForAdmin() =>
+      caller.callServerEndpoint<List<_i3.Students>>(
+        'search',
+        'getAllStudentsForAdmin',
+        {},
+      );
+
+  _i2.Future<List<_i3.Students>> getStudentsForCurator() =>
+      caller.callServerEndpoint<List<_i3.Students>>(
+        'search',
+        'getStudentsForCurator',
+        {},
       );
 }
 

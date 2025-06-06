@@ -1,13 +1,16 @@
 import 'package:journal_custom_server/src/custom_scope.dart';
 import 'package:journal_custom_server/src/services/Scope_service.dart';
 import 'package:serverpod/serverpod.dart';
+import 'package:serverpod_auth_server/module.dart'; // For Scope.admin
 import '../generated/protocol.dart';
 import '../services/search_service.dart';
 import '../services/user_subgroup_service.dart';
+import 'package:serverpod_test/src/function_call_wrappers.dart';
+
 
 class SearchEndpoint extends Endpoint {
   @override
-  bool get requireLogin  => true;
+  bool get requireLogin => true;
 
   // @override
   // Set<Scope> get requiredScopes  => {CustomScope.curator, CustomScope.groupHead, CustomScope.teacher, CustomScope.student, CustomScope.documentSpecialist};
@@ -220,6 +223,71 @@ class SearchEndpoint extends Endpoint {
       where: (s) => finalCondition,
       orderBy: (s) => s.name,
       orderDescending: false,
+    );
+  }
+
+  Future<List<Students>> getAllStudentsForAdmin(Session session) async {
+    // Проверка, что пользователь является администратором
+    await ScopeService.checkScopes(session, requiredScopes: {Scope.admin});
+    return await Students.db.find(
+      session,
+      include: Students.include(
+        person: Person.include(),
+        groups: Groups.include(),
+      ),
+      orderBy: (s) => s.person.lastName, // Пример сортировки
+    );
+  }
+
+  Future<List<Students>> getStudentsForCurator(Session session) async {
+    // Проверка, что пользователь является куратором
+    await ScopeService.checkScopes(session, requiredScopes: {CustomScope.curator});
+
+    final authInfo = await session.authenticated;
+    if (authInfo == null) {
+      throw ServerpodUnauthenticatedException();
+    }
+
+    // Находим Person по userInfoId
+    final person = await Person.db.findFirstRow(
+      session,
+      where: (p) => p.userInfoId.equals(authInfo.userId),
+    );
+    if (person == null) {
+      session.log('Person for userInfoId ${authInfo.userId} not found for curator.', level: LogLevel.warning);
+      return [];
+    }
+
+    // Находим Teachers по personId
+    final teacher = await Teachers.db.findFirstRow(
+      session,
+      where: (t) => t.personId.equals(person.id),
+    );
+    if (teacher == null) {
+      session.log('Teacher for personId ${person.id} not found for curator.', level: LogLevel.warning);
+      return [];
+    }
+
+    // Находим группы, где этот преподаватель является куратором
+    final curatedGroups = await Groups.db.find(
+      session,
+      where: (g) => g.curatorId.equals(teacher.id),
+    );
+    if (curatedGroups.isEmpty) {
+      return [];
+    }
+
+    final groupIds = curatedGroups.map((g) => g.id!).toSet();
+
+    // Находим всех студентов из этих групп
+    return await Students.db.find(
+      session,
+      where: (s) => s.groupsId.inSet(groupIds),
+      include: Students.include(
+        person: Person.include(),
+        groups: Groups.include(),
+      ),
+      orderBy: (s) => s.person.lastName, // Пример сортировки
     );
   }
 }

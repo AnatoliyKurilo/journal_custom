@@ -1,3 +1,4 @@
+import 'package:journal_custom_server/src/services/permission_service.dart';
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import '../services/user_subgroup_service.dart';
@@ -108,6 +109,48 @@ class ClassesEndpoint extends Endpoint {
     );
 
     return await Classes.db.insertRow(session, newClass);
+  }
+
+  Future<List<Subjects>> getSubjectsForGroup(Session session, int groupId) async {
+    // Проверяем, что пользователь имеет доступ к группе
+    final hasAccess = await PermissionService.canManageGroupSubgroups(session, groupId);
+    if (!hasAccess) {
+      throw Exception('Доступ запрещен: нет прав на просмотр предметов этой группы.');
+    }
+
+    // Получаем подгруппы, связанные с группой
+    final subgroups = await Subgroups.db.find(
+      session,
+      where: (s) => s.groupsId.equals(groupId),
+    );
+
+    if (subgroups.isEmpty) {
+      return [];
+    }
+
+    // Получаем ID подгрупп
+    final subgroupIds = subgroups.map((s) => s.id!).toSet();
+
+    // Получаем занятия, связанные с этими подгруппами
+    final classes = await Classes.db.find(
+      session,
+      where: (c) => c.subgroupsId.inSet(subgroupIds),
+    );
+
+    if (classes.isEmpty) {
+      return [];
+    }
+
+    // Получаем ID предметов, связанных с этими занятиями
+    final subjectIds = classes.map((c) => c.subjectsId).toSet();
+
+    // Получаем предметы по их ID
+    final subjects = await Subjects.db.find(
+      session,
+      where: (s) => s.id.inSet(subjectIds),
+    );
+
+    return subjects;
   }
 
   // Обновленный метод для получения студентов занятия

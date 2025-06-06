@@ -33,7 +33,7 @@ class _SubjectOverallAttendancePageState extends State<SubjectOverallAttendanceP
       if (widget.subject.id == null) {
         throw Exception('ID предмета не может быть null');
       }
-      final matrix = await client.subjectAttendanceMatrix 
+      final matrix = await client.attendance 
       .getSubjectAttendanceMatrix(subjectId: widget.subject.id!);
       if (mounted) {
         setState(() {

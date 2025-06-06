@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
+import 'package:journal_custom_flutter/src/features/attendance/students_page.dart';
 import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
 import 'package:journal_custom_flutter/core/serverpod_client.dart';
 import 'package:journal_custom_flutter/src/features/admin_panel/presentation/pages/admin_panel.dart';
-import 'package:journal_custom_flutter/src/features/group_management/presentation/pages/group_head_page.dart'; // Импортируем страницу старосты
-import 'package:journal_custom_flutter/src/features/attendance/presentation/pages/attendance_page.dart'; // Импортируем новую страницу
-import 'package:journal_custom_flutter/src/features/attendance/presentation/pages/view_attendance_page.dart'; // <-- Новый импорт
+import 'package:journal_custom_flutter/src/features/group_management/presentation/pages/group_head_page.dart';
+import 'package:journal_custom_flutter/src/features/attendance/presentation/pages/attendance_page.dart';
+import 'package:journal_custom_flutter/src/features/attendance/presentation/pages/view_attendance_page.dart';
+import 'package:journal_custom_flutter/src/features/admin_panel/presentation/tabs/students_tab.dart';
+// import 'package:journal_custom_flutter/src/features/admin_panel/presentation/pages/students_page.dart'; // <-- Изменили импорт
 
 import 'dart:developer' as developer;
 
@@ -15,7 +18,8 @@ class AccountPage extends StatelessWidget {
   Widget build(BuildContext context) {
     final isAdmin = sessionManager.signedInUser?.scopeNames.contains('serverpod.admin') ?? false;
     final isGroupHead = sessionManager.signedInUser?.scopeNames.contains('groupHead') ?? false;
-    final isCurator = sessionManager.signedInUser?.scopeNames.contains('curator') ?? false; // Добавим проверку на куратора
+    final isCurator = sessionManager.signedInUser?.scopeNames.contains('curator') ?? false;
+    final isDocumentSpecialist = sessionManager.signedInUser?.scopeNames.contains('documentSpecialist') ?? false;
 
     developer.log(
       'User scopes: ${sessionManager.signedInUser?.scopeNames}',
@@ -31,13 +35,8 @@ class AccountPage extends StatelessWidget {
           ListTile(
             contentPadding:
                 const EdgeInsets.symmetric(vertical: 8, horizontal: 16),
-            // leading: CircularUserImage(
-            //   userInfo: sessionManager.signedInUser,
-            //   size: 42,
-            // ),
-            // title: Text(sessionManager.signedInUser!.userName!),
-            title: Text("Курило Анатолий"),
-            subtitle: Text(sessionManager.signedInUser!.email ?? ''),
+            title: Text(sessionManager.signedInUser?.userName ?? "Пользователь"),
+            subtitle: Text(sessionManager.signedInUser?.email ?? ''),
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -136,7 +135,26 @@ class AccountPage extends StatelessWidget {
                 child: const Text('Панель администратора'),
               ),
             ),
-          if (isGroupHead || isAdmin) // Старосты и админы могут управлять подгруппами
+          
+          // Кнопка Студенты
+          if (isAdmin || isCurator || isDocumentSpecialist)
+            Padding(
+              padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
+              child: ElevatedButton(
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: Colors.purple[700],
+                  foregroundColor: Colors.white,
+                ),
+                onPressed: () {
+                  Navigator.of(context).push(
+                    MaterialPageRoute(builder: (context) => const StudentsPage()), // <-- Изменили на StudentsPage
+                  );
+                },
+                child: const Text('Студенты'),
+              ),
+            ),
+
+          if (isGroupHead || isAdmin) 
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               child: ElevatedButton(
@@ -153,8 +171,6 @@ class AccountPage extends StatelessWidget {
               ),
             ),
           
-          // Кнопка доступа к странице управления посещаемостью
-          // Доступна старостам, кураторам и администраторам
           if (isGroupHead || isCurator || isAdmin)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
@@ -172,7 +188,6 @@ class AccountPage extends StatelessWidget {
               ),
             ),
 
-          // кнопка для просмотра посещаемости
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: ElevatedButton(

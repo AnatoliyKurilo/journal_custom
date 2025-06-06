@@ -1,13 +1,16 @@
+import 'package:journal_custom_server/src/custom_scope.dart';
+import 'package:journal_custom_server/src/services/Scope_service.dart';
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
 import 'user_roles_endpoint.dart';
+import 'package:serverpod_auth_server/module.dart';
 
 class GroupsEndpoint extends Endpoint {
   @override
   bool get requireLogin  => true;
 
-  @override
-  Set<Scope> get requiredScopes => {Scope.admin};
+  // @override
+  // Set<Scope> get requiredScopes => {Scope.admin};
   
   // Создание группы
   Future<Groups> createGroup(Session session, String name, int? curatorId) async {
@@ -20,13 +23,68 @@ class GroupsEndpoint extends Endpoint {
 
   // Получение всех групп
   Future<List<Groups>> getAllGroups(Session session) async {
+  // Проверяем права доступа для администратора или старосты
+  // await ScopeService.checkScopes(
+  //   session,
+  //   requiredScopes: {Scope.admin, CustomScope.groupHead, CustomScope.curator, CustomScope.teacher, CustomScope.student, CustomScope.documentSpecialist},
+  // );
+
+  final authInfo = await session.authenticated;
+  // authInfo!.userId;
+  session.log('Области доступа пользователя: ${authInfo!.scopes.map((s) => s.name).toList()}');
+
+  // Если пользователь администратор, возвращаем все группы
+  if (await ScopeService.checkScopes(
+    session,
+    requiredScopes: {Scope.admin},
+  )) {
+    return await Groups.db.find(session);
+  }
+
+  // Если пользователь староста, возвращаем только связанные группы
+  if (await ScopeService.checkScopes(
+    session,
+    requiredScopes: {CustomScope.groupHead, CustomScope.student},
+  )) {
+    final person = await Person.db.findFirstRow(
+    session,
+    where: (p) => p.userInfoId.equals(authInfo.userId),
+  );
+    final student = await Students.db.findFirstRow(
+      session,
+      where: (s) => s.personId.equals(person?.id),
+    );
+
     return await Groups.db.find(
       session,
-      include: Groups.include(
-        curator: Teachers.include(person: Person.include()),
-      ),
+      where: (g) => g.id.equals(student?.groupsId),
     );
+    // student?.groupsId;
   }
+  //curator
+  if (await ScopeService.checkScopes(
+    session,
+    requiredScopes: {CustomScope.curator, CustomScope.teacher,} 
+  )) {
+    final person = await Person.db.findFirstRow(
+    session,
+    where: (p) => p.userInfoId.equals(authInfo.userId),
+  );
+    final teacher = await Teachers.db.findFirstRow(
+      session,
+      where: (s) => s.personId.equals(person?.id),
+    );
+
+    return await Groups.db.find(
+      session,
+      where: (g) => g.curatorId.equals(teacher?.id),
+    );
+    // student?.groupsId;
+  }
+
+  // Если пользователь не имеет прав, возвращаем пустой список
+  return [];
+}
 
   // Получение группы по названию
   Future<Groups?> getGroupByName(Session session, String groupName) async {

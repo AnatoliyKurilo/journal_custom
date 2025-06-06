@@ -16,7 +16,7 @@ class ScopeService {
   }
 
   /// Проверяет, имеет ли пользователь необходимые области доступа
-  static Future<void> checkScopes(Session session, {required Set<Scope> requiredScopes}) async {
+  static Future<bool> checkScopes(Session session, {required Set<Scope> requiredScopes}) async {
     final authInfo = await session.authenticated;
 
     if (authInfo == null) {
@@ -27,8 +27,10 @@ class ScopeService {
     final requiredScopeNames = requiredScopes.map((scope) => scope.name).toSet();
 
     // Проверяем, есть ли пересечение между областями доступа пользователя и необходимыми областями
-    if (userScopes.intersection(requiredScopeNames).isEmpty) {
-      throw ServerpodInsufficientAccessException();
+    if (userScopes.intersection(requiredScopeNames).isNotEmpty) {
+      return true; // Пользователь имеет необходимые права
     }
+    return false; // Пользователь не имеет необходимых прав
+    // throw ServerpodInsufficientAccessException(); // Недостаточно прав
   }
 }
