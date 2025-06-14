@@ -1,0 +1,6 @@
+class: TeacherInfo
+# table: teacher_info
+fields:
+  id: int
+  name: String
+  kaf: String?

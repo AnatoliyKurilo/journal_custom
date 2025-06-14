@@ -1,0 +1,8 @@
+class: GroupInfo
+# table: group_info
+fields:
+  id: int
+  name: String
+  facul: String
+  kurs: int
+  spec: String?

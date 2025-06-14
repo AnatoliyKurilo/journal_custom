@@ -13,18 +13,40 @@ classes:
   - getClassesBySubject:
   - createClass:
   - getSubjectsForGroup:
+  - importClassesFromScheduleForGroup:
 groups:
   - createGroup:
   - getAllGroups:
   - getGroupByName:
   - updateGroup:
   - deleteGroup:
+  - importGroupsFromSchedule:
 person:
   - createPerson:
   - getPerson:
   - updatePerson:
   - deletePerson:
   - getAllPersons:
+rasp:
+  - getAvailableYears:
+  - getGroupsList:
+  - getGroupsByFaculty:
+  - getGroupsByCourse:
+  - getGroupById:
+  - getFaculties:
+  - getTeachersList:
+  - getTeacherById:
+  - searchTeachersByName:
+  - getTeachersByDepartment:
+  - getDepartments:
+  - getScheduleForGroup:
+  - getClassesForGroup:
+  - getScheduleForTeacher:
+  - getClassesForTeacher:
+  - getSubjectsForGroup:
+  - getTeachersForGroup:
+  - getWeekSchedule:
+  - getScheduleForDate:
 search:
   - searchStudents:
   - searchTeachers:
@@ -41,6 +63,8 @@ students:
   - getAllStudents:
   - updateStudent:
   - getStudentOverallAttendanceRecords:
+  - getStudentsByGroup:
+  - getStudentsByGroupId:
 subgroups:
   - getCurrentUserGroup:
   - createSubgroup:
