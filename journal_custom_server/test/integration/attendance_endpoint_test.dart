@@ -176,7 +176,7 @@ withServerpod('Given AttendanceEndpoint', (sessionBuilder, endpoints) {
   );
 
   // Проверяем, что classSession не является null
-  expect(classSession, isNotNull, reason: 'Class session with id=1 should exist.');
+  expect(classSession, isNotNull);
 
   final result = await endpoints.attendance.getStudentsForClassWithAttendance(
     authenticatedSessionBuilder,
@@ -188,28 +188,18 @@ withServerpod('Given AttendanceEndpoint', (sessionBuilder, endpoints) {
   expect(result.any((attendance) => attendance.student.id == 2 && attendance.isPresent == false), isTrue);
 });
 
-      test('test getStudentsForClassWithAttendance returns empty for non-existing class', () async {
-        // final session = await authenticatedSessionBuilder.create();
-
-        // final result = await endpoints.attendance.getStudentsForClassWithAttendance(
-        //   authenticatedSessionBuilder,
-        //   classId: -1, // Несуществующий ID занятия
-        // );
-
-        Future<void> action() async {
-            await endpoints.attendance.getStudentsForClassWithAttendance(
-              authenticatedSessionBuilder,
-              classId: -1, // Несуществующий ID занятия
-            );
-          }
-        
-        await expectLater(action, throwsA(isA<Exception>().having(
-          (e) => e.toString(),
-          'message',
-          contains('Занятие с ID -1 не найдено.'),
-        )));
-        
-        // expect(result, isEmpty);
+    test('test getStudentsForClassWithAttendance returns empty for non-existing class', () async {
+      Future<void> action() async {
+          await endpoints.attendance.getStudentsForClassWithAttendance(
+            authenticatedSessionBuilder,
+            classId: -1, // Несуществующий ID занятия
+          );
+        }
+      await expectLater(action, throwsA(isA<Exception>().having(
+        (e) => e.toString(),
+        'message',
+        contains('Занятие с ID -1 не найдено.'),
+      )));
       });
     });
   // НЕ ТРОГАТЬ!!!!!!!!!!

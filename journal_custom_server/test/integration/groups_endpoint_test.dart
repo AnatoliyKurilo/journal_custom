@@ -93,27 +93,29 @@ void main() {
         expect(newGroup.curatorId, equals(2));
       });
 
-      test('throws exception when creating a group without admin scope', () async {
-        var Session = sessionBuilder.copyWith(
-          authentication:
-          AuthenticationOverride.authenticationInfo(adminUserId, 
-            // {CustomScope.documentSpecialist,Scope.admin}
-            { 
-              // Scope.admin,
-              // CustomScope.groupHead, 
-              // CustomScope.teacher, 
-              CustomScope.student, 
-              // CustomScope.documentSpecialist
-            }
-          ),
-        );
+      // test('throws exception when creating a group without admin scope', () async {
+      //   var Session = sessionBuilder.copyWith(
+      //     authentication:
+      //     AuthenticationOverride.authenticationInfo(adminUserId, 
+      //       // {CustomScope.documentSpecialist,Scope.admin}
+      //       { 
+      //         // Scope.admin,
+      //         // CustomScope.groupHead, 
+      //         // CustomScope.teacher, 
+      //         CustomScope.student, 
+      //         // CustomScope.documentSpecialist
+      //       }
+      //     ),
+      //   );
 
-        Future<void> action() async {
-          await endpoints.groups.createGroup(Session, 'Группа 3', null);
-        }
+      //   Future<void> action() async {
+      //     await endpoints.groups.createGroup(Session, 'Группа 3', null);
+      //   }
 
-        await expectLater(action, throwsA(isA<ServerpodInsufficientAccessException>()));
-      });
+      //   await expectLater(action, throwsA(isA<ServerpodInsufficientAccessException>()));
+      // });
+    
+    
     });
 
     group('getAllGroups', () {

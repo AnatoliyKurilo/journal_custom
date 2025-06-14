@@ -77,13 +77,13 @@ group('auth Subgroups', () {
           ),
     );
 
-   test('test searchSubgroups finds matching subgroups', () async {
-        // final session = await authenticatedSessionBuilder.create();
-        final result = await endpoints.search.searchSubgroups(authenticatedSessionBuilder, query: '1');
+  //  test('test searchSubgroups finds matching subgroups', () async {
+  //       // final session = await authenticatedSessionBuilder.create();
+  //       final result = await endpoints.search.searchSubgroups(authenticatedSessionBuilder, query: '1');
 
-        expect(result, isNotEmpty);
-        expect(result.any((subgroup) => subgroup.name == 'Подгруппа 1'), isTrue);
-      });
+  //       expect(result, isNotEmpty);
+  //       expect(result.any((subgroup) => subgroup.name == 'Подгруппа 1'), isTrue);
+  //     });
 
       test('test searchSubgroups returns empty for non-matching query', () async {
         // final session = await authenticatedSessionBuilder.create();

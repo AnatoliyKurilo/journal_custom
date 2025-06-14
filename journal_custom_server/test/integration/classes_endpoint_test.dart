@@ -173,8 +173,6 @@ void main() {
         expect(newClass.subjectsId, equals(1));
         expect(newClass.topic, equals('Тема занятия'));
       });
-
-      test('throws exception for invalid subgroup', () async {
         var ses = sessionBuilder.copyWith(
       authentication:
           AuthenticationOverride.authenticationInfo(GHid, 
@@ -188,7 +186,7 @@ void main() {
           }
           ),
     );
-
+      test('throws exception for invalid subgroup', () async {
         Future<void> action() async {
           await endpoints.classes.createClass(
             ses,
@@ -200,13 +198,138 @@ void main() {
             date: DateTime.now(),
           );
         }
-
         await expectLater(action, throwsA(isA<Exception>().having(
           (e) => e.toString(),
           'message',
           contains('Подгруппа с ID "-1" не найдена.'),
         )));
       });
+
+      test('throws exception for unauthorized user', () async {
+    var unauthorizedSession = sessionBuilder.copyWith(
+      authentication: AuthenticationOverride.authenticationInfo(
+        userId,
+        {CustomScope.student}, // Роль студента
+      ),
+    );
+
+    Future<void> action() async {
+      await endpoints.classes.createClass(
+        unauthorizedSession,
+        subjectsId: 1,
+        classTypesId: 1,
+        teachersId: 1,
+        semestersId: 1,
+        subgroupsId: 1,
+        date: DateTime.now(),
+      );
+    }
+
+    await expectLater(action, throwsA(isA<Exception>().having(
+      (e) => e.toString(),
+      'message',
+      contains('Доступ запрещен: студенты не могут создавать занятия.'),
+    )));
+  });
+
+  test('throws exception for invalid teacher ID', () async {
+    Future<void> action() async {
+      await endpoints.classes.createClass(
+        authenticatedSessionBuilder,
+        subjectsId: 1,
+        classTypesId: 1,
+        teachersId: -1, // Некорректный ID преподавателя
+        semestersId: 1,
+        subgroupsId: 1,
+        date: DateTime.now(),
+      );
+    }
+
+    await expectLater(action, throwsA(isA<Exception>().having(
+      (e) => e.toString(),
+      'message',
+      contains('Преподаватель с ID "-1" не найден.'),
+    )));
+  });
+
+  test('throws exception for invalid subject ID', () async {
+    Future<void> action() async {
+      await endpoints.classes.createClass(
+        authenticatedSessionBuilder,
+        subjectsId: -1, // Некорректный ID предмета
+        classTypesId: 1,
+        teachersId: 1,
+        semestersId: 1,
+        subgroupsId: 1,
+        date: DateTime.now(),
+      );
+    }
+
+    await expectLater(action, throwsA(isA<Exception>().having(
+      (e) => e.toString(),
+      'message',
+      contains('Предмет с ID "-1" не найден.'),
+    )));
+  });
+
+  test('throws exception for invalid semester ID', () async {
+    Future<void> action() async {
+      await endpoints.classes.createClass(
+        authenticatedSessionBuilder,
+        subjectsId: 1,
+        classTypesId: 1,
+        teachersId: 1,
+        semestersId: -1, // Некорректный ID семестра
+        subgroupsId: 1,
+        date: DateTime.now(),
+      );
+    }
+
+    await expectLater(action, throwsA(isA<Exception>().having(
+      (e) => e.toString(),
+      'message',
+      contains('Семестр с ID "-1" не найден.'),
+    )));
+  });
+
+  test('throws exception for invalid class type ID', () async {
+    Future<void> action() async {
+      await endpoints.classes.createClass(
+        authenticatedSessionBuilder,
+        subjectsId: 1,
+        classTypesId: -1, // Некорректный ID типа занятия
+        teachersId: 1,
+        semestersId: 1,
+        subgroupsId: 1,
+        date: DateTime.now(),
+      );
+    }
+
+    await expectLater(action, throwsA(isA<Exception>().having(
+      (e) => e.toString(),
+      'message',
+      contains('Тип занятия с ID "-1" не найден.'),
+    )));
+  });
+
+  test('creates a class with optional fields', () async {
+    final newClass = await endpoints.classes.createClass(
+      authenticatedSessionBuilder,
+      subjectsId: 1,
+      classTypesId: 1,
+      teachersId: 1,
+      semestersId: 1,
+      subgroupsId: 1,
+      date: DateTime.now(),
+      topic: null, // Тема занятия не указана
+      notes: null, // Примечания не указаны
+    );
+
+    expect(newClass, isNotNull);
+    expect(newClass.subjectsId, equals(1));
+    expect(newClass.topic, isNull);
+    expect(newClass.notes, isNull);
+  });
 
     });
 

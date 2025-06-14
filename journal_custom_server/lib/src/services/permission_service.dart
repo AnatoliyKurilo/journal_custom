@@ -101,4 +101,58 @@ class PermissionService {
 
     return null;
   }
+
+  // Проверка прав на просмотр подгрупп группы
+  static Future<bool> canViewGroupSubgroups(Session session, int groupId) async {
+    var userId = (await session.authenticated)!.userId;
+    var authUser = await Users.findUserByUserId(session, userId);
+    if (authUser == null) return false;
+
+    // Администраторы и документалисты имеют полный доступ
+    if (authUser.scopes.contains(CustomScope.documentSpecialist) || authUser.scopes.contains(Scope.admin)) {
+      return true;
+    }
+
+    // Находим связанную запись Person
+    final person = await Person.db.findFirstRow(
+      session,
+      where: (p) => p.userInfoId.equals(userId),
+    );
+    if (person == null) return false;
+
+    // Проверка на старосту группы
+    if (authUser.scopeNames.contains('groupHead')) {
+      final student = await Students.db.findFirstRow(
+        session,
+        where: (s) => s.personId.equals(person.id!) & s.groupsId.equals(groupId) & s.isGroupHead.equals(true),
+      );
+      if (student != null) return true;
+    }
+
+    // Проверка на куратора группы
+    if (authUser.scopeNames.contains('curator')) {
+      final teacher = await Teachers.db.findFirstRow(
+        session,
+        where: (t) => t.personId.equals(person.id!),
+      );
+
+      if (teacher != null) {
+        final group = await Groups.db.findById(session, groupId);
+        if (group != null && group.curatorId == teacher.id) {
+          return true;
+        }
+      }
+    }
+
+    // Проверка на студентов группы
+    if (authUser.scopeNames.contains('student')) {
+      final student = await Students.db.findFirstRow(
+        session,
+        where: (s) => s.personId.equals(person.id!) & s.groupsId.equals(groupId),
+      );
+      if (student != null) return true;
+    }
+
+    return false;
+  }
 }

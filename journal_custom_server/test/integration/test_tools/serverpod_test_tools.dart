@@ -32,15 +32,17 @@ import 'package:journal_custom_server/src/generated/subjects_protocol.dart'
     as _i11;
 import 'package:journal_custom_server/src/generated/classes.dart' as _i12;
 import 'package:journal_custom_server/src/generated/person.dart' as _i13;
+import 'package:journal_custom_server/src/generated/group_info.dart' as _i14;
+import 'package:journal_custom_server/src/generated/teacher_info.dart' as _i15;
 import 'package:journal_custom_server/src/generated/teachers_protocol.dart'
-    as _i14;
-import 'package:journal_custom_server/src/generated/subgroups_protocol.dart'
-    as _i15;
-import 'package:journal_custom_server/src/generated/semesters_protocol.dart'
     as _i16;
-import 'package:journal_custom_server/src/generated/student_overall_attendance_record.dart'
+import 'package:journal_custom_server/src/generated/subgroups_protocol.dart'
     as _i17;
-import 'package:journal_custom_server/src/generated/greeting.dart' as _i18;
+import 'package:journal_custom_server/src/generated/semesters_protocol.dart'
+    as _i18;
+import 'package:journal_custom_server/src/generated/student_overall_attendance_record.dart'
+    as _i19;
+import 'package:journal_custom_server/src/generated/greeting.dart' as _i20;
 import 'package:journal_custom_server/src/generated/protocol.dart';
 import 'package:journal_custom_server/src/generated/endpoints.dart';
 export 'package:serverpod_test/serverpod_test_public_exports.dart';
@@ -137,6 +139,8 @@ class TestEndpoints {
 
   late final _PersonEndpoint person;
 
+  late final _RaspEndpoint rasp;
+
   late final _SearchEndpoint search;
 
   late final _SemestersEndpoint semesters;
@@ -188,6 +192,10 @@ class _InternalTestEndpoints extends TestEndpoints
       serializationManager,
     );
     person = _PersonEndpoint(
+      endpoints,
+      serializationManager,
+    );
+    rasp = _RaspEndpoint(
       endpoints,
       serializationManager,
     );
@@ -622,6 +630,43 @@ class _ClassesEndpoint {
       }
     });
   }
+
+  _i3.Future<String> importClassesFromScheduleForGroup(
+    _i1.TestSessionBuilder sessionBuilder,
+    int groupId,
+    String year, {
+    String? startDate,
+    String? endDate,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'classes',
+        method: 'importClassesFromScheduleForGroup',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'classes',
+          methodName: 'importClassesFromScheduleForGroup',
+          parameters: _i1.testObjectToJson({
+            'groupId': groupId,
+            'year': year,
+            'startDate': startDate,
+            'endDate': endDate,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
 }
 
 class _GroupsEndpoint {
@@ -786,6 +831,35 @@ class _GroupsEndpoint {
       }
     });
   }
+
+  _i3.Future<String> importGroupsFromSchedule(
+    _i1.TestSessionBuilder sessionBuilder,
+    String year,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'groups',
+        method: 'importGroupsFromSchedule',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'groups',
+          methodName: 'importGroupsFromSchedule',
+          parameters: _i1.testObjectToJson({'year': year}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
 }
 
 class _PersonEndpoint {
@@ -942,6 +1016,606 @@ class _PersonEndpoint {
   }
 }
 
+class _RaspEndpoint {
+  _RaspEndpoint(
+    this._endpointDispatch,
+    this._serializationManager,
+  );
+
+  final _i2.EndpointDispatch _endpointDispatch;
+
+  final _i2.SerializationManager _serializationManager;
+
+  _i3.Future<List<String>> getAvailableYears(
+      _i1.TestSessionBuilder sessionBuilder) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'getAvailableYears',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'getAvailableYears',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<List<String>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i14.GroupInfo>> getGroupsList(
+    _i1.TestSessionBuilder sessionBuilder,
+    String year,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'getGroupsList',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'getGroupsList',
+          parameters: _i1.testObjectToJson({'year': year}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<List<_i14.GroupInfo>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i14.GroupInfo>> getGroupsByFaculty(
+    _i1.TestSessionBuilder sessionBuilder,
+    String year,
+    String faculty,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'getGroupsByFaculty',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'getGroupsByFaculty',
+          parameters: _i1.testObjectToJson({
+            'year': year,
+            'faculty': faculty,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<List<_i14.GroupInfo>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i14.GroupInfo>> getGroupsByCourse(
+    _i1.TestSessionBuilder sessionBuilder,
+    String year,
+    int course,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'getGroupsByCourse',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'getGroupsByCourse',
+          parameters: _i1.testObjectToJson({
+            'year': year,
+            'course': course,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<List<_i14.GroupInfo>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i14.GroupInfo?> getGroupById(
+    _i1.TestSessionBuilder sessionBuilder,
+    String year,
+    int groupId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'getGroupById',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'getGroupById',
+          parameters: _i1.testObjectToJson({
+            'year': year,
+            'groupId': groupId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<_i14.GroupInfo?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<String>> getFaculties(
+    _i1.TestSessionBuilder sessionBuilder,
+    String year,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'getFaculties',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'getFaculties',
+          parameters: _i1.testObjectToJson({'year': year}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<List<String>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i15.TeacherInfo>> getTeachersList(
+    _i1.TestSessionBuilder sessionBuilder,
+    String year,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'getTeachersList',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'getTeachersList',
+          parameters: _i1.testObjectToJson({'year': year}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<List<_i15.TeacherInfo>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<_i15.TeacherInfo?> getTeacherById(
+    _i1.TestSessionBuilder sessionBuilder,
+    String year,
+    int teacherId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'getTeacherById',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'getTeacherById',
+          parameters: _i1.testObjectToJson({
+            'year': year,
+            'teacherId': teacherId,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<_i15.TeacherInfo?>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i15.TeacherInfo>> searchTeachersByName(
+    _i1.TestSessionBuilder sessionBuilder,
+    String year,
+    String searchQuery,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'searchTeachersByName',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'searchTeachersByName',
+          parameters: _i1.testObjectToJson({
+            'year': year,
+            'searchQuery': searchQuery,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<List<_i15.TeacherInfo>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i15.TeacherInfo>> getTeachersByDepartment(
+    _i1.TestSessionBuilder sessionBuilder,
+    String year,
+    String department,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'getTeachersByDepartment',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'getTeachersByDepartment',
+          parameters: _i1.testObjectToJson({
+            'year': year,
+            'department': department,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<List<_i15.TeacherInfo>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<String>> getDepartments(
+    _i1.TestSessionBuilder sessionBuilder,
+    String year,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'getDepartments',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'getDepartments',
+          parameters: _i1.testObjectToJson({'year': year}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<List<String>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<String> getScheduleForGroup(
+    _i1.TestSessionBuilder sessionBuilder,
+    int groupId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'getScheduleForGroup',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'getScheduleForGroup',
+          parameters: _i1.testObjectToJson({'groupId': groupId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<String>> getClassesForGroup(
+    _i1.TestSessionBuilder sessionBuilder,
+    int groupId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'getClassesForGroup',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'getClassesForGroup',
+          parameters: _i1.testObjectToJson({'groupId': groupId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<List<String>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<String> getScheduleForTeacher(
+    _i1.TestSessionBuilder sessionBuilder,
+    int teacherId,
+    String year,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'getScheduleForTeacher',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'getScheduleForTeacher',
+          parameters: _i1.testObjectToJson({
+            'teacherId': teacherId,
+            'year': year,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<String>> getClassesForTeacher(
+    _i1.TestSessionBuilder sessionBuilder,
+    int teacherId,
+    String year,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'getClassesForTeacher',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'getClassesForTeacher',
+          parameters: _i1.testObjectToJson({
+            'teacherId': teacherId,
+            'year': year,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<List<String>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<String>> getSubjectsForGroup(
+    _i1.TestSessionBuilder sessionBuilder,
+    int groupId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'getSubjectsForGroup',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'getSubjectsForGroup',
+          parameters: _i1.testObjectToJson({'groupId': groupId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<List<String>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<String>> getTeachersForGroup(
+    _i1.TestSessionBuilder sessionBuilder,
+    int groupId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'getTeachersForGroup',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'getTeachersForGroup',
+          parameters: _i1.testObjectToJson({'groupId': groupId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<List<String>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<Map<String, List<String>>> getWeekSchedule(
+    _i1.TestSessionBuilder sessionBuilder,
+    int groupId,
+    DateTime weekStart,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'getWeekSchedule',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'getWeekSchedule',
+          parameters: _i1.testObjectToJson({
+            'groupId': groupId,
+            'weekStart': weekStart,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<Map<String, List<String>>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<String>> getScheduleForDate(
+    _i1.TestSessionBuilder sessionBuilder,
+    int groupId,
+    DateTime date,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'getScheduleForDate',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'getScheduleForDate',
+          parameters: _i1.testObjectToJson({
+            'groupId': groupId,
+            'date': date,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<List<String>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+}
+
 class _SearchEndpoint {
   _SearchEndpoint(
     this._endpointDispatch,
@@ -981,7 +1655,7 @@ class _SearchEndpoint {
     });
   }
 
-  _i3.Future<List<_i14.Teachers>> searchTeachers(
+  _i3.Future<List<_i16.Teachers>> searchTeachers(
     _i1.TestSessionBuilder sessionBuilder, {
     required String query,
   }) async {
@@ -1002,7 +1676,7 @@ class _SearchEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<List<_i14.Teachers>>);
+        ) as _i3.Future<List<_i16.Teachers>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1097,7 +1771,7 @@ class _SearchEndpoint {
     });
   }
 
-  _i3.Future<List<_i15.Subgroups>> searchSubgroups(
+  _i3.Future<List<_i17.Subgroups>> searchSubgroups(
     _i1.TestSessionBuilder sessionBuilder, {
     required String query,
   }) async {
@@ -1118,7 +1792,7 @@ class _SearchEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<List<_i15.Subgroups>>);
+        ) as _i3.Future<List<_i17.Subgroups>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1191,7 +1865,7 @@ class _SemestersEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<List<_i16.Semesters>> searchSemesters(
+  _i3.Future<List<_i18.Semesters>> searchSemesters(
     _i1.TestSessionBuilder sessionBuilder, {
     required String query,
   }) async {
@@ -1212,7 +1886,7 @@ class _SemestersEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<List<_i16.Semesters>>);
+        ) as _i3.Future<List<_i18.Semesters>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1330,7 +2004,7 @@ class _StudentsEndpoint {
     });
   }
 
-  _i3.Future<List<_i17.StudentOverallAttendanceRecord>>
+  _i3.Future<List<_i19.StudentOverallAttendanceRecord>>
       getStudentOverallAttendanceRecords(
     _i1.TestSessionBuilder sessionBuilder,
     int studentId,
@@ -1352,7 +2026,65 @@ class _StudentsEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<List<_i17.StudentOverallAttendanceRecord>>);
+        ) as _i3.Future<List<_i19.StudentOverallAttendanceRecord>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i4.Students>> getStudentsByGroup(
+    _i1.TestSessionBuilder sessionBuilder,
+    String groupName,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'students',
+        method: 'getStudentsByGroup',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'students',
+          methodName: 'getStudentsByGroup',
+          parameters: _i1.testObjectToJson({'groupName': groupName}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<List<_i4.Students>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<List<_i4.Students>> getStudentsByGroupId(
+    _i1.TestSessionBuilder sessionBuilder,
+    int groupId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'students',
+        method: 'getStudentsByGroupId',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'students',
+          methodName: 'getStudentsByGroupId',
+          parameters: _i1.testObjectToJson({'groupId': groupId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<List<_i4.Students>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1398,7 +2130,7 @@ class _SubgroupsEndpoint {
     });
   }
 
-  _i3.Future<_i15.Subgroups> createSubgroup(
+  _i3.Future<_i17.Subgroups> createSubgroup(
     _i1.TestSessionBuilder sessionBuilder,
     int groupId,
     String name,
@@ -1425,7 +2157,7 @@ class _SubgroupsEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i15.Subgroups>);
+        ) as _i3.Future<_i17.Subgroups>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1433,7 +2165,7 @@ class _SubgroupsEndpoint {
     });
   }
 
-  _i3.Future<_i15.Subgroups> createFullGroupSubgroup(
+  _i3.Future<_i17.Subgroups> createFullGroupSubgroup(
     _i1.TestSessionBuilder sessionBuilder,
     int groupId,
     String name,
@@ -1460,7 +2192,7 @@ class _SubgroupsEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i15.Subgroups>);
+        ) as _i3.Future<_i17.Subgroups>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1468,7 +2200,7 @@ class _SubgroupsEndpoint {
     });
   }
 
-  _i3.Future<List<_i15.Subgroups>> getGroupSubgroups(
+  _i3.Future<List<_i17.Subgroups>> getGroupSubgroups(
     _i1.TestSessionBuilder sessionBuilder,
     int groupId,
   ) async {
@@ -1489,7 +2221,7 @@ class _SubgroupsEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<List<_i15.Subgroups>>);
+        ) as _i3.Future<List<_i17.Subgroups>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1497,7 +2229,7 @@ class _SubgroupsEndpoint {
     });
   }
 
-  _i3.Future<_i15.Subgroups> updateSubgroup(
+  _i3.Future<_i17.Subgroups> updateSubgroup(
     _i1.TestSessionBuilder sessionBuilder,
     int subgroupId,
     String name,
@@ -1524,7 +2256,7 @@ class _SubgroupsEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i15.Subgroups>);
+        ) as _i3.Future<_i17.Subgroups>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1685,7 +2417,7 @@ class _SubgroupsEndpoint {
     });
   }
 
-  _i3.Future<List<_i15.Subgroups>> searchSubgroups(
+  _i3.Future<List<_i17.Subgroups>> searchSubgroups(
     _i1.TestSessionBuilder sessionBuilder, {
     required String query,
   }) async {
@@ -1706,7 +2438,7 @@ class _SubgroupsEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<List<_i15.Subgroups>>);
+        ) as _i3.Future<List<_i17.Subgroups>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1805,7 +2537,7 @@ class _TeachersEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i14.Teachers> createTeacher(
+  _i3.Future<_i16.Teachers> createTeacher(
     _i1.TestSessionBuilder sessionBuilder, {
     required String firstName,
     required String lastName,
@@ -1836,7 +2568,7 @@ class _TeachersEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i14.Teachers>);
+        ) as _i3.Future<_i16.Teachers>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1844,7 +2576,7 @@ class _TeachersEndpoint {
     });
   }
 
-  _i3.Future<List<_i14.Teachers>> getAllTeachers(
+  _i3.Future<List<_i16.Teachers>> getAllTeachers(
       _i1.TestSessionBuilder sessionBuilder) async {
     return _i1.callAwaitableFunctionAndHandleExceptions(() async {
       var _localUniqueSession =
@@ -1863,7 +2595,7 @@ class _TeachersEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<List<_i14.Teachers>>);
+        ) as _i3.Future<List<_i16.Teachers>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -1882,7 +2614,7 @@ class _TeacherSearchEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<List<_i14.Teachers>> searchTeachers(
+  _i3.Future<List<_i16.Teachers>> searchTeachers(
     _i1.TestSessionBuilder sessionBuilder, {
     required String query,
   }) async {
@@ -1903,7 +2635,7 @@ class _TeacherSearchEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<List<_i14.Teachers>>);
+        ) as _i3.Future<List<_i16.Teachers>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();
@@ -2126,7 +2858,7 @@ class _GreetingEndpoint {
 
   final _i2.SerializationManager _serializationManager;
 
-  _i3.Future<_i18.Greeting> hello(
+  _i3.Future<_i20.Greeting> hello(
     _i1.TestSessionBuilder sessionBuilder,
     String name,
   ) async {
@@ -2147,7 +2879,7 @@ class _GreetingEndpoint {
         var _localReturnValue = await (_localCallContext.method.call(
           _localUniqueSession,
           _localCallContext.arguments,
-        ) as _i3.Future<_i18.Greeting>);
+        ) as _i3.Future<_i20.Greeting>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

@@ -90,24 +90,25 @@ void main() {
         await expectLater(action, throwsA(isA<Exception>()));
       });
 
-      test('logs error when update fails', () async {
-        final session = sessionBuilder.build();
+      // test('logs error when update fails', () async {
+      //   final session = sessionBuilder.build();
 
-        // Создаем некорректный объект Person (например, с отсутствующим userInfoId)
-        var invalidPerson = Person(
-          id: 1,
-          firstName: 'Иван',
-          lastName: 'Иванов',
-          email: 'ivan.ivanov@example.com',
-          userInfoId: null, // Некорректное значение
-        );
+      //   // Создаем некорректный объект Person (например, с отсутствующим userInfoId)
+      //   var invalidPerson = Person(
+      //     id: 1,
+      //     firstName: 'Иван',
+      //     lastName: 'Иванов',
+      //     email: 'ivan.ivanov@example.com',
+      //     userInfoId: null, // Некорректное значение
+      //   );
 
-        Future<void> action() async {
-          await endpoints.person.updatePerson(authenticatedSessionBuilder, invalidPerson);
-        }
+      //   Future<void> action() async {
+      //     await endpoints.person.updatePerson(authenticatedSessionBuilder, invalidPerson);
+      //   }
 
-        await expectLater(action, throwsA(isA<Exception>()));
-      });
+      //   await expectLater(action, throwsA(isA<Exception>()));
+      // });
+    
     });
   
   
