@@ -1134,6 +1134,19 @@ class Protocol extends _i1.SerializationManagerServer {
       return (data as Map).map((k, v) =>
           MapEntry(deserialize<String>(k), deserialize<List<String>>(v))) as T;
     }
+    if (t == Map<String, List<Map<String, dynamic>>>) {
+      return (data as Map).map((k, v) => MapEntry(deserialize<String>(k),
+          deserialize<List<Map<String, dynamic>>>(v))) as T;
+    }
+    if (t == List<Map<String, dynamic>>) {
+      return (data as List)
+          .map((e) => deserialize<Map<String, dynamic>>(e))
+          .toList() as T;
+    }
+    if (t == Map<String, dynamic>) {
+      return (data as Map).map((k, v) =>
+          MapEntry(deserialize<String>(k), deserialize<dynamic>(v))) as T;
+    }
     if (t == List<_i33.Teachers>) {
       return (data as List).map((e) => deserialize<_i33.Teachers>(e)).toList()
           as T;

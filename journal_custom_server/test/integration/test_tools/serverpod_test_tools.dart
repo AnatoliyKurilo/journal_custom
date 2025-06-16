@@ -860,6 +860,35 @@ class _GroupsEndpoint {
       }
     });
   }
+
+  _i3.Future<String> synchronizeGroupIdsWithSchedule(
+    _i1.TestSessionBuilder sessionBuilder,
+    String year,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'groups',
+        method: 'synchronizeGroupIdsWithSchedule',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'groups',
+          methodName: 'synchronizeGroupIdsWithSchedule',
+          parameters: _i1.testObjectToJson({'year': year}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<String>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
 }
 
 class _PersonEndpoint {
@@ -1396,6 +1425,66 @@ class _RaspEndpoint {
     });
   }
 
+  _i3.Future<bool> checkApiAvailability(
+      _i1.TestSessionBuilder sessionBuilder) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'checkApiAvailability',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'checkApiAvailability',
+          parameters: _i1.testObjectToJson({}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<bool> checkGroupExists(
+    _i1.TestSessionBuilder sessionBuilder,
+    int groupId,
+    String year,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'checkGroupExists',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'checkGroupExists',
+          parameters: _i1.testObjectToJson({
+            'groupId': groupId,
+            'year': year,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
   _i3.Future<List<String>> getClassesForGroup(
     _i1.TestSessionBuilder sessionBuilder,
     int groupId,
@@ -1608,6 +1697,39 @@ class _RaspEndpoint {
           _localUniqueSession,
           _localCallContext.arguments,
         ) as _i3.Future<List<String>>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<Map<String, List<Map<String, dynamic>>>> getWeekScheduleDetailed(
+    _i1.TestSessionBuilder sessionBuilder,
+    int groupId,
+    DateTime weekStart,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'rasp',
+        method: 'getWeekScheduleDetailed',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'rasp',
+          methodName: 'getWeekScheduleDetailed',
+          parameters: _i1.testObjectToJson({
+            'groupId': groupId,
+            'weekStart': weekStart,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<Map<String, List<Map<String, dynamic>>>>);
         return _localReturnValue;
       } finally {
         await _localUniqueSession.close();

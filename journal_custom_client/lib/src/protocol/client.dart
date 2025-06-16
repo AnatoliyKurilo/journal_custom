@@ -28,17 +28,19 @@ import 'package:journal_custom_client/src/protocol/subjects_protocol.dart'
     as _i10;
 import 'package:journal_custom_client/src/protocol/classes.dart' as _i11;
 import 'package:journal_custom_client/src/protocol/person.dart' as _i12;
+import 'package:journal_custom_client/src/protocol/group_info.dart' as _i13;
+import 'package:journal_custom_client/src/protocol/teacher_info.dart' as _i14;
 import 'package:journal_custom_client/src/protocol/teachers_protocol.dart'
-    as _i13;
-import 'package:journal_custom_client/src/protocol/subgroups_protocol.dart'
-    as _i14;
-import 'package:journal_custom_client/src/protocol/semesters_protocol.dart'
     as _i15;
-import 'package:journal_custom_client/src/protocol/student_overall_attendance_record.dart'
+import 'package:journal_custom_client/src/protocol/subgroups_protocol.dart'
     as _i16;
-import 'package:journal_custom_client/src/protocol/greeting.dart' as _i17;
-import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i18;
-import 'protocol.dart' as _i19;
+import 'package:journal_custom_client/src/protocol/semesters_protocol.dart'
+    as _i17;
+import 'package:journal_custom_client/src/protocol/student_overall_attendance_record.dart'
+    as _i18;
+import 'package:journal_custom_client/src/protocol/greeting.dart' as _i19;
+import 'package:serverpod_auth_client/serverpod_auth_client.dart' as _i20;
+import 'protocol.dart' as _i21;
 
 /// {@category Endpoint}
 class EndpointAdmin extends _i1.EndpointRef {
@@ -179,6 +181,24 @@ class EndpointClasses extends _i1.EndpointRef {
         'getSubjectsForGroup',
         {'groupId': groupId},
       );
+
+  /// Импортирует занятия из API расписания для указанной группы
+  _i2.Future<String> importClassesFromScheduleForGroup(
+    int groupId,
+    String year, {
+    String? startDate,
+    String? endDate,
+  }) =>
+      caller.callServerEndpoint<String>(
+        'classes',
+        'importClassesFromScheduleForGroup',
+        {
+          'groupId': groupId,
+          'year': year,
+          'startDate': startDate,
+          'endDate': endDate,
+        },
+      );
 }
 
 /// {@category Endpoint}
@@ -230,10 +250,27 @@ class EndpointGroups extends _i1.EndpointRef {
         },
       );
 
+  /// Удаление группы
   _i2.Future<bool> deleteGroup(int groupId) => caller.callServerEndpoint<bool>(
         'groups',
         'deleteGroup',
         {'groupId': groupId},
+      );
+
+  /// Импортирует группы из внешнего API расписания для указанного года.
+  _i2.Future<String> importGroupsFromSchedule(String year) =>
+      caller.callServerEndpoint<String>(
+        'groups',
+        'importGroupsFromSchedule',
+        {'year': year},
+      );
+
+  /// Синхронизирует ID групп с API расписания (отдельный метод для исправления конфликтов)
+  _i2.Future<String> synchronizeGroupIdsWithSchedule(String year) =>
+      caller.callServerEndpoint<String>(
+        'groups',
+        'synchronizeGroupIdsWithSchedule',
+        {'year': year},
       );
 }
 
@@ -281,6 +318,258 @@ class EndpointPerson extends _i1.EndpointRef {
 }
 
 /// {@category Endpoint}
+class EndpointRasp extends _i1.EndpointRef {
+  EndpointRasp(_i1.EndpointCaller caller) : super(caller);
+
+  @override
+  String get name => 'rasp';
+
+  /// Получить список доступных годов
+  _i2.Future<List<String>> getAvailableYears() =>
+      caller.callServerEndpoint<List<String>>(
+        'rasp',
+        'getAvailableYears',
+        {},
+      );
+
+  /// Получить список групп для указанного года (ИСПРАВЛЕНО)
+  _i2.Future<List<_i13.GroupInfo>> getGroupsList(String year) =>
+      caller.callServerEndpoint<List<_i13.GroupInfo>>(
+        'rasp',
+        'getGroupsList',
+        {'year': year},
+      );
+
+  /// Получить список групп с фильтрацией по факультету (ИСПРАВЛЕНО)
+  _i2.Future<List<_i13.GroupInfo>> getGroupsByFaculty(
+    String year,
+    String faculty,
+  ) =>
+      caller.callServerEndpoint<List<_i13.GroupInfo>>(
+        'rasp',
+        'getGroupsByFaculty',
+        {
+          'year': year,
+          'faculty': faculty,
+        },
+      );
+
+  /// Получить список групп по курсу (ИСПРАВЛЕНО)
+  _i2.Future<List<_i13.GroupInfo>> getGroupsByCourse(
+    String year,
+    int course,
+  ) =>
+      caller.callServerEndpoint<List<_i13.GroupInfo>>(
+        'rasp',
+        'getGroupsByCourse',
+        {
+          'year': year,
+          'course': course,
+        },
+      );
+
+  /// Найти группу по ID (ИСПРАВЛЕНО)
+  _i2.Future<_i13.GroupInfo?> getGroupById(
+    String year,
+    int groupId,
+  ) =>
+      caller.callServerEndpoint<_i13.GroupInfo?>(
+        'rasp',
+        'getGroupById',
+        {
+          'year': year,
+          'groupId': groupId,
+        },
+      );
+
+  /// Получить список уникальных факультетов (ИСПРАВЛЕНО)
+  _i2.Future<List<String>> getFaculties(String year) =>
+      caller.callServerEndpoint<List<String>>(
+        'rasp',
+        'getFaculties',
+        {'year': year},
+      );
+
+  /// Получить список преподавателей для указанного года (ИСПРАВЛЕНО)
+  _i2.Future<List<_i14.TeacherInfo>> getTeachersList(String year) =>
+      caller.callServerEndpoint<List<_i14.TeacherInfo>>(
+        'rasp',
+        'getTeachersList',
+        {'year': year},
+      );
+
+  /// Найти преподавателя по ID (ИСПРАВЛЕНО)
+  _i2.Future<_i14.TeacherInfo?> getTeacherById(
+    String year,
+    int teacherId,
+  ) =>
+      caller.callServerEndpoint<_i14.TeacherInfo?>(
+        'rasp',
+        'getTeacherById',
+        {
+          'year': year,
+          'teacherId': teacherId,
+        },
+      );
+
+  /// Поиск преподавателей по имени (ИСПРАВЛЕНО)
+  _i2.Future<List<_i14.TeacherInfo>> searchTeachersByName(
+    String year,
+    String searchQuery,
+  ) =>
+      caller.callServerEndpoint<List<_i14.TeacherInfo>>(
+        'rasp',
+        'searchTeachersByName',
+        {
+          'year': year,
+          'searchQuery': searchQuery,
+        },
+      );
+
+  /// Получить список преподавателей по кафедре (ИСПРАВЛЕНО)
+  _i2.Future<List<_i14.TeacherInfo>> getTeachersByDepartment(
+    String year,
+    String department,
+  ) =>
+      caller.callServerEndpoint<List<_i14.TeacherInfo>>(
+        'rasp',
+        'getTeachersByDepartment',
+        {
+          'year': year,
+          'department': department,
+        },
+      );
+
+  /// Получить список уникальных кафедр (ИСПРАВЛЕНО)
+  _i2.Future<List<String>> getDepartments(String year) =>
+      caller.callServerEndpoint<List<String>>(
+        'rasp',
+        'getDepartments',
+        {'year': year},
+      );
+
+  /// Получить расписание для группы (JSON как строка) с улучшенной диагностикой
+  _i2.Future<String> getScheduleForGroup(int groupId) =>
+      caller.callServerEndpoint<String>(
+        'rasp',
+        'getScheduleForGroup',
+        {'groupId': groupId},
+      );
+
+  /// Проверить доступность API
+  _i2.Future<bool> checkApiAvailability() => caller.callServerEndpoint<bool>(
+        'rasp',
+        'checkApiAvailability',
+        {},
+      );
+
+  /// Проверить существование группы в API
+  _i2.Future<bool> checkGroupExists(
+    int groupId,
+    String year,
+  ) =>
+      caller.callServerEndpoint<bool>(
+        'rasp',
+        'checkGroupExists',
+        {
+          'groupId': groupId,
+          'year': year,
+        },
+      );
+
+  /// Получить список занятий для группы (упрощенно как строки)
+  _i2.Future<List<String>> getClassesForGroup(int groupId) =>
+      caller.callServerEndpoint<List<String>>(
+        'rasp',
+        'getClassesForGroup',
+        {'groupId': groupId},
+      );
+
+  /// Получить расписание для преподавателя (JSON как строка)
+  _i2.Future<String> getScheduleForTeacher(
+    int teacherId,
+    String year,
+  ) =>
+      caller.callServerEndpoint<String>(
+        'rasp',
+        'getScheduleForTeacher',
+        {
+          'teacherId': teacherId,
+          'year': year,
+        },
+      );
+
+  /// Получить список занятий для преподавателя (упрощенно как строки)
+  _i2.Future<List<String>> getClassesForTeacher(
+    int teacherId,
+    String year,
+  ) =>
+      caller.callServerEndpoint<List<String>>(
+        'rasp',
+        'getClassesForTeacher',
+        {
+          'teacherId': teacherId,
+          'year': year,
+        },
+      );
+
+  _i2.Future<List<String>> getSubjectsForGroup(int groupId) =>
+      caller.callServerEndpoint<List<String>>(
+        'rasp',
+        'getSubjectsForGroup',
+        {'groupId': groupId},
+      );
+
+  _i2.Future<List<String>> getTeachersForGroup(int groupId) =>
+      caller.callServerEndpoint<List<String>>(
+        'rasp',
+        'getTeachersForGroup',
+        {'groupId': groupId},
+      );
+
+  _i2.Future<Map<String, List<String>>> getWeekSchedule(
+    int groupId,
+    DateTime weekStart,
+  ) =>
+      caller.callServerEndpoint<Map<String, List<String>>>(
+        'rasp',
+        'getWeekSchedule',
+        {
+          'groupId': groupId,
+          'weekStart': weekStart,
+        },
+      );
+
+  /// Получить расписание на конкретную дату (улучшенная версия)
+  _i2.Future<List<String>> getScheduleForDate(
+    int groupId,
+    DateTime date,
+  ) =>
+      caller.callServerEndpoint<List<String>>(
+        'rasp',
+        'getScheduleForDate',
+        {
+          'groupId': groupId,
+          'date': date,
+        },
+      );
+
+  /// Получить занятия на неделю с конкретными датами
+  _i2.Future<Map<String, List<Map<String, dynamic>>>> getWeekScheduleDetailed(
+    int groupId,
+    DateTime weekStart,
+  ) =>
+      caller.callServerEndpoint<Map<String, List<Map<String, dynamic>>>>(
+        'rasp',
+        'getWeekScheduleDetailed',
+        {
+          'groupId': groupId,
+          'weekStart': weekStart,
+        },
+      );
+}
+
+/// {@category Endpoint}
 class EndpointSearch extends _i1.EndpointRef {
   EndpointSearch(_i1.EndpointCaller caller) : super(caller);
 
@@ -294,8 +583,8 @@ class EndpointSearch extends _i1.EndpointRef {
         {'query': query},
       );
 
-  _i2.Future<List<_i13.Teachers>> searchTeachers({required String query}) =>
-      caller.callServerEndpoint<List<_i13.Teachers>>(
+  _i2.Future<List<_i15.Teachers>> searchTeachers({required String query}) =>
+      caller.callServerEndpoint<List<_i15.Teachers>>(
         'search',
         'searchTeachers',
         {'query': query},
@@ -322,8 +611,8 @@ class EndpointSearch extends _i1.EndpointRef {
         {'query': query},
       );
 
-  _i2.Future<List<_i14.Subgroups>> searchSubgroups({required String query}) =>
-      caller.callServerEndpoint<List<_i14.Subgroups>>(
+  _i2.Future<List<_i16.Subgroups>> searchSubgroups({required String query}) =>
+      caller.callServerEndpoint<List<_i16.Subgroups>>(
         'search',
         'searchSubgroups',
         {'query': query},
@@ -351,8 +640,8 @@ class EndpointSemesters extends _i1.EndpointRef {
   @override
   String get name => 'semesters';
 
-  _i2.Future<List<_i15.Semesters>> searchSemesters({required String query}) =>
-      caller.callServerEndpoint<List<_i15.Semesters>>(
+  _i2.Future<List<_i17.Semesters>> searchSemesters({required String query}) =>
+      caller.callServerEndpoint<List<_i17.Semesters>>(
         'semesters',
         'searchSemesters',
         {'query': query},
@@ -403,13 +692,27 @@ class EndpointStudents extends _i1.EndpointRef {
         {'student': student},
       );
 
-  _i2.Future<List<_i16.StudentOverallAttendanceRecord>>
+  _i2.Future<List<_i18.StudentOverallAttendanceRecord>>
       getStudentOverallAttendanceRecords(int studentId) =>
-          caller.callServerEndpoint<List<_i16.StudentOverallAttendanceRecord>>(
+          caller.callServerEndpoint<List<_i18.StudentOverallAttendanceRecord>>(
             'students',
             'getStudentOverallAttendanceRecords',
             {'studentId': studentId},
           );
+
+  _i2.Future<List<_i3.Students>> getStudentsByGroup(String groupName) =>
+      caller.callServerEndpoint<List<_i3.Students>>(
+        'students',
+        'getStudentsByGroup',
+        {'groupName': groupName},
+      );
+
+  _i2.Future<List<_i3.Students>> getStudentsByGroupId(int groupId) =>
+      caller.callServerEndpoint<List<_i3.Students>>(
+        'students',
+        'getStudentsByGroupId',
+        {'groupId': groupId},
+      );
 }
 
 /// {@category Endpoint}
@@ -426,12 +729,12 @@ class EndpointSubgroups extends _i1.EndpointRef {
         {},
       );
 
-  _i2.Future<_i14.Subgroups> createSubgroup(
+  _i2.Future<_i16.Subgroups> createSubgroup(
     int groupId,
     String name,
     String? description,
   ) =>
-      caller.callServerEndpoint<_i14.Subgroups>(
+      caller.callServerEndpoint<_i16.Subgroups>(
         'subgroups',
         'createSubgroup',
         {
@@ -441,12 +744,12 @@ class EndpointSubgroups extends _i1.EndpointRef {
         },
       );
 
-  _i2.Future<_i14.Subgroups> createFullGroupSubgroup(
+  _i2.Future<_i16.Subgroups> createFullGroupSubgroup(
     int groupId,
     String name,
     String? description,
   ) =>
-      caller.callServerEndpoint<_i14.Subgroups>(
+      caller.callServerEndpoint<_i16.Subgroups>(
         'subgroups',
         'createFullGroupSubgroup',
         {
@@ -456,19 +759,19 @@ class EndpointSubgroups extends _i1.EndpointRef {
         },
       );
 
-  _i2.Future<List<_i14.Subgroups>> getGroupSubgroups(int groupId) =>
-      caller.callServerEndpoint<List<_i14.Subgroups>>(
+  _i2.Future<List<_i16.Subgroups>> getGroupSubgroups(int groupId) =>
+      caller.callServerEndpoint<List<_i16.Subgroups>>(
         'subgroups',
         'getGroupSubgroups',
         {'groupId': groupId},
       );
 
-  _i2.Future<_i14.Subgroups> updateSubgroup(
+  _i2.Future<_i16.Subgroups> updateSubgroup(
     int subgroupId,
     String name,
     String? description,
   ) =>
-      caller.callServerEndpoint<_i14.Subgroups>(
+      caller.callServerEndpoint<_i16.Subgroups>(
         'subgroups',
         'updateSubgroup',
         {
@@ -525,8 +828,8 @@ class EndpointSubgroups extends _i1.EndpointRef {
         },
       );
 
-  _i2.Future<List<_i14.Subgroups>> searchSubgroups({required String query}) =>
-      caller.callServerEndpoint<List<_i14.Subgroups>>(
+  _i2.Future<List<_i16.Subgroups>> searchSubgroups({required String query}) =>
+      caller.callServerEndpoint<List<_i16.Subgroups>>(
         'subgroups',
         'searchSubgroups',
         {'query': query},
@@ -571,14 +874,14 @@ class EndpointTeachers extends _i1.EndpointRef {
   @override
   String get name => 'teachers';
 
-  _i2.Future<_i13.Teachers> createTeacher({
+  _i2.Future<_i15.Teachers> createTeacher({
     required String firstName,
     required String lastName,
     String? patronymic,
     required String email,
     String? phoneNumber,
   }) =>
-      caller.callServerEndpoint<_i13.Teachers>(
+      caller.callServerEndpoint<_i15.Teachers>(
         'teachers',
         'createTeacher',
         {
@@ -590,8 +893,8 @@ class EndpointTeachers extends _i1.EndpointRef {
         },
       );
 
-  _i2.Future<List<_i13.Teachers>> getAllTeachers() =>
-      caller.callServerEndpoint<List<_i13.Teachers>>(
+  _i2.Future<List<_i15.Teachers>> getAllTeachers() =>
+      caller.callServerEndpoint<List<_i15.Teachers>>(
         'teachers',
         'getAllTeachers',
         {},
@@ -605,8 +908,8 @@ class EndpointTeacherSearch extends _i1.EndpointRef {
   @override
   String get name => 'teacherSearch';
 
-  _i2.Future<List<_i13.Teachers>> searchTeachers({required String query}) =>
-      caller.callServerEndpoint<List<_i13.Teachers>>(
+  _i2.Future<List<_i15.Teachers>> searchTeachers({required String query}) =>
+      caller.callServerEndpoint<List<_i15.Teachers>>(
         'teacherSearch',
         'searchTeachers',
         {'query': query},
@@ -691,8 +994,8 @@ class EndpointGreeting extends _i1.EndpointRef {
   String get name => 'greeting';
 
   /// Returns a personalized greeting message: "Hello {name}".
-  _i2.Future<_i17.Greeting> hello(String name) =>
-      caller.callServerEndpoint<_i17.Greeting>(
+  _i2.Future<_i19.Greeting> hello(String name) =>
+      caller.callServerEndpoint<_i19.Greeting>(
         'greeting',
         'hello',
         {'name': name},
@@ -701,10 +1004,10 @@ class EndpointGreeting extends _i1.EndpointRef {
 
 class Modules {
   Modules(Client client) {
-    auth = _i18.Caller(client);
+    auth = _i20.Caller(client);
   }
 
-  late final _i18.Caller auth;
+  late final _i20.Caller auth;
 }
 
 class Client extends _i1.ServerpodClientShared {
@@ -723,7 +1026,7 @@ class Client extends _i1.ServerpodClientShared {
     bool? disconnectStreamsOnLostInternetConnection,
   }) : super(
           host,
-          _i19.Protocol(),
+          _i21.Protocol(),
           securityContext: securityContext,
           authenticationKeyManager: authenticationKeyManager,
           streamingConnectionTimeout: streamingConnectionTimeout,
@@ -739,6 +1042,7 @@ class Client extends _i1.ServerpodClientShared {
     classes = EndpointClasses(this);
     groups = EndpointGroups(this);
     person = EndpointPerson(this);
+    rasp = EndpointRasp(this);
     search = EndpointSearch(this);
     semesters = EndpointSemesters(this);
     students = EndpointStudents(this);
@@ -764,6 +1068,8 @@ class Client extends _i1.ServerpodClientShared {
   late final EndpointGroups groups;
 
   late final EndpointPerson person;
+
+  late final EndpointRasp rasp;
 
   late final EndpointSearch search;
 
@@ -797,6 +1103,7 @@ class Client extends _i1.ServerpodClientShared {
         'classes': classes,
         'groups': groups,
         'person': person,
+        'rasp': rasp,
         'search': search,
         'semesters': semesters,
         'students': students,

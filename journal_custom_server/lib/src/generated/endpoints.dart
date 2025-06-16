@@ -586,6 +586,25 @@ class Endpoints extends _i1.EndpointDispatch {
             params['year'],
           ),
         ),
+        'synchronizeGroupIdsWithSchedule': _i1.MethodConnector(
+          name: 'synchronizeGroupIdsWithSchedule',
+          params: {
+            'year': _i1.ParameterDescription(
+              name: 'year',
+              type: _i1.getType<String>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['groups'] as _i6.GroupsEndpoint)
+                  .synchronizeGroupIdsWithSchedule(
+            session,
+            params['year'],
+          ),
+        ),
       },
     );
     connectors['person'] = _i1.EndpointConnector(
@@ -924,6 +943,40 @@ class Endpoints extends _i1.EndpointDispatch {
             params['groupId'],
           ),
         ),
+        'checkApiAvailability': _i1.MethodConnector(
+          name: 'checkApiAvailability',
+          params: {},
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['rasp'] as _i8.RaspEndpoint)
+                  .checkApiAvailability(session),
+        ),
+        'checkGroupExists': _i1.MethodConnector(
+          name: 'checkGroupExists',
+          params: {
+            'groupId': _i1.ParameterDescription(
+              name: 'groupId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'year': _i1.ParameterDescription(
+              name: 'year',
+              type: _i1.getType<String>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['rasp'] as _i8.RaspEndpoint).checkGroupExists(
+            session,
+            params['groupId'],
+            params['year'],
+          ),
+        ),
         'getClassesForGroup': _i1.MethodConnector(
           name: 'getClassesForGroup',
           params: {
@@ -1072,6 +1125,30 @@ class Endpoints extends _i1.EndpointDispatch {
             session,
             params['groupId'],
             params['date'],
+          ),
+        ),
+        'getWeekScheduleDetailed': _i1.MethodConnector(
+          name: 'getWeekScheduleDetailed',
+          params: {
+            'groupId': _i1.ParameterDescription(
+              name: 'groupId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'weekStart': _i1.ParameterDescription(
+              name: 'weekStart',
+              type: _i1.getType<DateTime>(),
+              nullable: false,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['rasp'] as _i8.RaspEndpoint).getWeekScheduleDetailed(
+            session,
+            params['groupId'],
+            params['weekStart'],
           ),
         ),
       },

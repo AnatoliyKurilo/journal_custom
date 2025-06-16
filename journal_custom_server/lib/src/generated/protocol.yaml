@@ -21,6 +21,7 @@ groups:
   - updateGroup:
   - deleteGroup:
   - importGroupsFromSchedule:
+  - synchronizeGroupIdsWithSchedule:
 person:
   - createPerson:
   - getPerson:
@@ -40,6 +41,8 @@ rasp:
   - getTeachersByDepartment:
   - getDepartments:
   - getScheduleForGroup:
+  - checkApiAvailability:
+  - checkGroupExists:
   - getClassesForGroup:
   - getScheduleForTeacher:
   - getClassesForTeacher:
@@ -47,6 +50,7 @@ rasp:
   - getTeachersForGroup:
   - getWeekSchedule:
   - getScheduleForDate:
+  - getWeekScheduleDetailed:
 search:
   - searchStudents:
   - searchTeachers:
