@@ -2,11 +2,13 @@ import 'package:flutter/material.dart';
 import 'package:journal_custom_flutter/src/features/admin_panel/presentation/tabs/teacher_tab.dart';
 import 'package:journal_custom_flutter/core/serverpod_client.dart';
 import 'package:serverpod_auth_shared_flutter/serverpod_auth_shared_flutter.dart';
-import 'package:journal_custom_flutter/src/features/group_management/presentation/pages/group_head_page.dart'; // Добавляем импорт страницы старосты
-import 'package:journal_custom_flutter/src/features/auth/presentation/pages/account_page.dart'; // Добавляем импорт страницы аккаунта
+import 'package:journal_custom_flutter/src/features/group_management/presentation/pages/group_head_page.dart';
+import 'package:journal_custom_flutter/src/features/auth/presentation/pages/account_page.dart';
 
 import '../tabs/groups_tab.dart';
-import '../tabs/students_tab.dart'; // Импортируем новую вкладку
+import '../tabs/students_tab.dart';
+import '../tabs/schedule_tab.dart';
+import '../tabs/auto_import_tab.dart'; // Новый импорт
 
 class AdminPanel extends StatefulWidget {
   const AdminPanel({Key? key}) : super(key: key);
@@ -20,7 +22,9 @@ class _AdminPanelState extends State<AdminPanel> {
     const Tab(text: 'Пользователи'),
     const Tab(text: 'Группы'),
     const Tab(text: 'Преподаватели'),
-    const Tab(text: 'Студенты'), // Новая вкладка
+    const Tab(text: 'Студенты'),
+    const Tab(text: 'Расписание'),
+    const Tab(text: 'Автоимпорт'), // Новая вкладка
     const Tab(text: 'Настройки'),
   ];
 
@@ -71,7 +75,9 @@ class _AdminPanelState extends State<AdminPanel> {
             UsersTab(),
             GroupsTab(),
             TeachersTab(),
-            StudentsTab(), // Подключаем новую вкладку
+            StudentsTab(),
+            ScheduleTab(),
+            AutoImportTab(), // Новая вкладка
             SettingsTab(),
           ],
         ),
