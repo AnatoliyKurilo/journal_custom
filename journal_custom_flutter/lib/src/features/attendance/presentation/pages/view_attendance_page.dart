@@ -76,7 +76,7 @@ class _ViewAttendancePageState extends State<ViewAttendancePage> {
       appBar: AppBar(
         title: Text(_selectedGroup == null
             ? 'Выберите группу'
-            : 'Предметы группы: ${_selectedGroup!.name}'),
+            : 'Предметы: ${_selectedGroup!.name}'),
         leading: _selectedGroup != null
             ? IconButton(
                 icon: const Icon(Icons.arrow_back),

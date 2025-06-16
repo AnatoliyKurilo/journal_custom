@@ -63,9 +63,9 @@ class _ViewClassAttendancePageState extends State<ViewClassAttendancePage> {
 
   @override
   Widget build(BuildContext context) {
-    String classTitle = 'Просмотр посещаемости';
+    String classTitle = '123';
     if (widget.classItem.subjects?.name != null) {
-      classTitle += ': ${widget.classItem.subjects!.name}';
+      classTitle += '${widget.classItem.subjects!.name}';
     }
     if (widget.classItem.date != null) {
       classTitle += ' (${DateFormat('dd.MM.yyyy HH:mm').format(widget.classItem.date!)})';
@@ -111,14 +111,24 @@ class _ViewClassAttendancePageState extends State<ViewClassAttendancePage> {
                             final student = studentInfo.student;
                             return DataRow(cells: [
                               DataCell(Text(
-                                  '${student.person?.lastName ?? ''} ${student.person?.firstName ?? ''} ${student.person?.patronymic ?? ''}'.trim())),
-                              DataCell(Text(
-                                studentInfo.isPresent ? 'Присутствовал' : 'Отсутствовал',
-                                style: TextStyle(
-                                  color: studentInfo.isPresent ? Colors.green.shade700 : Colors.red.shade700,
-                                  fontWeight: FontWeight.w500,
-                                ),
+                                '${student.person?.lastName ?? ''} ${student.person?.firstName?[0] ?? ''}. ${student.person?.patronymic?[0] ?? ''}'.trim(),
                               )),
+                              DataCell(
+                                Container(
+                                  color: studentInfo.isPresent ? Colors.green.shade50 : Colors.red.shade50, // Цвет фона
+                                  padding: const EdgeInsets.symmetric(vertical: 6.0, horizontal: 8.0), // Отступы внутри ячейки
+                                  child: Align(
+                                    alignment: Alignment.center, // Выравнивание текста по центру
+                                    child: Text(
+                                      studentInfo.isPresent ? 'П' : 'О',
+                                      style: TextStyle(
+                                        color: studentInfo.isPresent ? Colors.green.shade700 : Colors.red.shade700,
+                                        fontWeight: FontWeight.w500,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
                               DataCell(Text(studentInfo.comment ?? '')),
                             ]);
                           }).toList(),

@@ -106,7 +106,7 @@ class _ViewSubjectClassesPageState extends State<ViewSubjectClassesPage> {
 
                         return ListTile(
                           title: Text(
-                              '${classItem.class_types?.name ?? 'Занятие'} ID: ${classItem.id}'),
+                              '${classItem.class_types?.name ?? 'Занятие'} '),
                           subtitle: Text(subtitleText),
                           isThreeLine: (classItem.topic != null && classItem.topic!.isNotEmpty) ||
                               (classItem.notes != null && classItem.notes!.isNotEmpty),
