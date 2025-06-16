@@ -9,8 +9,8 @@ class AdminEndpoint extends Endpoint {
   @override
   bool get requireLogin  => true;
 
-  @override
-  Set<Scope> get requiredScopes  => {Scope.admin, CustomScope.curator, CustomScope.groupHead, CustomScope.teacher, CustomScope.student, CustomScope.documentSpecialist};
+  // @override
+  // Set<Scope> get requiredScopes  => {Scope.admin, CustomScope.curator, CustomScope.groupHead, CustomScope.teacher, CustomScope.student, CustomScope.documentSpecialist};
 
   // Метод для создания группы
   // Future<Groups> createGroup(Session session, String name, int? curatorId) async {

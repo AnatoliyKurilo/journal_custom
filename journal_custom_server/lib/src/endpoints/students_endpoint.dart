@@ -176,4 +176,78 @@ class StudentsEndpoint extends Endpoint {
     }
     return result;
   }
+
+  // Получение студентов по названию группы
+  Future<List<Students>> getStudentsByGroup(Session session, String groupName) async {
+    try {
+      session.log('StudentsEndpoint: Получение студентов для группы: $groupName');
+
+      // Найти группу по названию
+      final group = await Groups.db.findFirstRow(
+        session,
+        where: (g) => g.name.equals(groupName),
+      );
+
+      if (group == null) {
+        throw Exception('Группа с названием "$groupName" не найдена');
+      }
+
+      // Получить всех студентов этой группы
+      final students = await Students.db.find(
+        session,
+        where: (s) => s.groupsId.equals(group.id!),
+        include: Students.include(
+          person: Person.include(),
+          groups: Groups.include(),
+        ),
+        orderBy: (s) => s.person.lastName, // Сортируем по фамилии
+      );
+
+      session.log('StudentsEndpoint: Найдено ${students.length} студентов в группе "$groupName"');
+      return students;
+
+    } catch (e, stackTrace) {
+      session.log(
+        'StudentsEndpoint: Ошибка при получении студентов группы "$groupName": $e',
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
+
+  // Получение студентов по ID группы
+  Future<List<Students>> getStudentsByGroupId(Session session, int groupId) async {
+    try {
+      session.log('StudentsEndpoint: Получение студентов для группы ID: $groupId');
+
+      // Проверить, существует ли группа
+      final group = await Groups.db.findById(session, groupId);
+      if (group == null) {
+        throw Exception('Группа с ID $groupId не найдена');
+      }
+
+      // Получить всех студентов этой группы
+      final students = await Students.db.find(
+        session,
+        where: (s) => s.groupsId.equals(groupId),
+        include: Students.include(
+          person: Person.include(),
+          groups: Groups.include(),
+        ),
+        orderBy: (s) => s.person.lastName, // Сортируем по фамилии
+      );
+
+      session.log('StudentsEndpoint: Найдено ${students.length} студентов в группе ID: $groupId');
+      return students;
+
+    } catch (e, stackTrace) {
+      session.log(
+        'StudentsEndpoint: Ошибка при получении студентов группы ID $groupId: $e',
+        level: LogLevel.error,
+        stackTrace: stackTrace,
+      );
+      rethrow;
+    }
+  }
 }
