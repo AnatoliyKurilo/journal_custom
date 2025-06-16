@@ -4,7 +4,9 @@ import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
 import 'package:journal_custom_client/journal_custom_client.dart';
-import 'package:journal_custom_flutter/main.dart';
+// import 'package:journal_custom_flutter/main.dart';
+import 'package:journal_custom_flutter/core/serverpod_client.dart';
+import 'package:journal_custom_flutter/main.dart' hide client; // Для client
 
 /// Функция для импорта группы и студентов из CSV-файла
 Future<void> importGroupFromCsv(BuildContext context) async {
@@ -188,6 +190,15 @@ Future<void> importGroupFromCsv(BuildContext context) async {
           SnackBar(content: Text('Создана новая группа: $groupName'))
         );
       }
+    } else {
+      // Диалог подтверждения импорта в существующую группу
+      bool? continueImport = await _showGroupExistsDialog(context, groupName);
+      if (continueImport != true) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Импорт отменен пользователем'))
+        );
+        return;
+      }
     }
 
     // 10. Показываем индикатор прогресса
@@ -284,6 +295,33 @@ Future<void> importGroupFromCsv(BuildContext context) async {
       );
     }
   }
+}
+
+/// Проверка существующих студентов в группе
+Future<List<String>> _checkExistingStudents(
+  String groupName, 
+  List<Map<String, String>> studentsToImport
+) async {
+  final existingStudents = await client.students.getStudentsByGroup(groupName);
+  List<String> duplicates = [];
+  
+  for (var studentData in studentsToImport) {
+    final email = studentData['Email'] ?? '';
+    final firstName = studentData['Имя'] ?? '';
+    final lastName = studentData['Фамилия'] ?? '';
+    
+    // Проверяем по email или по имени/фамилии
+    final isDuplicate = existingStudents.any((existing) => 
+      (email.isNotEmpty && existing.person?.email == email) ||
+      (existing.person?.firstName == firstName && existing.person?.lastName == lastName)
+    );
+    
+    if (isDuplicate) {
+      duplicates.add('$firstName $lastName');
+    }
+  }
+  
+  return duplicates;
 }
 
 /// Определяет, является ли строка заголовком таблицы
@@ -433,6 +471,33 @@ void _showErrorsDialog(BuildContext context, List<String> errors, int imported, 
           ElevatedButton(
             onPressed: () => Navigator.pop(context),
             child: const Text('Закрыть'),
+          ),
+        ],
+      );
+    },
+  );
+}
+
+/// Диалог для подтверждения импорта в существующую группу
+Future<bool?> _showGroupExistsDialog(BuildContext context, String groupName) {
+  return showDialog<bool>(
+    context: context,
+    builder: (BuildContext context) {
+      return AlertDialog(
+        title: const Text('Группа уже существует'),
+        content: Text(
+          'Группа "$groupName" уже существует в системе.\n\n'
+          'Студенты будут добавлены к существующим участникам группы.\n\n'
+          'Продолжить импорт?'
+        ),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(context, false),
+            child: const Text('Отмена'),
+          ),
+          ElevatedButton(
+            onPressed: () => Navigator.pop(context, true),
+            child: const Text('Продолжить'),
           ),
         ],
       );
