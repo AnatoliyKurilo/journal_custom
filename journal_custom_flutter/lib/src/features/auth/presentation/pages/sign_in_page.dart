@@ -40,7 +40,7 @@ class SignInPage extends StatelessWidget {
         child: Container(
           color: Theme.of(context).colorScheme.surface, // Используем цвет темы для фона
           width: 400, // Увеличил ширину для лучшего отображения
-          padding: const EdgeInsets.all(24), // Немного увеличил отступы
+          padding: const EdgeInsets.all(18), // Немного увеличил отступы
           child: Column(
             mainAxisSize: MainAxisSize.max,
             crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -58,7 +58,10 @@ class SignInPage extends StatelessWidget {
                 child: Text(
                   'Журнал посещаемости',
                   textAlign: TextAlign.center,
-                  style: Theme.of(context).textTheme.headlineSmall, // Используем стиль заголовка
+                  style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                        fontFamily: 'Montserrat', // Указываем шрифт Montserrat      fontFamily: 'Montserrat', // Указываем шрифт Montserrat
+                        fontWeight: FontWeight.bold, // Используем жирный стиль        fontWeight: FontWeight.bold, // Используем жирный стиль
+                      ),
                 ),
               ),
               SignInWithEmailButton(
