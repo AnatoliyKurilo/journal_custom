@@ -97,9 +97,9 @@ class _ClassAttendancePageState extends State<ClassAttendancePage> {
 
   @override
   Widget build(BuildContext context) {
-    String classTitle = 'Посещаемость';
+    String classTitle = '';
     if (widget.classItem.subjects?.name != null) {
-      classTitle += ': ${widget.classItem.subjects!.name}';
+      classTitle += '${widget.classItem.subjects!.name}';
     }
     // ignore: unnecessary_null_comparison
     if (widget.classItem.date != null) {

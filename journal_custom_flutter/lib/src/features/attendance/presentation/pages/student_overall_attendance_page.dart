@@ -26,26 +26,21 @@ class _StudentOverallAttendancePageState extends State<StudentOverallAttendanceP
   }
 
   Future<void> _fetchAttendanceRecords() async {
-    setState(() {
-      _isLoading = true;
-      _errorMessage = null;
-      _attendanceRecords = [];
-      _groupedRecords = {};
+    setState(() { _isLoading = true; _errorMessage = null; 
+    _attendanceRecords = []; _groupedRecords = {};
+    
     });
     try {
       if (widget.student.id == null) {
         throw Exception('ID студента не может быть null');
       }
-      final records = await client.students.getStudentOverallAttendanceRecords(widget.student.id!);
-
+      final records = await client.students
+      .getStudentOverallAttendanceRecords(widget.student.id!);
       // Группировка по предмету
       final Map<String, List<StudentOverallAttendanceRecord>> grouped =
           groupBy(records, (StudentOverallAttendanceRecord record) => record.subjectName);
-
       if (mounted) {
-        setState(() {
-          _attendanceRecords = records;
-          _groupedRecords = grouped;
+        setState(() {_attendanceRecords = records; _groupedRecords = grouped;
           _isLoading = false;
         });
       }
@@ -68,7 +63,7 @@ class _StudentOverallAttendancePageState extends State<StudentOverallAttendanceP
 
     return Scaffold(
       appBar: AppBar(
-        title: Text('Посещаемость: $studentFullName', overflow: TextOverflow.ellipsis),
+        title: Text('$studentFullName', overflow: TextOverflow.ellipsis),
       ),
       body: _isLoading
           ? const Center(child: CircularProgressIndicator())
