@@ -1,9 +1,14 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
+import 'package:intl/intl.dart';
 import 'package:journal_custom_client/journal_custom_client.dart';
 import 'package:journal_custom_flutter/core/serverpod_client.dart';
 // import 'package:journal_custom_flutter/src/utils/name_formatters.dart';
 import 'package:journal_custom_flutter/src/features/attendance/presentation/pages/student_overall_attendance_page.dart';
 import 'package:journal_custom_flutter/src/utils/name_formatters.dart';
+import 'package:pdf/pdf.dart';
+import 'package:pdf/widgets.dart' as pw;
+import 'package:printing/printing.dart';
 
 class StudentsPage extends StatefulWidget {
   const StudentsPage({Key? key}) : super(key: key);
@@ -87,6 +92,97 @@ class _StudentsPageState extends State<StudentsPage> {
                groupName.contains(query);
       }).toList();
     });
+  }
+
+  Future<void> _generateStudentAttendanceReport(Students student) async {
+    final pdf = pw.Document();
+
+    // Загружаем шрифт
+    final fontData = await rootBundle.load('assets/fonts/Roboto-Regular.ttf');
+    final ttf = pw.Font.ttf(fontData);
+
+    try {
+      // Получаем данные о посещаемости студента
+      final attendanceRecords = await client.students.getStudentOverallAttendanceRecords(student.id!);
+
+      pdf.addPage(
+        pw.Page(
+          build: (context) {
+            return pw.Column(
+              crossAxisAlignment: pw.CrossAxisAlignment.start,
+              children: [
+                pw.Text(
+                  'Отчет о посещаемости',
+                  style: pw.TextStyle(font: ttf, fontSize: 18, fontWeight: pw.FontWeight.bold),
+                ),
+                pw.SizedBox(height: 16),
+                pw.Text(
+                  'Студент: ${student.person?.lastName ?? ''} ${student.person?.firstName ?? ''} ${student.person?.patronymic ?? ''}',
+                  style: pw.TextStyle(font: ttf),
+                ),
+                pw.SizedBox(height: 8),
+                pw.Table(
+                  border: pw.TableBorder.all(),
+                  children: [
+                    // Заголовок таблицы
+                    pw.TableRow(
+                      children: [
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(4.0),
+                          child: pw.Text('Предмет', style: pw.TextStyle(font: ttf, fontWeight: pw.FontWeight.bold)),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(4.0),
+                          child: pw.Text('Дата', style: pw.TextStyle(font: ttf, fontWeight: pw.FontWeight.bold)),
+                        ),
+                        pw.Padding(
+                          padding: const pw.EdgeInsets.all(4.0),
+                          child: pw.Text('Статус', style: pw.TextStyle(font: ttf, fontWeight: pw.FontWeight.bold)),
+                        ),
+                      ],
+                    ),
+                    // Данные посещаемости
+                    ...attendanceRecords.map((record) {
+                      return pw.TableRow(
+                        children: [
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.all(4.0),
+                            child: pw.Text(record.subjectName, style: pw.TextStyle(font: ttf)),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.all(4.0),
+                            child: pw.Text(
+                              DateFormat('dd.MM.yyyy HH:mm').format(record.classDate),
+                              style: pw.TextStyle(font: ttf),
+                            ),
+                          ),
+                          pw.Padding(
+                            padding: const pw.EdgeInsets.all(4.0),
+                            child: pw.Text(
+                              record.isPresent ? 'Присутствовал' : 'Отсутствовал',
+                              style: pw.TextStyle(font: ttf),
+                            ),
+                          ),
+                        ],
+                      );
+                    }).toList(),
+                  ],
+                ),
+              ],
+            );
+          },
+        ),
+      );
+
+      // Печать или сохранение PDF
+      await Printing.layoutPdf(
+        onLayout: (PdfPageFormat format) async => pdf.save(),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ошибка генерации отчета: $e')),
+      );
+    }
   }
 
   // TODO: Реализовать диалоги _showCreateStudentDialog и _showEditStudentDialog
@@ -207,11 +303,11 @@ class _StudentsPageState extends State<StudentsPage> {
                                 );
                               },
                             ),
-                            // IconButton(
-                            //   icon: const Icon(Icons.edit),
-                            //   tooltip: 'Редактировать',
-                            //   onPressed: () => _showEditStudentDialog(student),
-                            // ),
+                            IconButton(
+                              icon: const Icon(Icons.picture_as_pdf),
+                              tooltip: 'Скачать отчет (PDF)',
+                              onPressed: () => _generateStudentAttendanceReport(student),
+                            ),
                           ],
                         ),
                       ),
