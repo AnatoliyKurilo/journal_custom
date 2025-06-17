@@ -1,0 +1,89 @@
+@startuml
+' Class Diagram for Server Endpoints
+hide empty members
+skinparam classAttributeIconSize 0
+skinparam linetype ortho
+
+' abstract class Endpoint
+
+class AdminEndpoint  {
+  + exportGroups(session)
+  + importGroups(session, groups)
+  + importTeachers(session, teachers)
+}
+class AttendanceEndpoint  {
+  + getStudentOverallAttendance(session, studentId, semesterId)
+  + getStudentAttendanceForSubject(session, studentId, subjectId)
+  + getAttendanceForClass(session, classId)
+  + saveAttendances(session, attendances)
+}
+class ClassTypesEndpoint  {
+  + getClassTypes(session)
+}
+class ClassesEndpoint  {
+  + getClassesBySubjectAndGroup(session, subjectId, groupId)
+  + createClass(session, classInfo)
+  + deleteClass(session, classId)
+}
+class GroupsEndpoint  {
+  + getGroups(session)
+  + getGroup(session, id)
+  + saveGroup(session, group)
+  + deleteGroup(session, id)
+  + getGroupInfo(session, groupId)
+}
+class PersonEndpoint  {
+  + getPersons(session)
+  + getPersonsByRole(session, role)
+}
+class RaspEndpoint  {
+  + getRasp(session, from, to)
+}
+class SearchEndpoint  {
+  + search(session, query, roles)
+  + searchGroups(session, query)
+  + searchStudents(session, query)
+  + searchTeachers(session, query)
+  + searchSubjects(session, query)
+}
+class SemestersEndpoint  {
+  + getSemesters(session)
+  + createSemester(session, semester)
+  + deleteSemester(session, id)
+}
+class StudentsEndpoint  {
+  + getStudents(session)
+  + getStudent(session, id)
+  + saveStudent(session, student)
+  + deleteStudent(session, id)
+}
+class SubgroupsEndpoint  {
+  + getSubgroups(session)
+  + getStudentSubgroups(session, studentId)
+  + saveStudentSubgroups(session, studentSubgroups)
+}
+class SubjectAttendanceMatrixEndpoint  {
+  + getSubjectAttendanceMatrix(session, subjectId, groupId, from, to)
+}
+class SubjectsEndpoint  {
+  + getSubjects(session)
+  + getSubject(session, id)
+  + saveSubject(session, subject)
+  + deleteSubject(session, id)
+}
+class TeachersEndpoint  {
+  + getTeachers(session)
+  + getTeacher(session, id)
+  + saveTeacher(session, teacher)
+  + deleteTeacher(session, id)
+}
+class TeachersSearchEndpoint  {
+}
+class UserEndpoint  {
+  + getCurrentUser(session)
+}
+class UserRolesEndpoint  {
+  + getRoles(session)
+}
+
+@enduml
