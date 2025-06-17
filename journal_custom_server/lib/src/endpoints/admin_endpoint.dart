@@ -1,9 +1,9 @@
-import 'package:journal_custom_server/src/custom_scope.dart';
-import 'package:journal_custom_server/src/services/user_subgroup_service.dart';
+// import 'package:journal_custom_server/src/custom_scope.dart';
+// import 'package:journal_custom_server/src/services/user_subgroup_service.dart';
 import 'package:serverpod/serverpod.dart';
 import '../generated/protocol.dart';
-import 'package:collection/collection.dart';
-import 'user_roles_endpoint.dart'; // Убедитесь, что этот эндпоинт импортирован
+// import 'package:collection/collection.dart';
+// import 'user_roles_endpoint.dart'; // Убедитесь, что этот эндпоинт импортирован
 
 class AdminEndpoint extends Endpoint {
   @override
@@ -532,19 +532,20 @@ class AdminEndpoint extends Endpoint {
   // }
 
   // Вспомогательный метод для обработки ошибок
-  Future<T> _executeWithErrorHandling<T>(
-    Session session,
-    Future<T> Function() action,
-  ) async {
-    try {
-      return await action();
-    } catch (e, stackTrace) {
-      session.log(
-        'Ошибка: $e',
-        level: LogLevel.error,
-        stackTrace: stackTrace,
-      );
-      rethrow;
-    }
-  }
+  // Future<T> _executeWithErrorHandling<T>(
+  //   Session session,
+  //   Future<T> Function() action,
+  // ) async {
+  //   try {
+  //     return await action();
+  //   } catch (e, stackTrace) {
+  //     session.log(
+  //       'Ошибка: $e',
+  //       level: LogLevel.error,
+  //       stackTrace: stackTrace,
+  //     );
+  //     rethrow;
+  //   }
+  // }
+
 }

@@ -1,11 +1,13 @@
+// ignore_for_file: avoid_print, use_build_context_synchronously
+
 import 'dart:convert';
 import 'dart:io';
 import 'package:csv/csv.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:flutter/material.dart';
-import 'package:journal_custom_client/journal_custom_client.dart';
+// import 'package:journal_custom_client/journal_custom_client.dart';
 import 'package:journal_custom_flutter/core/serverpod_client.dart';
-import 'package:journal_custom_flutter/main.dart' hide client; // Для client
+// import 'package:journal_custom_flutter/main.dart' hide client; // Для client
 
 /// Функция для импорта преподавателей из CSV-файла
 Future<void> importTeachersFromCsv(BuildContext context) async {

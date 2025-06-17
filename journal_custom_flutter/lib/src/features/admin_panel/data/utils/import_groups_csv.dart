@@ -6,7 +6,7 @@ import 'package:flutter/material.dart';
 import 'package:journal_custom_client/journal_custom_client.dart';
 // import 'package:journal_custom_flutter/main.dart';
 import 'package:journal_custom_flutter/core/serverpod_client.dart';
-import 'package:journal_custom_flutter/main.dart' hide client; // Для client
+// import 'package:journal_custom_flutter/main.dart' hide client; // Для client
 
 /// Функция для импорта группы и студентов из CSV-файла
 Future<void> importGroupFromCsv(BuildContext context) async {
@@ -298,6 +298,7 @@ Future<void> importGroupFromCsv(BuildContext context) async {
 }
 
 /// Проверка существующих студентов в группе
+// ignore: unused_element
 Future<List<String>> _checkExistingStudents(
   String groupName, 
   List<Map<String, String>> studentsToImport

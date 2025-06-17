@@ -1,3 +1,5 @@
+// ignore_for_file: avoid_print
+
 import 'dart:io';
 import 'package:collection/collection.dart';
 import 'package:journal_custom_client/journal_custom_client.dart';
@@ -31,8 +33,8 @@ Future<void> exportGroupsToCsv(List<Groups> groups, List<Students> allStudents) 
       String groupHeadFullName = 'Не назначен';
       if (groupHeadStudent != null && groupHeadStudent.person != null) {
         groupHeadFullName = [
-          groupHeadStudent.person!.lastName ?? '',
-          groupHeadStudent.person!.firstName ?? '',
+          groupHeadStudent.person!.lastName,
+          groupHeadStudent.person!.firstName,
           groupHeadStudent.person!.patronymic ?? ''
         ].where((namePart) => namePart.isNotEmpty).join(' ').trim();
         if (groupHeadFullName.isEmpty) groupHeadFullName = 'Не назначен'; // На случай, если у Person нет имени
@@ -40,7 +42,7 @@ Future<void> exportGroupsToCsv(List<Groups> groups, List<Students> allStudents) 
       
       rows.add([
         group.id ?? 'N/A',
-        group.name ?? 'Без названия',
+        group.name,
         curatorFullName,
         groupHeadFullName,
       ]);

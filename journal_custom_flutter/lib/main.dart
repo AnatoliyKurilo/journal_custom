@@ -4,7 +4,7 @@ import 'package:journal_custom_flutter/src/features/auth/presentation/pages/acco
 import 'package:journal_custom_flutter/core/serverpod_client.dart';
 import 'package:journal_custom_flutter/src/features/auth/presentation/pages/sign_in_page.dart';
 import 'package:serverpod_flutter/serverpod_flutter.dart';
-import 'package:intl/intl.dart';
+// import 'package:intl/intl.dart';
 import 'package:intl/date_symbol_data_local.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
 
