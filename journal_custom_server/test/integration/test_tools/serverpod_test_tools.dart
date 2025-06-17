@@ -667,6 +667,82 @@ class _ClassesEndpoint {
       }
     });
   }
+
+  _i3.Future<_i12.Classes> updateClass(
+    _i1.TestSessionBuilder sessionBuilder, {
+    required int classId,
+    int? subjectsId,
+    int? classTypesId,
+    int? teachersId,
+    int? semestersId,
+    int? subgroupsId,
+    DateTime? date,
+    String? topic,
+    String? notes,
+  }) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'classes',
+        method: 'updateClass',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'classes',
+          methodName: 'updateClass',
+          parameters: _i1.testObjectToJson({
+            'classId': classId,
+            'subjectsId': subjectsId,
+            'classTypesId': classTypesId,
+            'teachersId': teachersId,
+            'semestersId': semestersId,
+            'subgroupsId': subgroupsId,
+            'date': date,
+            'topic': topic,
+            'notes': notes,
+          }),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<_i12.Classes>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
+
+  _i3.Future<bool> deleteClass(
+    _i1.TestSessionBuilder sessionBuilder,
+    int classId,
+  ) async {
+    return _i1.callAwaitableFunctionAndHandleExceptions(() async {
+      var _localUniqueSession =
+          (sessionBuilder as _i1.InternalTestSessionBuilder).internalBuild(
+        endpoint: 'classes',
+        method: 'deleteClass',
+      );
+      try {
+        var _localCallContext = await _endpointDispatch.getMethodCallContext(
+          createSessionCallback: (_) => _localUniqueSession,
+          endpointPath: 'classes',
+          methodName: 'deleteClass',
+          parameters: _i1.testObjectToJson({'classId': classId}),
+          serializationManager: _serializationManager,
+        );
+        var _localReturnValue = await (_localCallContext.method.call(
+          _localUniqueSession,
+          _localCallContext.arguments,
+        ) as _i3.Future<bool>);
+        return _localReturnValue;
+      } finally {
+        await _localUniqueSession.close();
+      }
+    });
+  }
 }
 
 class _GroupsEndpoint {

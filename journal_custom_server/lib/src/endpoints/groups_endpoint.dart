@@ -14,6 +14,7 @@ class GroupsEndpoint extends Endpoint {
   
   // Создание группы
   Future<Groups> createGroup(Session session, String name, int? curatorId) async {
+    
     var group = Groups(
       name: name,
       curatorId: curatorId,
@@ -23,64 +24,138 @@ class GroupsEndpoint extends Endpoint {
 
   // Получение всех групп
   Future<List<Groups>> getAllGroups(Session session) async {
-  // Проверяем права доступа для администратора или старосты
-  // await ScopeService.checkScopes(
-  //   session,
-  //   requiredScopes: {Scope.admin, CustomScope.groupHead, CustomScope.curator, CustomScope.teacher, CustomScope.student, CustomScope.documentSpecialist},
-  // );
-
   final authInfo = await session.authenticated;
-  // authInfo!.userId;
   session.log('Области доступа пользователя: ${authInfo!.scopes.map((s) => s.name).toList()}');
 
   // Если пользователь администратор, возвращаем все группы
-  if (await ScopeService.checkScopes(
-    session,
-    requiredScopes: {Scope.admin},
-  )) {
+  if (await ScopeService.checkScopes(session, requiredScopes: {Scope.admin,CustomScope.documentSpecialist})) {
     return await Groups.db.find(session);
   }
 
-  // Если пользователь староста, возвращаем только связанные группы
-  if (await ScopeService.checkScopes(
-    session,
-    requiredScopes: {CustomScope.groupHead, CustomScope.student},
-  )) {
+  // Если пользователь староста или студент, возвращаем только связанные группы
+  if (await ScopeService.checkScopes(session, requiredScopes: {CustomScope.groupHead, CustomScope.student})) {
     final person = await Person.db.findFirstRow(
-    session,
-    where: (p) => p.userInfoId.equals(authInfo.userId),
-  );
+      session,
+      where: (p) => p.userInfoId.equals(authInfo.userId),
+    );
     final student = await Students.db.findFirstRow(
       session,
       where: (s) => s.personId.equals(person?.id),
     );
 
-    return await Groups.db.find(
-      session,
-      where: (g) => g.id.equals(student?.groupsId),
-    );
-    // student?.groupsId;
+    if (student?.groupsId != null) {
+      return await Groups.db.find(
+        session,
+        where: (g) => g.id.equals(student!.groupsId),
+      );
+    }
   }
-  //curator
-  if (await ScopeService.checkScopes(
-    session,
-    requiredScopes: {CustomScope.curator, CustomScope.teacher,} 
-  )) {
+
+  // Для кураторов и преподавателей - существующая логика
+  if (await ScopeService.checkScopes(session, requiredScopes: {CustomScope.curator})) {
     final person = await Person.db.findFirstRow(
-    session,
-    where: (p) => p.userInfoId.equals(authInfo.userId),
-  );
+      session,
+      where: (p) => p.userInfoId.equals(authInfo.userId),
+    );
     final teacher = await Teachers.db.findFirstRow(
       session,
       where: (s) => s.personId.equals(person?.id),
     );
 
-    return await Groups.db.find(
-      session,
-      where: (g) => g.curatorId.equals(teacher?.id),
-    );
-    // student?.groupsId;
+    if (teacher != null) {
+      // Для кураторов - группы где они кураторы
+      if (authInfo.scopes.any((scope) => scope.name == CustomScope.curator.name)) {
+        return await Groups.db.find(
+          session,
+          where: (g) => g.curatorId.equals(teacher.id),
+        );
+      }
+      
+      // Для преподавателей - группы где они ведут занятия
+      if (authInfo.scopes.any((scope) => scope.name == CustomScope.teacher.name)) {
+        // Получаем все занятия преподавателя
+        final teacherClasses = await Classes.db.find(
+          session,
+          where: (c) => c.teachersId.equals(teacher.id),
+        );
+        
+        if (teacherClasses.isEmpty) {
+          return [];
+        }
+        
+        // Получаем подгруппы из занятий
+        final subgroupIds = teacherClasses
+            .where((c) => c.subgroupsId != null)
+            .map((c) => c.subgroupsId!)
+            .toSet();
+        
+        if (subgroupIds.isEmpty) {
+          return [];
+        }
+        
+        // Получаем группы через подгруппы
+        final subgroups = await Subgroups.db.find(
+          session,
+          where: (s) => s.id.inSet(subgroupIds),
+        );
+        
+        final groupIds = subgroups
+            .where((s) => s.groupsId != null)
+            .map((s) => s.groupsId!)
+            .toSet();
+        
+        if (groupIds.isEmpty) {
+          return [];
+        }
+        
+        return await Groups.db.find(
+          session,
+          where: (g) => g.id.inSet(groupIds),
+        );
+      }
+    }
   }
+  
+  if (authInfo.scopes.contains(CustomScope.teacher)) {
+    final person = await Person.db.findFirstRow(
+      session,
+      where: (p) => p.userInfoId.equals(authInfo.userId),
+    );
+
+    if (person != null) {
+      final teacher = await Teachers.db.findFirstRow(
+        session,
+        where: (t) => t.personId.equals(person.id),
+      );
+
+      if (teacher != null) {
+        final teacherClasses = await Classes.db.find(
+          session,
+          where: (c) => c.teachersId.equals(teacher.id),
+        );
+
+        if (teacherClasses.isNotEmpty) {
+          final subgroupIds = teacherClasses.map((c) => c.subgroupsId!).toSet();
+
+          final subgroups = await Subgroups.db.find(
+            session,
+            where: (s) => s.id.inSet(subgroupIds),
+          );
+
+          final groupIds = subgroups.map((s) => s.groupsId!).toSet();
+
+          return await Groups.db.find(
+            session,
+            where: (g) => g.id.inSet(groupIds),
+          );
+        }
+      }
+    }
+
+    return [];
+  }
+
+
 
   // Если пользователь не имеет прав, возвращаем пустой список
   return [];

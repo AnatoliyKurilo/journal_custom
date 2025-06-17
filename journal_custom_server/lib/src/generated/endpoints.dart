@@ -462,6 +462,90 @@ class Endpoints extends _i1.EndpointDispatch {
             endDate: params['endDate'],
           ),
         ),
+        'updateClass': _i1.MethodConnector(
+          name: 'updateClass',
+          params: {
+            'classId': _i1.ParameterDescription(
+              name: 'classId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            ),
+            'subjectsId': _i1.ParameterDescription(
+              name: 'subjectsId',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'classTypesId': _i1.ParameterDescription(
+              name: 'classTypesId',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'teachersId': _i1.ParameterDescription(
+              name: 'teachersId',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'semestersId': _i1.ParameterDescription(
+              name: 'semestersId',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'subgroupsId': _i1.ParameterDescription(
+              name: 'subgroupsId',
+              type: _i1.getType<int?>(),
+              nullable: true,
+            ),
+            'date': _i1.ParameterDescription(
+              name: 'date',
+              type: _i1.getType<DateTime?>(),
+              nullable: true,
+            ),
+            'topic': _i1.ParameterDescription(
+              name: 'topic',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+            'notes': _i1.ParameterDescription(
+              name: 'notes',
+              type: _i1.getType<String?>(),
+              nullable: true,
+            ),
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['classes'] as _i5.ClassesEndpoint).updateClass(
+            session,
+            classId: params['classId'],
+            subjectsId: params['subjectsId'],
+            classTypesId: params['classTypesId'],
+            teachersId: params['teachersId'],
+            semestersId: params['semestersId'],
+            subgroupsId: params['subgroupsId'],
+            date: params['date'],
+            topic: params['topic'],
+            notes: params['notes'],
+          ),
+        ),
+        'deleteClass': _i1.MethodConnector(
+          name: 'deleteClass',
+          params: {
+            'classId': _i1.ParameterDescription(
+              name: 'classId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['classes'] as _i5.ClassesEndpoint).deleteClass(
+            session,
+            params['classId'],
+          ),
+        ),
       },
     );
     connectors['groups'] = _i1.EndpointConnector(

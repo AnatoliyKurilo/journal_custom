@@ -63,7 +63,7 @@ class _ViewClassAttendancePageState extends State<ViewClassAttendancePage> {
 
   @override
   Widget build(BuildContext context) {
-    String classTitle = '123';
+    String classTitle = '';
     if (widget.classItem.subjects?.name != null) {
       classTitle += '${widget.classItem.subjects!.name}';
     }

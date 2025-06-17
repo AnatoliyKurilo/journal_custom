@@ -199,6 +199,39 @@ class EndpointClasses extends _i1.EndpointRef {
           'endDate': endDate,
         },
       );
+
+  _i2.Future<_i11.Classes> updateClass({
+    required int classId,
+    int? subjectsId,
+    int? classTypesId,
+    int? teachersId,
+    int? semestersId,
+    int? subgroupsId,
+    DateTime? date,
+    String? topic,
+    String? notes,
+  }) =>
+      caller.callServerEndpoint<_i11.Classes>(
+        'classes',
+        'updateClass',
+        {
+          'classId': classId,
+          'subjectsId': subjectsId,
+          'classTypesId': classTypesId,
+          'teachersId': teachersId,
+          'semestersId': semestersId,
+          'subgroupsId': subgroupsId,
+          'date': date,
+          'topic': topic,
+          'notes': notes,
+        },
+      );
+
+  _i2.Future<bool> deleteClass(int classId) => caller.callServerEndpoint<bool>(
+        'classes',
+        'deleteClass',
+        {'classId': classId},
+      );
 }
 
 /// {@category Endpoint}

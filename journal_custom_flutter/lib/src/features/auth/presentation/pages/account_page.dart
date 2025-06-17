@@ -20,6 +20,7 @@ class AccountPage extends StatelessWidget {
     final isGroupHead = sessionManager.signedInUser?.scopeNames.contains('groupHead') ?? false;
     final isCurator = sessionManager.signedInUser?.scopeNames.contains('curator') ?? false;
     final isDocumentSpecialist = sessionManager.signedInUser?.scopeNames.contains('documentSpecialist') ?? false;
+    final isTeacher = sessionManager.signedInUser?.scopeNames.contains('teacher') ?? false; // Добавляем проверку для преподавателя
 
     developer.log(
       'User scopes: ${sessionManager.signedInUser?.scopeNames}',
@@ -137,7 +138,7 @@ class AccountPage extends StatelessWidget {
             ),
           
           // Кнопка Студенты
-          if (isAdmin || isCurator || isDocumentSpecialist)
+          if (isAdmin || isCurator || isDocumentSpecialist )
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               child: ElevatedButton(
@@ -171,7 +172,7 @@ class AccountPage extends StatelessWidget {
               ),
             ),
           
-          if (isGroupHead || isCurator || isAdmin)
+          if (isGroupHead || isCurator || isAdmin || isTeacher)
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
               child: ElevatedButton(
@@ -188,6 +189,7 @@ class AccountPage extends StatelessWidget {
               ),
             ),
 
+          // Кнопка "Просмотр посещаемости" остается доступной всем
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16.0, vertical: 8.0),
             child: ElevatedButton(

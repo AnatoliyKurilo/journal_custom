@@ -155,4 +155,92 @@ class PermissionService {
 
     return false;
   }
+
+  // Проверка прав на просмотр предметов группы
+  static Future<bool> canViewGroupSubjects(Session session, int groupId) async {
+    final authInfo = await session.authenticated;
+    if (authInfo == null) return false;
+
+    final userInfo = await Users.findUserByUserId(session, authInfo.userId);
+    if (userInfo == null) return false;
+
+    // Администратор может видеть все
+    if (userInfo.scopes.contains(Scope.admin)) {
+      return true;
+    }
+
+    // Специалист по документообороту может видеть все
+    if (userInfo.scopes.contains(CustomScope.documentSpecialist)) {
+      return true;
+    }
+
+    // Находим связанную запись Person
+    final person = await Person.db.findFirstRow(
+      session,
+      where: (p) => p.userInfoId.equals(authInfo.userId),
+    );
+    if (person == null) return false;
+
+    // Куратор может видеть свои группы
+    if (userInfo.scopes.contains(CustomScope.curator)) {
+      final teacher = await Teachers.db.findFirstRow(
+        session,
+        where: (t) => t.personId.equals(person.id),
+      );
+      
+      if (teacher != null) {
+        final group = await Groups.db.findById(session, groupId);
+        return group?.curatorId == teacher.id;
+      }
+    }
+
+    // Староста может видеть свою группу
+    if (userInfo.scopes.contains(CustomScope.groupHead)) {
+      final student = await Students.db.findFirstRow(
+        session,
+        where: (s) => s.personId.equals(person.id),
+      );
+      
+      return student?.groupsId == groupId;
+    }
+
+    // ДОБАВЛЯЕМ: Преподаватель может видеть группы, в которых ведет занятия
+    if (userInfo.scopes.contains(CustomScope.teacher)) {
+      final teacher = await Teachers.db.findFirstRow(
+        session,
+        where: (t) => t.personId.equals(person.id),
+      );
+
+      if (teacher != null) {
+        final subgroups = await Subgroups.db.find(
+          session,
+          where: (s) => s.groupsId.equals(groupId),
+        );
+
+        if (subgroups.isNotEmpty) {
+          final subgroupIds = subgroups.map((s) => s.id!).toSet();
+
+          final teacherClasses = await Classes.db.find(
+            session,
+            where: (c) => c.teachersId.equals(teacher.id) & c.subgroupsId.inSet(subgroupIds),
+            limit: 1,
+          );
+
+          return teacherClasses.isNotEmpty;
+        }
+      }
+    }
+
+    // ДОБАВЛЯЕМ: Студент может видеть предметы своей группы
+    if (userInfo.scopes.contains(CustomScope.student)) {
+      final student = await Students.db.findFirstRow(
+        session,
+        where: (s) => s.personId.equals(person.id),
+      );
+      
+      return student?.groupsId == groupId;
+    }
+
+    return false;
+  }
 }

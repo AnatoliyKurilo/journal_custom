@@ -333,5 +333,107 @@ void main() {
 
     });
 
+    group('updateClass', () {
+  test('updates an existing class', () async {
+    final existingClass = await Classes.db.findById(session, 1);
+    expect(existingClass, isNotNull);
+
+    final updatedClass = await endpoints.classes.updateClass(
+      authenticatedSessionBuilder,
+      classId: 1,
+      topic: 'Обновленная тема занятия',
+      notes: 'Обновленные примечания',
+    );
+
+    expect(updatedClass, isNotNull);
+    expect(updatedClass.topic, equals('Обновленная тема занятия'));
+    expect(updatedClass.notes, equals('Обновленные примечания'));
+  });
+
+  test('throws exception for non-existing class', () async {
+    Future<void> action() async {
+      await endpoints.classes.updateClass(
+        authenticatedSessionBuilder,
+        classId: -1,
+        topic: 'Тема',
+      );
+    }
+
+    await expectLater(action, throwsA(isA<Exception>().having(
+      (e) => e.toString(),
+      'message',
+      contains('Занятие с ID "-1" не найдено.'),
+    )));
+  });
+
+  test('throws exception for unauthorized user', () async {
+    var unauthorizedSession = sessionBuilder.copyWith(
+      authentication: AuthenticationOverride.authenticationInfo(
+        userId,
+        {CustomScope.student},
+      ),
+    );
+
+    Future<void> action() async {
+      await endpoints.classes.updateClass(
+        unauthorizedSession,
+        classId: 1,
+        topic: 'Тема',
+      );
+    }
+
+    await expectLater(action, throwsA(isA<Exception>().having(
+      (e) => e.toString(),
+      'message',
+      contains('Доступ запрещен: студенты не могут редактировать занятия.'),
+    )));
+  });
+});
+
+group('deleteClass', () {
+  test('deletes an existing class', () async {
+    final result = await endpoints.classes.deleteClass(
+      authenticatedSessionBuilder,
+      1,
+    );
+
+    expect(result, isTrue);
+
+    final deletedClass = await Classes.db.findById(session, 1);
+    expect(deletedClass, isNull);
+  });
+
+  test('throws exception for non-existing class', () async {
+    Future<void> action() async {
+      await endpoints.classes.deleteClass(authenticatedSessionBuilder, -1);
+    }
+
+    await expectLater(action, throwsA(isA<Exception>().having(
+      (e) => e.toString(),
+      'message',
+      contains('Занятие с ID "-1" не найдено.'),
+    )));
+  });
+
+  test('throws exception for unauthorized user', () async {
+    var unauthorizedSession = sessionBuilder.copyWith(
+      authentication: AuthenticationOverride.authenticationInfo(
+        userId,
+        {CustomScope.student},
+      ),
+    );
+
+    Future<void> action() async {
+      await endpoints.classes.deleteClass(unauthorizedSession, 1);
+    }
+
+    await expectLater(action, throwsA(isA<Exception>().having(
+      (e) => e.toString(),
+      'message',
+      contains('Доступ запрещен: студенты не могут удалять занятия.'),
+    )));
+  });
+});
+
   }); 
 }
