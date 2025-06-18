@@ -259,6 +259,10 @@ class Protocol extends _i1.SerializationManager {
       return (data as List).map((e) => deserialize<_i27.Classes>(e)).toList()
           as T;
     }
+    if (t == Map<String, dynamic>) {
+      return (data as Map).map((k, v) =>
+          MapEntry(deserialize<String>(k), deserialize<dynamic>(v))) as T;
+    }
     if (t == List<_i28.Person>) {
       return (data as List).map((e) => deserialize<_i28.Person>(e)).toList()
           as T;
@@ -287,10 +291,6 @@ class Protocol extends _i1.SerializationManager {
       return (data as List)
           .map((e) => deserialize<Map<String, dynamic>>(e))
           .toList() as T;
-    }
-    if (t == Map<String, dynamic>) {
-      return (data as Map).map((k, v) =>
-          MapEntry(deserialize<String>(k), deserialize<dynamic>(v))) as T;
     }
     if (t == List<_i31.Teachers>) {
       return (data as List).map((e) => deserialize<_i31.Teachers>(e)).toList()

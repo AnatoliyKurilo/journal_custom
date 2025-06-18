@@ -16,6 +16,9 @@ classes:
   - importClassesFromScheduleForGroup:
   - updateClass:
   - deleteClass:
+  - closeClassByTeacher:
+  - reopenClass:
+  - getClassStatus:
 groups:
   - createGroup:
   - getAllGroups:

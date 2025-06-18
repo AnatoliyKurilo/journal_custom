@@ -35,6 +35,9 @@ abstract class Classes
     required this.date,
     this.topic,
     this.notes,
+    this.isClosedByTeacher,
+    this.closedAt,
+    this.closedByTeacherId,
   });
 
   factory Classes({
@@ -52,6 +55,9 @@ abstract class Classes
     required DateTime date,
     String? topic,
     String? notes,
+    bool? isClosedByTeacher,
+    DateTime? closedAt,
+    int? closedByTeacherId,
   }) = _ClassesImpl;
 
   factory Classes.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -85,6 +91,11 @@ abstract class Classes
       date: _i1.DateTimeJsonExtension.fromJson(jsonSerialization['date']),
       topic: jsonSerialization['topic'] as String?,
       notes: jsonSerialization['notes'] as String?,
+      isClosedByTeacher: jsonSerialization['isClosedByTeacher'] as bool?,
+      closedAt: jsonSerialization['closedAt'] == null
+          ? null
+          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['closedAt']),
+      closedByTeacherId: jsonSerialization['closedByTeacherId'] as int?,
     );
   }
 
@@ -121,6 +132,12 @@ abstract class Classes
 
   String? notes;
 
+  bool? isClosedByTeacher;
+
+  DateTime? closedAt;
+
+  int? closedByTeacherId;
+
   @override
   _i1.Table<int?> get table => t;
 
@@ -142,6 +159,9 @@ abstract class Classes
     DateTime? date,
     String? topic,
     String? notes,
+    bool? isClosedByTeacher,
+    DateTime? closedAt,
+    int? closedByTeacherId,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -160,6 +180,9 @@ abstract class Classes
       'date': date.toJson(),
       if (topic != null) 'topic': topic,
       if (notes != null) 'notes': notes,
+      if (isClosedByTeacher != null) 'isClosedByTeacher': isClosedByTeacher,
+      if (closedAt != null) 'closedAt': closedAt?.toJson(),
+      if (closedByTeacherId != null) 'closedByTeacherId': closedByTeacherId,
     };
   }
 
@@ -180,6 +203,9 @@ abstract class Classes
       'date': date.toJson(),
       if (topic != null) 'topic': topic,
       if (notes != null) 'notes': notes,
+      if (isClosedByTeacher != null) 'isClosedByTeacher': isClosedByTeacher,
+      if (closedAt != null) 'closedAt': closedAt?.toJson(),
+      if (closedByTeacherId != null) 'closedByTeacherId': closedByTeacherId,
     };
   }
 
@@ -243,6 +269,9 @@ class _ClassesImpl extends Classes {
     required DateTime date,
     String? topic,
     String? notes,
+    bool? isClosedByTeacher,
+    DateTime? closedAt,
+    int? closedByTeacherId,
   }) : super._(
           id: id,
           subjectsId: subjectsId,
@@ -258,6 +287,9 @@ class _ClassesImpl extends Classes {
           date: date,
           topic: topic,
           notes: notes,
+          isClosedByTeacher: isClosedByTeacher,
+          closedAt: closedAt,
+          closedByTeacherId: closedByTeacherId,
         );
 
   /// Returns a shallow copy of this [Classes]
@@ -279,6 +311,9 @@ class _ClassesImpl extends Classes {
     DateTime? date,
     Object? topic = _Undefined,
     Object? notes = _Undefined,
+    Object? isClosedByTeacher = _Undefined,
+    Object? closedAt = _Undefined,
+    Object? closedByTeacherId = _Undefined,
   }) {
     return Classes(
       id: id is int? ? id : this.id,
@@ -301,6 +336,13 @@ class _ClassesImpl extends Classes {
       date: date ?? this.date,
       topic: topic is String? ? topic : this.topic,
       notes: notes is String? ? notes : this.notes,
+      isClosedByTeacher: isClosedByTeacher is bool?
+          ? isClosedByTeacher
+          : this.isClosedByTeacher,
+      closedAt: closedAt is DateTime? ? closedAt : this.closedAt,
+      closedByTeacherId: closedByTeacherId is int?
+          ? closedByTeacherId
+          : this.closedByTeacherId,
     );
   }
 }
@@ -339,6 +381,18 @@ class ClassesTable extends _i1.Table<int?> {
       'notes',
       this,
     );
+    isClosedByTeacher = _i1.ColumnBool(
+      'isClosedByTeacher',
+      this,
+    );
+    closedAt = _i1.ColumnDateTime(
+      'closedAt',
+      this,
+    );
+    closedByTeacherId = _i1.ColumnInt(
+      'closedByTeacherId',
+      this,
+    );
   }
 
   late final _i1.ColumnInt subjectsId;
@@ -366,6 +420,12 @@ class ClassesTable extends _i1.Table<int?> {
   late final _i1.ColumnString topic;
 
   late final _i1.ColumnString notes;
+
+  late final _i1.ColumnBool isClosedByTeacher;
+
+  late final _i1.ColumnDateTime closedAt;
+
+  late final _i1.ColumnInt closedByTeacherId;
 
   _i2.SubjectsTable get subjects {
     if (_subjects != null) return _subjects!;
@@ -443,6 +503,9 @@ class ClassesTable extends _i1.Table<int?> {
         date,
         topic,
         notes,
+        isClosedByTeacher,
+        closedAt,
+        closedByTeacherId,
       ];
 
   @override

@@ -187,8 +187,8 @@ class ClassesEndpoint extends Endpoint {
       return [];
     }
 
-    // Если пользователь — преподаватель (но НЕ куратор), фильтруем занятия по его ID
-    if (authInfo.scopes.contains(CustomScope.teacher) && !authInfo.scopes.contains(CustomScope.curator)) {
+    // Если пользователь — преподаватель, фильтруем занятия по его ID
+    if (authInfo.scopes.contains(CustomScope.teacher)) {
       final person = await Person.db.findFirstRow(
         session,
         where: (p) => p.userInfoId.equals(authInfo.userId),
@@ -850,5 +850,105 @@ class ClassesEndpoint extends Endpoint {
   // Удаляем само занятие
   await Classes.db.deleteRow(session, existingClass);
   return true;
+}
+
+  /// Закрыть занятие (подпись преподавателя)
+Future<Classes> closeClassByTeacher(Session session, int classId) async {
+  final authInfo = await session.authenticated;
+  if (authInfo == null) {
+    throw Exception('Пользователь не авторизован.');
+  }
+
+  final classInfo = await Classes.db.findById(session, classId);
+  if (classInfo == null) {
+    throw Exception('Занятие с ID $classId не найдено.');
+  }
+
+  // Проверяем, является ли пользователь преподавателем этого занятия
+  final person = await Person.db.findFirstRow(
+    session,
+    where: (p) => p.userInfoId.equals(authInfo.userId),
+  );
+  
+  if (person == null) {
+    throw Exception('Пользователь не найден.');
+  }
+
+  final teacher = await Teachers.db.findFirstRow(
+    session,
+    where: (t) => t.personId.equals(person.id),
+  );
+  
+  if (teacher == null || teacher.id != classInfo.teachersId) {
+    throw Exception('Только преподаватель данного занятия может его закрыть.');
+  }
+
+  if (classInfo.isClosedByTeacher == true) {
+    throw Exception('Занятие уже закрыто.');
+  }
+
+  // Закрываем занятие
+  final updatedClass = classInfo.copyWith(
+    isClosedByTeacher: true,
+    closedAt: DateTime.now(),
+    closedByTeacherId: teacher.id,
+  );
+
+  return await Classes.db.updateRow(session, updatedClass);
+}
+
+/// Открыть занятие (только для администраторов)
+Future<Classes> reopenClass(Session session, int classId) async {
+  final authInfo = await session.authenticated;
+  if (authInfo == null) {
+    throw Exception('Пользователь не авторизован.');
+  }
+
+  // Проверяем права администратора
+  final userInfo = await Users.findUserByUserId(session, authInfo.userId);
+  if (userInfo == null || !userInfo.scopes.contains(Scope.admin)) {
+    throw Exception('Только администраторы могут открывать закрытые занятия.');
+  }
+
+  final classInfo = await Classes.db.findById(session, classId);
+  if (classInfo == null) {
+    throw Exception('Занятие с ID $classId не найдено.');
+  }
+
+  if (classInfo.isClosedByTeacher != true) {
+    throw Exception('Занятие не закрыто.');
+  }
+
+  // Открываем занятие
+  final updatedClass = classInfo.copyWith(
+    isClosedByTeacher: false,
+    closedAt: null,
+    closedByTeacherId: null,
+  );
+
+  return await Classes.db.updateRow(session, updatedClass);
+}
+
+/// Получить статус занятия
+Future<Map<String, dynamic>> getClassStatus(Session session, int classId) async {
+  final classInfo = await Classes.db.findById(
+    session, 
+    classId,
+    include: Classes.include(
+      teachers: Teachers.include(person: Person.include()),
+    ),
+  );
+  
+  if (classInfo == null) {
+    throw Exception('Занятие с ID $classId не найдено.');
+  }
+
+  return {
+    'isClosed': classInfo.isClosedByTeacher ?? false,
+    'closedAt': classInfo.closedAt?.toIso8601String(),
+    'closedByTeacher': classInfo.teachers?.person != null 
+        ? '${classInfo.teachers!.person!.firstName} ${classInfo.teachers!.person!.lastName}'
+        : null,
+  };
 }
 }

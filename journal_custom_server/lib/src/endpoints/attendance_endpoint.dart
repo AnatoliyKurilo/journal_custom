@@ -61,56 +61,120 @@ class AttendanceEndpoint extends Endpoint {
   }
 
   // Обновление посещаемости студента
-  Future<Attendance> updateStudentAttendance(Session session, {
-    required int classId,
-    required int studentId,
-    required bool isPresent,
-    String? comment,
-  }) async {
+  // Future<Attendance> updateStudentAttendance(Session session, {
+  //   required int classId,
+  //   required int studentId,
+  //   required bool isPresent,
+  //   String? comment,
+  // }) async {
+  // // Проверяем существование занятия
+  // final classInfo = await Classes.db.findById(session, classId);
+  // if (classInfo == null) {
+  //   throw Exception('Занятие с ID $classId не найдено.');
+  // }
+  // // Проверяем существование студента
+  // final studentInfo = await Students.db.findById(session, studentId);
+  // if (studentInfo == null) {
+  //   throw Exception('Студент с ID $studentId не найден.');
+  // }
+  //   var attendanceRecord = await Attendance.db.findFirstRow(
+  //     session,
+  //     where: (a) => a.classesId.equals(classId) & a.studentsId.equals(studentId),
+  //   );
+  //   if (attendanceRecord == null) {
+  //     attendanceRecord = Attendance(
+  //       classesId: classId,
+  //       studentsId: studentId,
+  //       isPresent: isPresent,
+  //       comment: comment,
+  //     );
+  //     return await Attendance.db.insertRow(session, attendanceRecord);
+  //   } else {
+  //     attendanceRecord.isPresent = isPresent;
+  //     attendanceRecord.comment = comment;
+  //     return await Attendance.db.updateRow(session, attendanceRecord);
+  //   }
+  // }
 
+Future<Attendance> updateStudentAttendance(Session session, {
+  required int classId,
+  required int studentId,
+  required bool isPresent,
+  String? comment,
+}) async {
   // Проверяем существование занятия
   final classInfo = await Classes.db.findById(session, classId);
   if (classInfo == null) {
     throw Exception('Занятие с ID $classId не найдено.');
   }
 
-  // Проверяем существование студента
+  // НОВАЯ ПРОВЕРКА: Проверяем, не закрыто ли занятие преподавателем
+  if (classInfo.isClosedByTeacher == true) {
+    // Проверяем, является ли текущий пользователь преподавателем этого занятия
+    final authInfo = await session.authenticated;
+    if (authInfo != null) {
+      final person = await Person.db.findFirstRow(
+        session,
+        where: (p) => p.userInfoId.equals(authInfo.userId),
+      );
+      
+      if (person != null) {
+        final teacher = await Teachers.db.findFirstRow(
+          session,
+          where: (t) => t.personId.equals(person.id),
+        );
+        
+        // Если это не преподаватель данного занятия, запрещаем изменения
+        if (teacher == null || teacher.id != classInfo.teachersId) {
+          throw Exception('Занятие закрыто преподавателем. Изменения посещаемости невозможны.');
+        }
+        
+        // Если это преподаватель занятия, но у него нет роли admin, 
+        // также можно запретить (по вашему усмотрению)
+        // final userInfo = await Users.findUserByUserId(session, authInfo.userId);
+        // if (userInfo != null && !userInfo.scopes.contains(Scope.admin)) {
+        //   throw Exception('Занятие закрыто. Для повторного открытия обратитесь к администратору.');
+        // }
+      }
+    }
+  }
+
+  // Остальная логика обновления посещаемости...
   final studentInfo = await Students.db.findById(session, studentId);
   if (studentInfo == null) {
     throw Exception('Студент с ID $studentId не найден.');
   }
 
-    var attendanceRecord = await Attendance.db.findFirstRow(
-      session,
-      where: (a) => a.classesId.equals(classId) & a.studentsId.equals(studentId),
+  var attendanceRecord = await Attendance.db.findFirstRow(
+    session,
+    where: (a) => a.classesId.equals(classId) & a.studentsId.equals(studentId),
+  );
+  
+  if (attendanceRecord == null) {
+    attendanceRecord = Attendance(
+      classesId: classId,
+      studentsId: studentId,
+      isPresent: isPresent,
+      comment: comment,
     );
-    if (attendanceRecord == null) {
-      attendanceRecord = Attendance(
-        classesId: classId,
-        studentsId: studentId,
-        isPresent: isPresent,
-        comment: comment,
-      );
-      return await Attendance.db.insertRow(session, attendanceRecord);
-    } else {
-      attendanceRecord.isPresent = isPresent;
-      attendanceRecord.comment = comment;
-      return await Attendance.db.updateRow(session, attendanceRecord);
-    }
+    return await Attendance.db.insertRow(session, attendanceRecord);
+  } else {
+    attendanceRecord.isPresent = isPresent;
+    attendanceRecord.comment = comment;
+    return await Attendance.db.updateRow(session, attendanceRecord);
   }
+}
 
   // Получение общей посещаемости по предмету
   Future<List<StudentClassAttendanceFlatRecord>> getSubjectOverallAttendance(
     Session session, {
     required int subjectId,
   }) async {
-
     if (subjectId <= 0) {
       throw Exception('Предмет с ID $subjectId не найден.');
     }
-    // Перенести логику из ClassesEndpoint
-    final List<StudentClassAttendanceFlatRecord> flatRecords = [];
 
+    final List<StudentClassAttendanceFlatRecord> flatRecords = [];
     final classesForSubject = await Classes.db.find(
       session,
       where: (c) => c.subjectsId.equals(subjectId),
@@ -180,6 +244,8 @@ class AttendanceEndpoint extends Endpoint {
     }
     return flatRecords;
   }
+
+
 
   // Получение матрицы посещаемости по предмету
   Future<SubjectAttendanceMatrix> getSubjectAttendanceMatrix(

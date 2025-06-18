@@ -32,6 +32,9 @@ abstract class Classes implements _i1.SerializableModel {
     required this.date,
     this.topic,
     this.notes,
+    this.isClosedByTeacher,
+    this.closedAt,
+    this.closedByTeacherId,
   });
 
   factory Classes({
@@ -49,6 +52,9 @@ abstract class Classes implements _i1.SerializableModel {
     required DateTime date,
     String? topic,
     String? notes,
+    bool? isClosedByTeacher,
+    DateTime? closedAt,
+    int? closedByTeacherId,
   }) = _ClassesImpl;
 
   factory Classes.fromJson(Map<String, dynamic> jsonSerialization) {
@@ -82,6 +88,11 @@ abstract class Classes implements _i1.SerializableModel {
       date: _i1.DateTimeJsonExtension.fromJson(jsonSerialization['date']),
       topic: jsonSerialization['topic'] as String?,
       notes: jsonSerialization['notes'] as String?,
+      isClosedByTeacher: jsonSerialization['isClosedByTeacher'] as bool?,
+      closedAt: jsonSerialization['closedAt'] == null
+          ? null
+          : _i1.DateTimeJsonExtension.fromJson(jsonSerialization['closedAt']),
+      closedByTeacherId: jsonSerialization['closedByTeacherId'] as int?,
     );
   }
 
@@ -116,6 +127,12 @@ abstract class Classes implements _i1.SerializableModel {
 
   String? notes;
 
+  bool? isClosedByTeacher;
+
+  DateTime? closedAt;
+
+  int? closedByTeacherId;
+
   /// Returns a shallow copy of this [Classes]
   /// with some or all fields replaced by the given arguments.
   @_i1.useResult
@@ -134,6 +151,9 @@ abstract class Classes implements _i1.SerializableModel {
     DateTime? date,
     String? topic,
     String? notes,
+    bool? isClosedByTeacher,
+    DateTime? closedAt,
+    int? closedByTeacherId,
   });
   @override
   Map<String, dynamic> toJson() {
@@ -152,6 +172,9 @@ abstract class Classes implements _i1.SerializableModel {
       'date': date.toJson(),
       if (topic != null) 'topic': topic,
       if (notes != null) 'notes': notes,
+      if (isClosedByTeacher != null) 'isClosedByTeacher': isClosedByTeacher,
+      if (closedAt != null) 'closedAt': closedAt?.toJson(),
+      if (closedByTeacherId != null) 'closedByTeacherId': closedByTeacherId,
     };
   }
 
@@ -179,6 +202,9 @@ class _ClassesImpl extends Classes {
     required DateTime date,
     String? topic,
     String? notes,
+    bool? isClosedByTeacher,
+    DateTime? closedAt,
+    int? closedByTeacherId,
   }) : super._(
           id: id,
           subjectsId: subjectsId,
@@ -194,6 +220,9 @@ class _ClassesImpl extends Classes {
           date: date,
           topic: topic,
           notes: notes,
+          isClosedByTeacher: isClosedByTeacher,
+          closedAt: closedAt,
+          closedByTeacherId: closedByTeacherId,
         );
 
   /// Returns a shallow copy of this [Classes]
@@ -215,6 +244,9 @@ class _ClassesImpl extends Classes {
     DateTime? date,
     Object? topic = _Undefined,
     Object? notes = _Undefined,
+    Object? isClosedByTeacher = _Undefined,
+    Object? closedAt = _Undefined,
+    Object? closedByTeacherId = _Undefined,
   }) {
     return Classes(
       id: id is int? ? id : this.id,
@@ -237,6 +269,13 @@ class _ClassesImpl extends Classes {
       date: date ?? this.date,
       topic: topic is String? ? topic : this.topic,
       notes: notes is String? ? notes : this.notes,
+      isClosedByTeacher: isClosedByTeacher is bool?
+          ? isClosedByTeacher
+          : this.isClosedByTeacher,
+      closedAt: closedAt is DateTime? ? closedAt : this.closedAt,
+      closedByTeacherId: closedByTeacherId is int?
+          ? closedByTeacherId
+          : this.closedByTeacherId,
     );
   }
 }

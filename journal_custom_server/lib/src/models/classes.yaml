@@ -17,3 +17,7 @@ fields:
     # groups: List<Groups>?, relation(optional)
   topic: String? # Новое поле "Тема занятия"
   notes: String? # Новое поле "Комментарии/Примечание"
+  isClosedByTeacher: bool? # Новое поле
+  closedAt: DateTime? # Когда было закрыто
+  closedByTeacherId: int? # Кто закрыл (для истории)
+  

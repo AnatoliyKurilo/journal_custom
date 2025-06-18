@@ -28,7 +28,6 @@ class MockSessionManager extends Mock implements SessionManager {
   @override
   bool get isSignedIn => _mockSignedInUser != null;
   
-  // Добавляем все необходимые методы SessionManager
   @override
   Stream<UserInfo?> get onUserChanged => Stream.value(_mockSignedInUser);
   
@@ -44,7 +43,6 @@ class MockSessionManager extends Mock implements SessionManager {
     return true;
   }
   
-  // Добавляем поддержку слушателей
   @override
   void addListener(VoidCallback listener) {
     _listeners.add(listener);
@@ -63,7 +61,7 @@ class MockSessionManager extends Mock implements SessionManager {
   
   void setMockSignedInUser(UserInfo? user) {
     _mockSignedInUser = user;
-    _notifyListeners(); // Уведомляем слушателей об изменении
+    _notifyListeners();
   }
 }
 
@@ -109,160 +107,422 @@ void main() {
   late MockClient mockClient;
 
   setUp(() {
-    // Инициализируем моки перед каждым тестом
     mockSessionManager = MockSessionManager();
     mockClient = MockClient();
     
-    // Настраиваем структуру моков
     final mockModules = MockModules();
     final mockAuthModule = MockAuthModule();
     
     mockModules.auth = mockAuthModule;
     mockClient.modules = mockModules;
     
-    // Заменяем глобальные переменные на моки
     serverpod_client.sessionManager = mockSessionManager;
     serverpod_client.client = mockClient;
   });
 
-  testWidgets('MyHomePage displays AccountPage when signed in', (WidgetTester tester) async {
-    // Создаем мок пользователя
-    final mockUser = UserInfo(
-      id: 1,
-      userIdentifier: 'test@example.com',
-      email: 'test@example.com',
-      userName: 'Test User',
-      fullName: 'Test User',
-      created: DateTime.now(),
-      imageUrl: null,
-      scopeNames: ['user'],
-      blocked: false,
-    );
-    
-    // Устанавливаем пользователя в мок
-    mockSessionManager.setMockSignedInUser(mockUser);
+  group('App Navigation Tests', () {
+    testWidgets('MyHomePage displays AccountPage when signed in', (WidgetTester tester) async {
+      final mockUser = UserInfo(
+        id: 1,
+        userIdentifier: 'test@example.com',
+        email: 'test@example.com',
+        userName: 'Test User',
+        fullName: 'Test User',
+        created: DateTime.now(),
+        imageUrl: null,
+        scopeNames: ['user'],
+        blocked: false,
+      );
+      
+      mockSessionManager.setMockSignedInUser(mockUser);
 
-    // Загружаем виджет MyApp
-    await tester.pumpWidget(const MyApp());
-    
-    // Ждем завершения анимаций
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
 
-    // Проверяем, что отображается AccountPage
-    expect(find.byType(AccountPage), findsOneWidget);
+      expect(find.byType(AccountPage), findsOneWidget);
+    });
+
+    testWidgets('MyHomePage displays SignInPage when not signed in', (WidgetTester tester) async {
+      mockSessionManager.setMockSignedInUser(null);
+
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SignInPage), findsOneWidget);
+    });
+    
+    testWidgets('MyHomePage switches between pages based on auth state', (WidgetTester tester) async {
+      mockSessionManager.setMockSignedInUser(null);
+
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SignInPage), findsOneWidget);
+      expect(find.byType(AccountPage), findsNothing);
+
+      final mockUser = UserInfo(
+        id: 1,
+        userIdentifier: 'test@example.com',
+        email: 'test@example.com',
+        userName: 'Test User',
+        fullName: 'Test User',
+        created: DateTime.now(),
+        imageUrl: null,
+        scopeNames: ['user'],
+        blocked: false,
+      );
+      
+      mockSessionManager.setMockSignedInUser(mockUser);
+
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AccountPage), findsOneWidget);
+      expect(find.byType(SignInPage), findsNothing);
+    });
   });
 
-  testWidgets('MyHomePage displays SignInPage when not signed in', (WidgetTester tester) async {
-    // Устанавливаем null пользователя (не авторизован)
-    mockSessionManager.setMockSignedInUser(null);
+  group('SignInPage Widget Tests', () {
+    testWidgets('displays all required elements', (WidgetTester tester) async {
+      mockSessionManager.setMockSignedInUser(null);
 
-    // Загружаем виджет MyApp
-    await tester.pumpWidget(const MyApp());
-    
-    // Ждем завершения анимаций
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
 
-    // Проверяем, что отображается SignInPage
-    expect(find.byType(SignInPage), findsOneWidget);
-  });
-  
-  testWidgets('MyHomePage switches between pages based on auth state', (WidgetTester tester) async {
-    // Начинаем с неавторизованного состояния
-    mockSessionManager.setMockSignedInUser(null);
+      expect(find.byType(SignInPage), findsOneWidget);
+      expect(find.byType(SignInWithEmailButton), findsOneWidget);
+      expect(find.text('Журнал посещаемости'), findsOneWidget);
+      expect(find.text('Войти с Email'), findsOneWidget);
+      expect(find.byType(Image), findsOneWidget);
+    });
 
-    // Загружаем виджет MyApp
-    await tester.pumpWidget(const MyApp());
-    await tester.pumpAndSettle();
+    testWidgets('logo image loads correctly', (WidgetTester tester) async {
+      mockSessionManager.setMockSignedInUser(null);
 
-    // Проверяем, что отображается SignInPage
-    expect(find.byType(SignInPage), findsOneWidget);
-    expect(find.byType(AccountPage), findsNothing);
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
 
-    // Эмулируем авторизацию
-    final mockUser = UserInfo(
-      id: 1,
-      userIdentifier: 'test@example.com',
-      email: 'test@example.com',
-      userName: 'Test User',
-      fullName: 'Test User',
-      created: DateTime.now(),
-      imageUrl: null,
-      scopeNames: ['user'],
-      blocked: false,
-    );
-    
-    // Устанавливаем пользователя - это автоматически вызовет _notifyListeners()
-    mockSessionManager.setMockSignedInUser(mockUser);
+      final imageFinder = find.byType(Image);
+      expect(imageFinder, findsOneWidget);
 
-    // Даем время для перерисовки после уведомления слушателей
-    await tester.pump();
-    await tester.pumpAndSettle();
+      final Image image = tester.widget(imageFinder);
+      expect(image.height, equals(150));
+    });
 
-    // Проверяем, что теперь отображается AccountPage
-    expect(find.byType(AccountPage), findsOneWidget);
-    expect(find.byType(SignInPage), findsNothing);
+    testWidgets('sign in button is interactive', (WidgetTester tester) async {
+      mockSessionManager.setMockSignedInUser(null);
+
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
+
+      final buttonFinder = find.byType(SignInWithEmailButton);
+      expect(buttonFinder, findsOneWidget);
+
+      await tester.tap(buttonFinder);
+      await tester.pumpAndSettle();
+    });
   });
 
-  testWidgets('SignInPage displays correctly with auth button', (WidgetTester tester) async {
-    // Устанавливаем неавторизованное состояние
-    mockSessionManager.setMockSignedInUser(null);
+  group('AccountPage Navigation Tests', () {
+    testWidgets('displays admin panel button for admin users', (WidgetTester tester) async {
+      final mockUser = UserInfo(
+        id: 1,
+        userIdentifier: 'admin@example.com',
+        email: 'admin@example.com',
+        userName: 'Admin User',
+        fullName: 'Admin User',
+        created: DateTime.now(),
+        imageUrl: null,
+        scopeNames: ['serverpod.admin'], // ИСПРАВЛЕНО: правильная роль админа
+        blocked: false,
+      );
+      
+      mockSessionManager.setMockSignedInUser(mockUser);
 
-    // Загружаем виджет MyApp
-    await tester.pumpWidget(const MyApp());
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
 
-    // Проверяем, что отображается SignInPage
-    expect(find.byType(SignInPage), findsOneWidget);
+      // ИСПРАВЛЕНО: правильный текст кнопки
+      expect(find.text('Панель администратора'), findsOneWidget);
+    });
 
-    // Проверяем наличие виджета SignInWithEmailButton
-    expect(find.byType(SignInWithEmailButton), findsOneWidget);
+    testWidgets('displays different options for different user roles', (WidgetTester tester) async {
+      // Тест для куратора
+      final curatorUser = UserInfo(
+        id: 1,
+        userIdentifier: 'curator@example.com',
+        email: 'curator@example.com',
+        userName: 'Curator User',
+        fullName: 'Curator User',
+        created: DateTime.now(),
+        imageUrl: null,
+        scopeNames: ['curator'],
+        blocked: false,
+      );
+      
+      mockSessionManager.setMockSignedInUser(curatorUser);
 
-    // Проверяем наличие заголовка
-    expect(find.text('Журнал посещаемости'), findsOneWidget);
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
 
-    // Проверяем наличие текста кнопки входа
-    expect(find.text('Войти с Email'), findsOneWidget);
+      expect(find.text('Управление посещаемостью'), findsOneWidget);
+      expect(find.text('Просмотр посещаемости'), findsOneWidget);
+      expect(find.text('Панель администратора'), findsNothing);
+    });
 
-    // Проверяем наличие логотипа (Image)
-    expect(find.byType(Image), findsOneWidget);
+    testWidgets('displays group head options', (WidgetTester tester) async {
+      final groupHeadUser = UserInfo(
+        id: 1,
+        userIdentifier: 'grouphead@example.com',
+        email: 'grouphead@example.com',
+        userName: 'Group Head User',
+        fullName: 'Group Head User',
+        created: DateTime.now(),
+        imageUrl: null,
+        scopeNames: ['groupHead'],
+        blocked: false,
+      );
+      
+      mockSessionManager.setMockSignedInUser(groupHeadUser);
 
-    // Проверяем, что можно нажать на кнопку входа по тексту
-    await tester.tap(find.text('Войти с Email'));
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
 
-    // После нажатия может появиться диалог входа
-    // (здесь можно добавить проверки для диалога, если нужно)
+      expect(find.text('Управление подгруппами'), findsOneWidget);
+      expect(find.text('Управление посещаемостью'), findsOneWidget);
+      expect(find.text('Просмотр посещаемости'), findsOneWidget);
+    });
+
+    testWidgets('regular user sees only basic options', (WidgetTester tester) async {
+      final regularUser = UserInfo(
+        id: 1,
+        userIdentifier: 'user@example.com',
+        email: 'user@example.com',
+        userName: 'Regular User',
+        fullName: 'Regular User',
+        created: DateTime.now(),
+        imageUrl: null,
+        scopeNames: ['student'], // обычный студент
+        blocked: false,
+      );
+      
+      mockSessionManager.setMockSignedInUser(regularUser);
+
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('Просмотр посещаемости'), findsOneWidget);
+      expect(find.text('Выйти'), findsOneWidget);
+      expect(find.text('Панель администратора'), findsNothing);
+      expect(find.text('Управление подгруппами'), findsNothing);
+      expect(find.text('Управление посещаемостью'), findsNothing);
+    });
   });
 
-  testWidgets('AccountPage displays user information when signed in', (WidgetTester tester) async {
-    // Создаем мок пользователя с тестовыми данными
-    final mockUser = UserInfo(
-      id: 1,
-      userIdentifier: 'test@example.com',
-      email: 'test@example.com',
-      userName: 'Test User',
-      fullName: 'Test User',
-      created: DateTime.now(),
-      imageUrl: null,
-      scopeNames: ['user'],
-      blocked: false,
-    );
-    
-    // Устанавливаем пользователя в мок
-    mockSessionManager.setMockSignedInUser(mockUser);
+  group('Auth Functionality Tests', () {
+    testWidgets('sign out functionality works correctly', (WidgetTester tester) async {
+      final mockUser = UserInfo(
+        id: 1,
+        userIdentifier: 'test@example.com',
+        email: 'test@example.com',
+        userName: 'Test User',
+        fullName: 'Test User',
+        created: DateTime.now(),
+        imageUrl: null,
+        scopeNames: ['user'],
+        blocked: false,
+      );
+      
+      mockSessionManager.setMockSignedInUser(mockUser);
 
-    // Загружаем виджет MyApp
-    await tester.pumpWidget(const MyApp());
-    await tester.pumpAndSettle();
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
 
-    // Проверяем, что отображается AccountPage
-    expect(find.byType(AccountPage), findsOneWidget);
+      expect(find.byType(AccountPage), findsOneWidget);
+      
+      await tester.tap(find.text('Выйти'));
+      await tester.pumpAndSettle();
 
-    // Проверяем наличие email пользователя
-    expect(find.text('test@example.com'), findsOneWidget);
-    
-    // Проверяем наличие кнопки выхода
-    expect(find.text('Выйти'), findsOneWidget);
+      expect(find.byType(SignInPage), findsOneWidget);
+      expect(find.byType(AccountPage), findsNothing);
+    });
+
+    testWidgets('app handles null user gracefully', (WidgetTester tester) async {
+      mockSessionManager.setMockSignedInUser(null);
+
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
+
+      expect(tester.takeException(), isNull);
+      expect(find.byType(SignInPage), findsOneWidget);
+    });
+
+    testWidgets('app handles multiple auth state changes', (WidgetTester tester) async {
+      mockSessionManager.setMockSignedInUser(null);
+
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SignInPage), findsOneWidget);
+
+      // Первая авторизация
+      final user1 = UserInfo(
+        id: 1,
+        userIdentifier: 'user1@example.com',
+        email: 'user1@example.com',
+        userName: 'User 1',
+        fullName: 'User 1',
+        created: DateTime.now(),
+        imageUrl: null,
+        scopeNames: ['user'],
+        blocked: false,
+      );
+      
+      mockSessionManager.setMockSignedInUser(user1);
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AccountPage), findsOneWidget);
+
+      // Выход
+      mockSessionManager.setMockSignedInUser(null);
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(SignInPage), findsOneWidget);
+
+      // Вторая авторизация с другим пользователем
+      final user2 = UserInfo(
+        id: 2,
+        userIdentifier: 'user2@example.com',
+        email: 'user2@example.com',
+        userName: 'User 2',
+        fullName: 'User 2',
+        created: DateTime.now(),
+        imageUrl: null,
+        scopeNames: ['serverpod.admin'],
+        blocked: false,
+      );
+      
+      mockSessionManager.setMockSignedInUser(user2);
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      expect(find.byType(AccountPage), findsOneWidget);
+      expect(find.text('Панель администратора'), findsOneWidget);
+    });
+  });
+
+  group('User Interface Tests', () {
+    testWidgets('displays user information correctly', (WidgetTester tester) async {
+      final mockUser = UserInfo(
+        id: 1,
+        userIdentifier: 'test@example.com',
+        email: 'test@example.com',
+        userName: 'Test User Name',
+        fullName: 'Full Test User Name',
+        created: DateTime.now(),
+        imageUrl: null,
+        scopeNames: ['user'],
+        blocked: false,
+      );
+      
+      mockSessionManager.setMockSignedInUser(mockUser);
+
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('test@example.com'), findsOneWidget);
+      expect(find.text('Профиль пользователя'), findsOneWidget);
+    });
+
+    testWidgets('app state persists during rebuilds', (WidgetTester tester) async {
+      final mockUser = UserInfo(
+        id: 1,
+        userIdentifier: 'persistent@example.com',
+        email: 'persistent@example.com',
+        userName: 'Persistent User',
+        fullName: 'Persistent User',
+        created: DateTime.now(),
+        imageUrl: null,
+        scopeNames: ['user'],
+        blocked: false,
+      );
+      
+      mockSessionManager.setMockSignedInUser(mockUser);
+
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
+
+      expect(find.text('persistent@example.com'), findsOneWidget);
+
+      // Инициируем перестройку
+      await tester.pump();
+      await tester.pumpAndSettle();
+
+      // Состояние должно сохраниться
+      expect(find.text('persistent@example.com'), findsOneWidget);
+      expect(find.byType(AccountPage), findsOneWidget);
+    });
+
+    testWidgets('app handles blocked user correctly', (WidgetTester tester) async {
+      final blockedUser = UserInfo(
+        id: 1,
+        userIdentifier: 'blocked@example.com',
+        email: 'blocked@example.com',
+        userName: 'Blocked User',
+        fullName: 'Blocked User',
+        created: DateTime.now(),
+        imageUrl: null,
+        scopeNames: ['user'],
+        blocked: true, // Заблокированный пользователь
+      );
+      
+      mockSessionManager.setMockSignedInUser(blockedUser);
+
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
+
+      // Приложение должно корректно обработать заблокированного пользователя
+      expect(tester.takeException(), isNull);
+      // В зависимости от логики, можно проверить отображение AccountPage или SignInPage
+    });
+  });
+
+  group('Button Interaction Tests', () {
+    testWidgets('navigation buttons work correctly', (WidgetTester tester) async {
+      final adminUser = UserInfo(
+        id: 1,
+        userIdentifier: 'admin@example.com',
+        email: 'admin@example.com',
+        userName: 'Admin User',
+        fullName: 'Admin User',
+        created: DateTime.now(),
+        imageUrl: null,
+        scopeNames: ['serverpod.admin', 'groupHead'],
+        blocked: false,
+      );
+      
+      mockSessionManager.setMockSignedInUser(adminUser);
+
+      await tester.pumpWidget(const MyApp());
+      await tester.pumpAndSettle();
+
+      // Проверяем, что кнопки отображаются и можно по ним нажать
+      expect(find.text('Панель администратора'), findsOneWidget);
+      expect(find.text('Управление подгруппами'), findsOneWidget);
+      expect(find.text('Просмотр посещаемости'), findsOneWidget);
+
+      // Тестируем нажатие (без фактической навигации в тестах)
+      await tester.tap(find.text('Просмотр посещаемости'));
+      await tester.pumpAndSettle();
+
+      // Проверяем, что не произошло исключений
+      expect(tester.takeException(), isNull);
+    });
   });
 }
+
+
+
 

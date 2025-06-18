@@ -232,6 +232,30 @@ class EndpointClasses extends _i1.EndpointRef {
         'deleteClass',
         {'classId': classId},
       );
+
+  /// Закрыть занятие (подпись преподавателя)
+  _i2.Future<_i11.Classes> closeClassByTeacher(int classId) =>
+      caller.callServerEndpoint<_i11.Classes>(
+        'classes',
+        'closeClassByTeacher',
+        {'classId': classId},
+      );
+
+  /// Открыть занятие (только для администраторов)
+  _i2.Future<_i11.Classes> reopenClass(int classId) =>
+      caller.callServerEndpoint<_i11.Classes>(
+        'classes',
+        'reopenClass',
+        {'classId': classId},
+      );
+
+  /// Получить статус занятия
+  _i2.Future<Map<String, dynamic>> getClassStatus(int classId) =>
+      caller.callServerEndpoint<Map<String, dynamic>>(
+        'classes',
+        'getClassStatus',
+        {'classId': classId},
+      );
 }
 
 /// {@category Endpoint}

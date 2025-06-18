@@ -546,6 +546,60 @@ class Endpoints extends _i1.EndpointDispatch {
             params['classId'],
           ),
         ),
+        'closeClassByTeacher': _i1.MethodConnector(
+          name: 'closeClassByTeacher',
+          params: {
+            'classId': _i1.ParameterDescription(
+              name: 'classId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['classes'] as _i5.ClassesEndpoint).closeClassByTeacher(
+            session,
+            params['classId'],
+          ),
+        ),
+        'reopenClass': _i1.MethodConnector(
+          name: 'reopenClass',
+          params: {
+            'classId': _i1.ParameterDescription(
+              name: 'classId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['classes'] as _i5.ClassesEndpoint).reopenClass(
+            session,
+            params['classId'],
+          ),
+        ),
+        'getClassStatus': _i1.MethodConnector(
+          name: 'getClassStatus',
+          params: {
+            'classId': _i1.ParameterDescription(
+              name: 'classId',
+              type: _i1.getType<int>(),
+              nullable: false,
+            )
+          },
+          call: (
+            _i1.Session session,
+            Map<String, dynamic> params,
+          ) async =>
+              (endpoints['classes'] as _i5.ClassesEndpoint).getClassStatus(
+            session,
+            params['classId'],
+          ),
+        ),
       },
     );
     connectors['groups'] = _i1.EndpointConnector(

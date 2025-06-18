@@ -584,6 +584,7 @@ class _SubjectClassesPageState extends State<SubjectClassesPage> {
                         final classItem = _classes[index];
                         String subtitleText =
                             'Дата: ${classItem.date != null ? DateFormat('dd.MM.yyyy HH:mm').format(classItem.date!) : 'Не указана'}';
+                        
                         if (classItem.topic != null && classItem.topic!.isNotEmpty) {
                           subtitleText += '\nТема: ${classItem.topic}';
                         }
@@ -592,8 +593,30 @@ class _SubjectClassesPageState extends State<SubjectClassesPage> {
                         }
 
                         return ListTile(
-                          title: Text(
-                              '${classItem.class_types?.name ?? 'Занятие'} '),
+                          title: Row(
+                            children: [
+                              Expanded(
+                                child: Text('${classItem.class_types?.name ?? 'Занятие'}'),
+                              ),
+                              // Индикатор закрытого занятия
+                              if (classItem.isClosedByTeacher == true)
+                                Container(
+                                  padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
+                                  decoration: BoxDecoration(
+                                    color: Colors.red.shade100,
+                                    borderRadius: BorderRadius.circular(4),
+                                  ),
+                                  child: Text(
+                                    'ЗАКРЫТО',
+                                    style: TextStyle(
+                                      color: Colors.red.shade800,
+                                      fontSize: 10,
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                            ],
+                          ),
                           subtitle: Text(subtitleText),
                           isThreeLine: (classItem.topic != null && classItem.topic!.isNotEmpty) ||
                               (classItem.notes != null && classItem.notes!.isNotEmpty),
@@ -606,7 +629,7 @@ class _SubjectClassesPageState extends State<SubjectClassesPage> {
                                 tooltip: 'Редактировать занятие',
                               ),
                               const SizedBox(width: 8),
-                              Icon(Icons.arrow_forward_ios, size: 16),
+                              const Icon(Icons.arrow_forward_ios, size: 16),
                             ],
                           ),
                           onTap: () {
@@ -616,10 +639,6 @@ class _SubjectClassesPageState extends State<SubjectClassesPage> {
                                 MaterialPageRoute(
                                   builder: (context) => ClassAttendancePage(classItem: classItem),
                                 ),
-                              );
-                            } else {
-                              ScaffoldMessenger.of(context).showSnackBar(
-                                const SnackBar(content: Text('Ошибка: ID занятия не определен.')),
                               );
                             }
                           },
