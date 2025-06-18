@@ -190,7 +190,7 @@ class PermissionService {
       
       if (teacher != null) {
         final group = await Groups.db.findById(session, groupId);
-        return group?.curatorId == teacher.id;
+        return group?.curatorId == teacher.id; // ← Это работает корректно
       }
     }
 

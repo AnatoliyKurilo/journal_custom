@@ -56,11 +56,15 @@ class UserSubgroupService {
           where: (g) => g.curatorId.equals(teacher.id!),
         );
         
+        session.log('Куратор ${teacher.id} курирует группы: ${curatedGroups.map((g) => '${g.id}:${g.name}').join(', ')}');
+        
         for (final group in curatedGroups) {
           final groupSubgroups = await Subgroups.db.find(
             session,
             where: (s) => s.groupsId.equals(group.id!),
           );
+          session.log('Группа ${group.id} имеет подгруппы: ${groupSubgroups.map((s) => s.id).join(', ')}');
+          
           accessibleSubgroupIds.addAll(
             groupSubgroups.map((s) => s.id!),
           );

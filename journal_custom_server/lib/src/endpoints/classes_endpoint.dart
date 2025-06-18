@@ -130,9 +130,37 @@ class ClassesEndpoint extends Endpoint {
       throw Exception('Пользователь не авторизован.');
     }
 
+    session.log('getSubjectsForGroup: groupId=$groupId, userId=${authInfo.userId}, scopes=${authInfo.scopes.map((s) => s.name).join(',')}');
+
     // Проверяем, имеет ли пользователь доступ к группе
     final hasAccess = await PermissionService.canViewGroupSubjects(session, groupId);
+    session.log('getSubjectsForGroup: hasAccess=$hasAccess для группы $groupId');
+    
     if (!hasAccess) {
+      // Добавляем дополнительную диагностику
+      final person = await Person.db.findFirstRow(
+        session,
+        where: (p) => p.userInfoId.equals(authInfo.userId),
+      );
+      
+      if (person != null && authInfo.scopes.any((scope) => scope.name == 'curator')) {
+        final teacher = await Teachers.db.findFirstRow(
+          session,
+          where: (t) => t.personId.equals(person.id),
+        );
+        
+        if (teacher != null) {
+          final group = await Groups.db.findById(session, groupId);
+          session.log('getSubjectsForGroup: teacher.id=${teacher.id}, group.curatorId=${group?.curatorId}, person.id=${person.id}');
+          
+          final allCuratedGroups = await Groups.db.find(
+            session,
+            where: (g) => g.curatorId.equals(teacher.id),
+          );
+          session.log('getSubjectsForGroup: куратор ${teacher.id} курирует группы: ${allCuratedGroups.map((g) => '${g.id}:${g.name}').join(', ')}');
+        }
+      }
+      
       throw Exception('Доступ запрещен: нет прав на просмотр предметов этой группы.');
     }
 
@@ -159,8 +187,8 @@ class ClassesEndpoint extends Endpoint {
       return [];
     }
 
-    // Если пользователь — преподаватель, фильтруем занятия по его ID
-    if (authInfo.scopes.contains(CustomScope.teacher)) {
+    // Если пользователь — преподаватель (но НЕ куратор), фильтруем занятия по его ID
+    if (authInfo.scopes.contains(CustomScope.teacher) && !authInfo.scopes.contains(CustomScope.curator)) {
       final person = await Person.db.findFirstRow(
         session,
         where: (p) => p.userInfoId.equals(authInfo.userId),

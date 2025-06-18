@@ -205,15 +205,16 @@ class GroupsEndpoint extends Endpoint {
         if (groupToUpdate.curatorId != null) {
           var oldCuratorTeacher = await Teachers.db.findById(session, groupToUpdate.curatorId!);
           if (oldCuratorTeacher != null && oldCuratorTeacher.personId != null) {
-            await UserRolesEndpoint().removeRole(session, oldCuratorTeacher.personId, 'curator');
+            await UserRolesEndpoint().removeRole(session, oldCuratorTeacher.personId!, 'curator');
           }
         }
         
         // Назначаем нового куратора
         groupToUpdate.curatorId = newCuratorId;
         var newCuratorTeacher = await Teachers.db.findById(session, newCuratorId);
-        if (newCuratorTeacher != null && newCuratorTeacher.personId != null) {
-           await UserRolesEndpoint().assignCuratorRole(session, newCuratorTeacher.personId);
+        if (newCuratorTeacher != null && newCuratorTeacher.id != null) {
+          // ИСПРАВЛЕНИЕ: передаем teacherId, а не personId
+          await UserRolesEndpoint().assignCuratorRole(session, newCuratorTeacher.id!);
         }
         groupRecordChanged = true;
       }
