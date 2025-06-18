@@ -549,16 +549,16 @@ ${importResults.join('\n')}
                 });
               },
             ),
-            CheckboxListTile(
-              title: const Text('Создавать отсутствующие группы'),
-              subtitle: const Text('Автоматически создать группы из расписания'),
-              value: autoCreateMissingGroups,
-              onChanged: (bool? value) {
-                setState(() {
-                  autoCreateMissingGroups = value ?? true;
-                });
-              },
-            ),
+            // CheckboxListTile(
+            //   title: const Text('Создавать отсутствующие группы'),
+            //   subtitle: const Text('Автоматически создать группы из расписания'),
+            //   value: autoCreateMissingGroups,
+            //   onChanged: (bool? value) {
+            //     setState(() {
+            //       autoCreateMissingGroups = value ?? true;
+            //     });
+            //   },
+            // ),
           ],
         ),
       ),
@@ -678,7 +678,7 @@ ${importResults.join('\n')}
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    '🤖 Автоматический импорт занятий',
+                    'Автоматический импорт занятий',
                     style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
                   ),
                   const SizedBox(height: 8),

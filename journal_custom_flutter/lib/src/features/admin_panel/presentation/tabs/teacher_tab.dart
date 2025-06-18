@@ -3,6 +3,7 @@ import 'package:journal_custom_client/journal_custom_client.dart';
 import 'package:journal_custom_flutter/core/serverpod_client.dart';
 import 'package:journal_custom_flutter/src/features/admin_panel/data/utils/import_teachers_csv.dart';
 import 'dart:async'; // Добавляем для Timer
+import 'package:journal_custom_flutter/src/widgets/csv_format_dialog.dart';
 
 class TeachersTab extends StatefulWidget {
   @override
@@ -361,18 +362,147 @@ class _TeachersTabState extends State<TeachersTab> {
     );
   }
 
-  Future<void> _importTeachers() async {
-    try {
-      await importTeachersFromCsv(context);
-      _loadAllTeachers();
-    } catch (e) {
-      if (mounted) {
-        ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Ошибка при импорте: $e')),
+  Future<bool?> _showTeacherCsvFormatWarningDialog() async {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.info_outline, color: Colors.blue),
+              SizedBox(width: 8),
+              Text('Формат CSV файла для преподавателей'),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Для корректного импорта преподавателей CSV файл должен иметь следующий формат:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Заголовок (первая строка):',
+                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                      ),
+                      Text(
+                        'Имя,Фамилия,Отчество,Email,Телефон',
+                        style: TextStyle(fontFamily: 'monospace'),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Пример данных:',
+                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                      ),
+                      Text(
+                        'Иван,Иванов,Иванович,ivan.teacher@university.edu,79001234567\nМария,Петрова,Сергеевна,maria.petrova@university.edu,79007654321',
+                        style: TextStyle(fontFamily: 'monospace'),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text('📋 Требования к файлу:'),
+                const SizedBox(height: 8),
+                _buildRequirementItem('• Кодировка: UTF-8'),
+                _buildRequirementItem('• Разделитель: запятая (,) или точка с запятой (;)'),
+                _buildRequirementItem('• Обязательные поля: Имя, Фамилия, Email'),
+                _buildRequirementItem('• Необязательные поля: Отчество, Телефон'),
+                _buildRequirementItem('• Email должен быть уникальным в системе'),
+                _buildRequirementItem('• Рекомендуется использовать корпоративные email'),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.green.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.green.shade200),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.tips_and_updates, color: Colors.green, size: 20),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Совет: Экспортируйте существующих преподавателей, чтобы увидеть правильный формат',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Отмена'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Продолжить импорт'),
+            ),
+          ],
         );
-      }
+      },
+    );
+  }
+
+  Widget _buildRequirementItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, bottom: 4),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 13),
+      ),
+    );
+  }
+
+  // Future<void> _importTeachers() async {
+  //   try {
+  //     // Показываем предупреждение о формате
+  //     final shouldProceed = await _showTeacherCsvFormatWarningDialog();
+  //     if (shouldProceed != true) return;
+  //     await importTeachersFromCsv(context);
+  //     _loadAllTeachers();
+  //   } catch (e) {
+  //     if (mounted) {
+  //       ScaffoldMessenger.of(context).showSnackBar(
+  //         SnackBar(content: Text('Ошибка при импорте: $e')),
+  //       );
+  //     }
+  //   }
+  // }
+
+Future<void> _importTeachers() async {
+  try {
+    final shouldProceed = await CsvFormatDialog.showTeacherCsvDialog(context);
+    if (shouldProceed != true) return;
+    
+    await importTeachersFromCsv(context);
+    _loadAllTeachers();
+  } catch (e) {
+    if (mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Ошибка при импорте: $e')),
+      );
     }
   }
+}
 
   @override
   Widget build(BuildContext context) {

@@ -5,6 +5,8 @@ import 'package:journal_custom_flutter/src/features/admin_panel/data/utils/impor
 import 'package:journal_custom_flutter/core/serverpod_client.dart';
 import 'package:collection/collection.dart';
 import 'dart:async'; // Добавляем для Timer
+import 'package:journal_custom_flutter/src/widgets/csv_format_dialog.dart';
+
 
 // Функция для фильтрации студентов по ФИО
 List<Students> filterStudents(List<Students> allStudents, String query) {
@@ -812,6 +814,115 @@ class _GroupsTabState extends State<GroupsTab> {
     );
   }
 
+  Future<bool?> _showCsvFormatWarningDialog() async {
+    return showDialog<bool>(
+      context: context,
+      builder: (BuildContext context) {
+        return AlertDialog(
+          title: const Row(
+            children: [
+              Icon(Icons.info_outline, color: Colors.blue),
+              SizedBox(width: 8),
+              Text('Формат CSV файла'),
+            ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                const Text(
+                  'Для корректного импорта студентов CSV файл должен иметь следующий формат:',
+                  style: TextStyle(fontWeight: FontWeight.bold),
+                ),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(12),
+                  decoration: BoxDecoration(
+                    color: Colors.grey.shade100,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.grey.shade300),
+                  ),
+                  child: const Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'Заголовок (первая строка):',
+                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                      ),
+                      Text(
+                        'Имя,Фамилия,Отчество,Email,Телефон',
+                        style: TextStyle(fontFamily: 'monospace'),
+                      ),
+                      SizedBox(height: 8),
+                      Text(
+                        'Пример данных:',
+                        style: TextStyle(fontWeight: FontWeight.bold, color: Colors.blue),
+                      ),
+                      Text(
+                        'Иван,Иванов,Иванович,ivan@example.com,79001234567\nПетр,Петров,Петрович,petr@example.com,79007654321',
+                        style: TextStyle(fontFamily: 'monospace'),
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(height: 16),
+                const Text('📋 Требования к файлу:'),
+                const SizedBox(height: 8),
+                _buildRequirementItem('• Кодировка: UTF-8'),
+                _buildRequirementItem('• Разделитель: запятая (,) или точка с запятой (;)'),
+                _buildRequirementItem('• Обязательные поля: Имя, Фамилия, Email'),
+                _buildRequirementItem('• Необязательные поля: Отчество, Телефон'),
+                _buildRequirementItem('• Email должен быть уникальным'),
+                const SizedBox(height: 16),
+                Container(
+                  padding: const EdgeInsets.all(8),
+                  decoration: BoxDecoration(
+                    color: Colors.amber.shade50,
+                    borderRadius: BorderRadius.circular(8),
+                    border: Border.all(color: Colors.amber.shade200),
+                  ),
+                  child: const Row(
+                    children: [
+                      Icon(Icons.warning_amber, color: Colors.amber, size: 20),
+                      SizedBox(width: 8),
+                      Expanded(
+                        child: Text(
+                          'Название группы будет взято из имени файла или запрошено отдельно',
+                          style: TextStyle(fontSize: 12),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(false),
+              child: const Text('Отмена'),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.of(context).pop(true),
+              child: const Text('Продолжить импорт'),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildRequirementItem(String text) {
+    return Padding(
+      padding: const EdgeInsets.only(left: 8, bottom: 4),
+      child: Text(
+        text,
+        style: const TextStyle(fontSize: 13),
+      ),
+    );
+  }
+
   @override
   Widget build(BuildContext context) {
     if (isLoading) {
@@ -858,7 +969,7 @@ class _GroupsTabState extends State<GroupsTab> {
               PopupMenuButton<String>(
                 tooltip: 'Дополнительные действия',
                 icon: const Icon(Icons.more_vert),
-                onSelected: (String value) {
+                onSelected: (String value) async {
                   switch (value) {
                     case 'import_schedule':
                       _importGroupsFromSchedule();
@@ -867,7 +978,10 @@ class _GroupsTabState extends State<GroupsTab> {
                       _synchronizeGroupIds();
                       break;
                     case 'import_csv':
-                      importGroupFromCsv(context).then((_) => _loadAllGroups());
+                      final shouldProceed = await CsvFormatDialog.showStudentCsvDialog(context);
+                      if (shouldProceed == true) {
+                        importGroupFromCsv(context).then((_) => _loadAllGroups());
+                      }
                       break;
                     case 'export_csv':
                       exportGroupsToCsv(filteredGroups, students);
@@ -893,14 +1007,14 @@ class _GroupsTabState extends State<GroupsTab> {
                       title: Text('Импорт из расписания'),
                     ),
                   ),
-                  const PopupMenuItem<String>(
-                    value: 'sync_ids',
-                    child: ListTile(
-                      leading: Icon(Icons.sync, color: Colors.orange),
-                      title: Text('Синхронизация ID'),
-                      subtitle: Text('Обновить ID групп из API'),
-                    ),
-                  ),
+                  // const PopupMenuItem<String>(
+                  //   value: 'sync_ids',
+                  //   child: ListTile(
+                  //     leading: Icon(Icons.sync, color: Colors.orange),
+                  //     title: Text('Синхронизация ID'),
+                  //     subtitle: Text('Обновить ID групп из API'),
+                  //   ),
+                  // ),
                   const PopupMenuDivider(),
                   const PopupMenuItem<String>(
                     value: 'import_csv',
@@ -909,13 +1023,13 @@ class _GroupsTabState extends State<GroupsTab> {
                       title: Text('Импорт из CSV'),
                     ),
                   ),
-                  const PopupMenuItem<String>(
-                    value: 'export_csv',
-                    child: ListTile(
-                      leading: Icon(Icons.file_download),
-                      title: Text('Экспорт в CSV'),
-                    ),
-                  ),
+                  // const PopupMenuItem<String>(
+                  //   value: 'export_csv',
+                  //   child: ListTile(
+                  //     leading: Icon(Icons.file_download),
+                  //     title: Text('Экспорт в CSV'),
+                  //   ),
+                  // ),
                 ],
               ),
             ],
