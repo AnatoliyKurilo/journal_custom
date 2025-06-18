@@ -19,13 +19,13 @@ class AdminPanel extends StatefulWidget {
 
 class _AdminPanelState extends State<AdminPanel> {
   final _tabs = [
-    const Tab(text: 'Пользователи'),
+    // const Tab(text: 'Пользователи'),
     const Tab(text: 'Группы'),
     const Tab(text: 'Преподаватели'),
     const Tab(text: 'Студенты'),
-    const Tab(text: 'Расписание'),
+    // const Tab(text: 'Расписание'),
     const Tab(text: 'Автоимпорт'), // Новая вкладка
-    const Tab(text: 'Настройки'),
+    // const Tab(text: 'Настройки'),
   ];
 
   @override
@@ -72,13 +72,13 @@ class _AdminPanelState extends State<AdminPanel> {
         ),
         body: TabBarView(
           children: [
-            UsersTab(),
+            // UsersTab(),
             GroupsTab(),
             TeachersTab(),
             StudentsTab(),
-            ScheduleTab(),
+            // ScheduleTab(),
             AutoImportTab(), // Новая вкладка
-            SettingsTab(),
+            // SettingsTab(),
           ],
         ),
       ),
