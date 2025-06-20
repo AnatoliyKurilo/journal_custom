@@ -10,32 +10,25 @@ import 'package:journal_custom_client/journal_custom_client.dart';
 // Создаем мок для sessionManager
 class MockSessionManager extends Mock implements SessionManager {
   UserInfo? _mockSignedInUser;
-  
   @override
   UserInfo? get signedInUser => _mockSignedInUser;
-  
   @override
   bool get isSignedIn => _mockSignedInUser != null;
-  
   @override
   Future<bool> signOut() async {
     _mockSignedInUser = null;
     return true;
   }
-  
   void setMockSignedInUser(UserInfo? user) {
     _mockSignedInUser = user;
   }
 }
-
 // Создаем мок для Client
 class MockClient extends Mock implements Client {
   Modules? _modules;
-  
   @override
   Modules get modules => _modules ??= MockModules();
 }
-
 // Создаем мок для Modules
 class MockModules extends Mock implements Modules {
   Caller? _auth;
@@ -43,7 +36,6 @@ class MockModules extends Mock implements Modules {
   @override
   Caller get auth => _auth ??= MockAuthModule();
 }
-
 // Создаем мок для AuthModule
 class MockAuthModule extends Mock implements Caller {}
 
@@ -73,15 +65,12 @@ void main() {
     //     imageUrl: null,
     //     scopeNames: ['user'],
     //     blocked: false,
-    //   );
-      
+    //   );  
     //   mockSessionManager.setMockSignedInUser(mockUser);
-
     //   await tester.pumpWidget(
     //     MaterialApp(home: const AccountPage()),
     //   );
     //   await tester.pumpAndSettle();
-
     //   // Проверяем базовые элементы
     //   expect(find.byType(AccountPage), findsOneWidget);
     //   expect(find.text('Профиль пользователя'), findsOneWidget);
